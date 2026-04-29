@@ -1,0 +1,65 @@
+.step {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding: 0 24px 40px;
+}
+
+/* Hero */
+.hero {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  padding-bottom: 16px;
+}
+
+.heroIcon {
+  filter: drop-shadow(0 8px 24px rgba(0, 136, 255, 0.28));
+}
+
+.wordmark {
+  display: flex;
+  align-items: center;
+}
+
+.wordmarkText {
+  font-family: 'Space Grotesk', 'Noto Sans KR', sans-serif;
+  font-weight: 700;
+  font-size: 32px;
+  letter-spacing: -0.5px;
+  background: linear-gradient(90deg, #0088FF 0%, #00C3D0 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.tagline {
+  font-size: 15px;
+  color: var(--ink-3);
+  text-align: center;
+}
+
+/* Social buttons */
+.socialList {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+/* Terms */
+.terms {
+  text-align: center;
+  font-size: 12px;
+  color: var(--ink-4);
+  line-height: 1.6;
+}
+
+.termsLink {
+  color: var(--ink-3);
+  text-decoration: underline;
+  cursor: pointer;
+}

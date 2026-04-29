@@ -1,0 +1,229 @@
+.page { position: relative; min-height: 100dvh; background: var(--base); }
+
+/* ── Hero ── */
+.hero {
+  position: relative;
+  height: 280px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.heroEmoji { font-size: 80px; }
+
+.heroNav {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+}
+
+.navBtn {
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: rgba(0,0,0,0.22);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+}
+
+/* ── Content card overlapping hero by 24px ── */
+.content {
+  background: var(--base);
+  border-radius: 24px 24px 0 0;
+  margin-top: -24px;
+  position: relative;
+  z-index: 1;
+  padding: 24px 20px 0;
+  min-height: calc(100dvh - 256px);
+}
+
+/* ── Tags ── */
+.tags { display: flex; gap: 6px; margin-bottom: 10px; flex-wrap: wrap; }
+
+.tag {
+  font-size: 12px; font-weight: 600;
+  color: var(--blue); background: var(--blue-soft);
+  padding: 3px 10px; border-radius: 999px;
+}
+
+.tagPrivate {
+  font-size: 12px; font-weight: 600;
+  color: var(--ink-3); background: var(--base-border);
+  padding: 3px 10px; border-radius: 999px;
+}
+
+.tagNew {
+  font-size: 12px; font-weight: 600;
+  color: var(--pink); background: var(--pink-soft);
+  padding: 3px 10px; border-radius: 999px;
+}
+
+.name {
+  font-size: 22px; font-weight: 700; color: var(--ink);
+  margin-bottom: 16px;
+}
+
+/* ── Info boxes ── */
+.infoRow {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+
+.infoBox {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--blue-soft);
+  border-radius: 10px;
+  padding: 7px 12px;
+}
+
+.infoBoxIcon { display: flex; align-items: center; }
+
+.infoBoxText {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--ink-2);
+}
+
+/* ── Sub-tabs ── */
+.subTabs {
+  display: flex;
+  border-bottom: 1px solid var(--base-border);
+  margin-bottom: 20px;
+}
+
+.subTab {
+  flex: 1; height: 44px;
+  font-size: 14px; font-weight: 600;
+  color: var(--ink-3);
+  border-bottom: 2px solid transparent;
+  transition: color 0.15s, border-color 0.15s;
+}
+
+.subTabActive {
+  color: var(--blue);
+  border-bottom-color: var(--blue);
+}
+
+/* ── Intro ── */
+.introBody { display: flex; flex-direction: column; gap: 16px; }
+
+.desc {
+  font-size: 15px; color: var(--ink-2); line-height: 1.7;
+}
+
+.tagRow { display: flex; gap: 6px; flex-wrap: wrap; }
+
+.hashTag {
+  font-size: 13px; font-weight: 500;
+  color: var(--blue);
+  background: var(--blue-soft);
+  padding: 4px 10px; border-radius: 999px;
+}
+
+/* ── Schedule mini card ── */
+.scheduleMini {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 16px;
+  border-radius: 14px;
+  background: var(--grad-blue-mint);
+  gap: 12px;
+}
+
+.scheduleMiniLeft {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 1;
+}
+
+.scheduleMiniTitle {
+  font-size: 11px; font-weight: 500; color: rgba(255,255,255,0.75);
+}
+
+.scheduleMiniDate {
+  font-size: 14px; font-weight: 700; color: #fff;
+}
+
+/* white btn on blue/gradient bg */
+.scheduleWhiteBtn {
+  background: #fff; color: var(--blue);
+  font-size: 13px; font-weight: 700;
+  padding: 8px 18px; border-radius: 999px;
+  flex-shrink: 0;
+}
+
+/* ── Members ── */
+.memberList { display: flex; flex-direction: column; }
+
+.memberRow {
+  display: flex; align-items: center; gap: 12px;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--base-border);
+}
+
+.memberEmoji { font-size: 32px; }
+.memberName { font-size: 14px; font-weight: 600; color: var(--ink); }
+.memberMeta { font-size: 12px; color: var(--ink-3); }
+
+.memberMore {
+  font-size: 13px; color: var(--ink-3);
+  padding: 16px 0 8px;
+  text-align: center;
+}
+
+/* ── CTA bar ── */
+.ctaBar {
+  position: fixed;
+  bottom: var(--height-tab-bar);
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100%;
+  max-width: var(--max-width);
+  padding: 12px 20px;
+  background: var(--base-white);
+  border-top: 1px solid var(--base-border);
+  z-index: 50;
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.bookmarkCta {
+  width: 48px; height: 48px;
+  border-radius: 14px;
+  border: 1.5px solid var(--base-border);
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+  background: var(--base-white);
+}
+
+.joinBtn {
+  flex: 1; height: 48px;
+  border-radius: var(--r-btn);
+  background: var(--pink);
+  color: #fff;
+  font-size: 15px; font-weight: 700;
+  box-shadow: var(--shadow-pink);
+  transition: background 0.2s;
+}
+
+.joinedBtn {
+  background: var(--base-border);
+  color: var(--ink-3);
+  box-shadow: none;
+}

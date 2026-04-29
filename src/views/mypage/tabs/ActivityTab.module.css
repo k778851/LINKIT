@@ -1,0 +1,168 @@
+.tab { padding: 8px 16px 32px; display: flex; flex-direction: column; gap: 8px; }
+
+.section {
+  background: var(--base-white);
+  border-radius: var(--r-card);
+  border: 1px solid var(--base-border);
+  padding: 16px;
+  margin-bottom: 8px;
+}
+
+.sectionHeader { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+.sectionTitle  { font-size: 14px; font-weight: 700; color: var(--ink); }
+.moreBtn       { font-size: 12px; color: var(--blue); font-weight: 500; }
+.empty         { font-size: 13px; color: var(--ink-3); text-align: center; padding: 12px 0; }
+
+/* ── Schedule card with D-day blue tile ── */
+.scheduleCard {
+  display: flex; align-items: center; gap: 12px;
+  padding: 10px 0; border-bottom: 1px solid var(--base-border);
+}
+.scheduleCard:last-child { border-bottom: none; }
+
+.ddayTile {
+  width: 52px; min-height: 52px;
+  border-radius: 12px;
+  background: var(--blue-soft);
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  gap: 2px; flex-shrink: 0;
+  padding: 6px 4px;
+}
+
+.ddayNum {
+  font-size: 13px; font-weight: 800;
+  color: var(--blue);
+  line-height: 1;
+}
+
+.ddayDate {
+  font-size: 10px; font-weight: 500;
+  color: var(--blue);
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.scheduleInfo { flex: 1; }
+
+.scheduleName {
+  font-size: 14px; font-weight: 600; color: var(--ink);
+  display: flex; align-items: center; gap: 6px;
+}
+
+.scheduleEmoji { font-size: 16px; }
+
+.scheduleMeta { font-size: 12px; color: var(--ink-3); margin-top: 2px; }
+
+/* ── Bookmarked clubs — 100x100 gradient tiles with heart overlay ── */
+.bookmarkRow {
+  display: flex; gap: 10px;
+  overflow-x: auto; padding-bottom: 4px;
+}
+
+.bookmarkCard {
+  flex-shrink: 0; width: 88px;
+  display: flex; flex-direction: column; gap: 4px;
+}
+
+.bookmarkTile {
+  width: 88px; height: 88px;
+  border-radius: 14px;
+  display: flex; align-items: center; justify-content: center;
+  position: relative;
+  overflow: hidden;
+  cursor: pointer;
+}
+
+.bookmarkEmoji { font-size: 32px; }
+
+.heartOverlay {
+  position: absolute;
+  bottom: 6px; right: 6px;
+  width: 26px; height: 26px;
+  border-radius: 50%;
+  background: rgba(255, 102, 138, 0.88);
+  color: #fff;
+  font-size: 13px;
+  display: flex; align-items: center; justify-content: center;
+}
+
+.bookmarkName { font-size: 12px; font-weight: 600; color: var(--ink); }
+.bookmarkMeta { font-size: 11px; color: var(--ink-3); }
+
+/* ── Joined clubs — horizontal scroll tiles ── */
+.joinedRow {
+  display: flex; gap: 10px;
+  overflow-x: auto; padding-bottom: 4px;
+}
+
+.joinedCard {
+  flex-shrink: 0; width: 76px;
+  display: flex; flex-direction: column; gap: 4px;
+}
+
+.joinedTile {
+  width: 76px; height: 76px;
+  border-radius: 14px;
+  display: flex; align-items: center; justify-content: center;
+  position: relative; overflow: hidden;
+  cursor: pointer;
+}
+
+.joinedEmoji { font-size: 28px; }
+
+.leaveOverlay {
+  position: absolute;
+  top: 5px; right: 5px;
+  width: 22px; height: 22px;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.38);
+  color: #fff;
+  font-size: 10px;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer;
+}
+
+.joinedName { font-size: 11px; font-weight: 600; color: var(--ink); }
+.joinedMeta { font-size: 10px; color: var(--ink-3); }
+
+/* ── Count pill & empty box ── */
+.countPill {
+  display: inline-flex; align-items: center; justify-content: center;
+  background: var(--blue); color: #fff;
+  font-size: 10px; font-weight: 700;
+  min-width: 18px; height: 18px;
+  border-radius: 999px; padding: 0 5px;
+  margin-left: 6px;
+}
+
+.emptyBox {
+  display: flex; flex-direction: column; align-items: center; gap: 8px;
+  padding: 12px 0;
+}
+
+.exploreBtn {
+  font-size: 12px; font-weight: 600;
+  color: var(--blue); background: var(--blue-soft);
+  padding: 6px 16px; border-radius: 999px;
+}
+
+/* ── My posts ── */
+.postRow {
+  display: flex; flex-direction: column; gap: 4px; width: 100%;
+  text-align: left; padding: 10px 0; border-bottom: 1px solid var(--base-border);
+}
+.postRow:last-child { border-bottom: none; }
+
+.postBadge {
+  font-size: 11px; font-weight: 700;
+  color: var(--blue); background: var(--blue-soft);
+  padding: 2px 8px; border-radius: 999px; width: fit-content;
+}
+
+.postTitle { font-size: 14px; font-weight: 600; color: var(--ink); }
+
+.postMeta {
+  display: flex; gap: 8px; font-size: 11px;
+  color: var(--ink-4); align-items: center;
+}

@@ -1,0 +1,32 @@
+.page {
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  background-color: var(--base-white);
+}
+
+/* Progress bar — gradient fill */
+.progressWrap {
+  padding: 14px 20px 0;
+}
+
+.progressTrack {
+  height: 4px;
+  background: var(--base-border);
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.progressFill {
+  height: 100%;
+  background: var(--grad-blue-mint);
+  border-radius: 999px;
+  transition: width 0.3s ease;
+}
+
+.progressLabel {
+  text-align: right;
+  font-size: 12px;
+  color: var(--ink-4);
+  margin-top: 6px;
+}

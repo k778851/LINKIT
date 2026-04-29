@@ -1,0 +1,178 @@
+.page { min-height: 100dvh; background: var(--base); display: flex; flex-direction: column; }
+
+/* ── Search bar ── */
+.searchBar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 16px;
+  background: var(--base-white);
+  border-bottom: 1px solid var(--base-border);
+  position: sticky; top: 0; z-index: 50;
+}
+
+.inputWrap {
+  flex: 1; height: 40px;
+  display: flex; align-items: center; gap: 8px;
+  background: var(--base); border-radius: 12px;
+  padding: 0 12px;
+  border: 1.5px solid var(--base-border);
+  transition: border-color 0.15s;
+}
+
+.inputWrap:focus-within { border-color: var(--blue); }
+
+.searchIcon { flex-shrink: 0; }
+
+.input {
+  flex: 1; border: none; background: transparent;
+  color: var(--ink); font-size: 15px; outline: none;
+  font-family: inherit;
+}
+
+.clearBtn {
+  display: flex; align-items: center; padding: 2px;
+}
+
+.cancelBtn {
+  font-size: 15px; font-weight: 600;
+  color: var(--ink-2); white-space: nowrap; flex-shrink: 0;
+}
+
+/* ── Body ── */
+.body { flex: 1; overflow-y: auto; padding: 0 0 32px; }
+
+.section { padding: 20px 16px 0; }
+
+.sectionHeader {
+  display: flex; align-items: center;
+  justify-content: space-between; margin-bottom: 12px;
+}
+
+.sectionTitle { font-size: 14px; font-weight: 700; color: var(--ink); }
+
+.clearAll { font-size: 12px; color: var(--ink-3); }
+
+/* ── Recent ── */
+.recentList { display: flex; flex-direction: column; gap: 2px; }
+
+.recentRow {
+  display: flex; align-items: center;
+  justify-content: space-between;
+  padding: 8px 4px;
+  border-bottom: 1px solid var(--base-border);
+}
+.recentRow:last-child { border-bottom: none; }
+
+.recentTerm {
+  display: flex; align-items: center; gap: 10px;
+  font-size: 14px; color: var(--ink-2);
+  flex: 1; text-align: left;
+}
+
+.recentDel {
+  width: 28px; height: 28px;
+  display: flex; align-items: center; justify-content: center;
+  border-radius: 50%;
+}
+
+/* ── Trending ── */
+.trendingGrid {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 8px;
+}
+
+.trendingChip {
+  display: flex; align-items: center; gap: 8px;
+  padding: 10px 14px;
+  background: var(--base-white);
+  border: 1px solid var(--base-border);
+  border-radius: 12px;
+  font-size: 14px; color: var(--ink-2);
+  text-align: left;
+}
+
+.trendingRank {
+  font-size: 13px; font-weight: 800;
+  color: var(--pink); min-width: 16px;
+}
+
+.trendingChip span:nth-child(2) { flex: 1; }
+
+/* ── Tabs ── */
+.tabRow {
+  display: flex; gap: 0;
+  padding: 12px 16px 0;
+  border-bottom: 1px solid var(--base-border);
+}
+
+.tabBtn {
+  padding: 8px 16px;
+  font-size: 14px; font-weight: 500; color: var(--ink-3);
+  border-bottom: 2px solid transparent;
+  transition: color 0.15s, border-color 0.15s;
+}
+
+.tabActive {
+  color: var(--blue);
+  border-bottom-color: var(--blue);
+  font-weight: 700;
+}
+
+/* ── Empty ── */
+.empty {
+  display: flex; flex-direction: column;
+  align-items: center; gap: 8px;
+  padding: 64px 20px;
+  text-align: center;
+}
+
+.emptyIcon  { font-size: 48px; }
+.emptyTitle { font-size: 16px; font-weight: 700; color: var(--ink); }
+.emptyDesc  { font-size: 14px; color: var(--ink-3); }
+
+/* ── Club result row ── */
+.clubRow {
+  display: flex; align-items: center; gap: 12px;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--base-border);
+  width: 100%; text-align: left;
+}
+.clubRow:last-child { border-bottom: none; }
+
+.clubEmoji {
+  width: 44px; height: 44px; border-radius: 12px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 22px; flex-shrink: 0;
+}
+
+.clubInfo { flex: 1; min-width: 0; }
+.clubName { font-size: 15px; font-weight: 600; color: var(--ink); }
+.clubMeta { font-size: 12px; color: var(--ink-3); margin-top: 2px; }
+
+.privateBadge {
+  font-size: 11px; font-weight: 600;
+  color: var(--ink-3); background: var(--base-border);
+  padding: 2px 8px; border-radius: 999px; flex-shrink: 0;
+}
+
+/* ── Post result row ── */
+.postRow {
+  width: 100%; text-align: left;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--base-border);
+  display: flex; flex-direction: column; gap: 5px;
+}
+.postRow:last-child { border-bottom: none; }
+
+.postTop { display: flex; align-items: center; gap: 8px; }
+
+.postBadge {
+  font-size: 11px; font-weight: 700;
+  color: var(--blue); background: var(--blue-soft);
+  padding: 2px 8px; border-radius: 999px;
+}
+
+.postAuthor { font-size: 12px; color: var(--ink-3); margin-left: auto; }
+
+.postTitle   { font-size: 15px; font-weight: 600; color: var(--ink); }
+.postPreview { font-size: 13px; color: var(--ink-3); line-height: 1.5; }

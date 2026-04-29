@@ -1,0 +1,77 @@
+package com.linkit.domain.user;
+
+import com.linkit.common.ApiResponse;
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.web.bind.annotation.*;
+
+@RestController
+@RequestMapping("/api")
+@RequiredArgsConstructor
+public class UserController {
+
+    private final UserService userService;
+
+    /* ── 인증 ─────────────────────────────────────────── */
+
+    @PostMapping("/auth/register")
+    @ResponseStatus(HttpStatus.CREATED)
+    public ApiResponse<UserDto.ProfileResponse> register(@RequestBody @Valid UserDto.RegisterRequest req) {
+        return ApiResponse.ok("회원가입이 완료됐어요.", userService.register(req));
+    }
+
+    @PostMapping("/auth/login")
+    public ApiResponse<UserDto.LoginResponse> login(@RequestBody @Valid UserDto.LoginRequest req) {
+        return ApiResponse.ok(userService.login(req));
+    }
+
+    /* ── 내 프로필 ─────────────────────────────────────── */
+
+    @GetMapping("/users/me")
+    public ApiResponse<UserDto.ProfileResponse> getMe(@AuthenticationPrincipal UserDetails principal) {
+        return ApiResponse.ok(userService.getProfile(principal.getUsername()));
+    }
+
+    @PutMapping("/users/me")
+    public ApiResponse<UserDto.ProfileResponse> updateMe(
+            @AuthenticationPrincipal UserDetails principal,
+            @RequestBody @Valid UserDto.UpdateRequest req) {
+        return ApiResponse.ok(userService.updateProfile(principal.getUsername(), principal.getUsername(), req));
+    }
+
+    /* ── 특정 유저 프로필 조회 ─────────────────────────── */
+
+    @GetMapping("/users/{userId}")
+    public ApiResponse<UserDto.ProfileResponse> getUser(@PathVariable String userId) {
+        return ApiResponse.ok(userService.getProfile(userId));
+    }
+
+    /* ── 클럽 멤버십 ───────────────────────────────────── */
+
+    @PostMapping("/clubs/{clubId}/join")
+    public ApiResponse<Void> joinClub(
+            @AuthenticationPrincipal UserDetails principal,
+            @PathVariable String clubId) {
+        userService.joinClub(principal.getUsername(), clubId);
+        return ApiResponse.ok("모임에 신청했어요 🎉");
+    }
+
+    @DeleteMapping("/clubs/{clubId}/join")
+    public ApiResponse<Void> leaveClub(
+            @AuthenticationPrincipal UserDetails principal,
+            @PathVariable String clubId) {
+        userService.leaveClub(principal.getUsername(), clubId);
+        return ApiResponse.ok("참여를 취소했어요.");
+    }
+
+    @PostMapping("/clubs/{clubId}/bookmark")
+    public ApiResponse<Void> toggleBookmark(
+            @AuthenticationPrincipal UserDetails principal,
+            @PathVariable String clubId) {
+        boolean added = userService.toggleBookmark(principal.getUsername(), clubId);
+        return ApiResponse.ok(added ? "찜 목록에 추가했어요 💖" : "찜 목록에서 제거했어요");
+    }
+}

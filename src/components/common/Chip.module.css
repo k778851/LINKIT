@@ -1,0 +1,21 @@
+.chip {
+  display: inline-flex;
+  align-items: center;
+  height: 34px;
+  padding: 0 14px;
+  border-radius: var(--radius-chip);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  border: none;
+  white-space: nowrap;
+  transition: background-color 0.15s, color 0.15s;
+  background-color: var(--chip-default-bg);
+  color: var(--chip-default-text);
+}
+
+.active {
+  background-color: var(--chip-active-bg);
+  color: var(--chip-active-text);
+  font-weight: 600;
+}

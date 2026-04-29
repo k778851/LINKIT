@@ -1,0 +1,36 @@
+.nav {
+  position: fixed;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100%;
+  max-width: var(--max-width);
+  height: var(--height-tab-bar);
+  background-color: var(--tab-bar-bg);
+  box-shadow: var(--shadow-bar);
+  display: flex;
+  align-items: stretch;
+  z-index: 100;
+}
+
+.tab {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  color: var(--tab-icon-inactive);
+  text-decoration: none;
+  transition: color 0.15s;
+  min-height: 44px;
+}
+
+.active {
+  color: var(--tab-icon-active);
+}
+
+.label {
+  font-size: 10px;
+  font-weight: 500;
+}

@@ -1,0 +1,130 @@
+/* ── 공통 관리자 스타일 ──────────────────────────────── */
+
+.pageHeader {
+  margin-bottom: 24px;
+}
+.pageTitle {
+  font-size: 22px; font-weight: 700; color: #1a2236;
+}
+.pageDesc {
+  font-size: 13px; color: #888; margin-top: 4px;
+}
+
+/* ── 통계 카드 ────────────────────────────────────────── */
+.statGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 16px;
+  margin-bottom: 32px;
+}
+.statCard {
+  background: #fff;
+  border-radius: 16px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+}
+.statIcon {
+  width: 40px; height: 40px; border-radius: 12px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 20px;
+}
+.statNum  { font-size: 28px; font-weight: 800; color: #1a2236; line-height: 1; }
+.statLabel{ font-size: 13px; color: #888; }
+
+/* ── 섹션 카드 ────────────────────────────────────────── */
+.card {
+  background: #fff;
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+  margin-bottom: 24px;
+}
+.cardTitle {
+  font-size: 15px; font-weight: 700; color: #1a2236;
+  margin-bottom: 16px;
+  display: flex; align-items: center; justify-content: space-between;
+}
+
+/* ── 검색 바 ─────────────────────────────────────────── */
+.searchBar {
+  display: flex; align-items: center; gap: 10px;
+  margin-bottom: 20px;
+}
+.searchWrap {
+  flex: 1; position: relative;
+}
+.searchInput {
+  width: 100%; height: 42px;
+  border: 1.5px solid #e8eaf0;
+  border-radius: 10px;
+  padding: 0 14px 0 38px;
+  font-size: 14px; color: #1a2236;
+  background: #f8f9fc;
+  outline: none; font-family: inherit;
+  transition: border-color 0.15s;
+}
+.searchInput:focus { border-color: #4361ee; background: #fff; }
+.searchIcon {
+  position: absolute; left: 12px; top: 50%; transform: translateY(-50%);
+  color: #aaa;
+}
+
+/* ── 테이블 ─────────────────────────────────────────── */
+.tableWrap { overflow-x: auto; }
+.table {
+  width: 100%; border-collapse: collapse;
+  font-size: 14px;
+}
+.table th {
+  text-align: left; padding: 10px 12px;
+  font-size: 12px; font-weight: 600; color: #888;
+  border-bottom: 1.5px solid #f0f1f5;
+  white-space: nowrap;
+}
+.table td {
+  padding: 12px;
+  border-bottom: 1px solid #f5f6fa;
+  color: #333;
+  vertical-align: middle;
+}
+.table tr:last-child td { border-bottom: none; }
+.table tr:hover td { background: #fafbff; }
+
+/* ── 배지 ────────────────────────────────────────────── */
+.badge {
+  display: inline-block;
+  padding: 3px 9px; border-radius: 999px;
+  font-size: 11px; font-weight: 600;
+}
+.badgeBlue   { background: #eef2ff; color: #4361ee; }
+.badgeRed    { background: #fff0f0; color: #e03131; }
+.badgeGreen  { background: #f0fdf4; color: #2f9e44; }
+.badgeGray   { background: #f1f3f5; color: #868e96; }
+.badgeOrange { background: #fff4e6; color: #e8590c; }
+
+/* ── 액션 버튼 ──────────────────────────────────────── */
+.deleteBtn {
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 5px 10px; border-radius: 8px;
+  font-size: 12px; font-weight: 600;
+  color: #e03131; background: #fff0f0;
+  transition: background 0.15s;
+}
+.deleteBtn:hover { background: #ffe3e3; }
+.deleteBtn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+/* ── 빈 상태 ─────────────────────────────────────────── */
+.empty {
+  text-align: center; padding: 48px 0;
+  color: #aaa; font-size: 14px;
+}
+.emptyIcon { font-size: 36px; margin-bottom: 8px; }
+
+/* ── 로딩 ────────────────────────────────────────────── */
+.loading {
+  text-align: center; padding: 48px 0;
+  color: #aaa; font-size: 14px;
+}

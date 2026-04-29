@@ -1,0 +1,53 @@
+.page { min-height: 100dvh; background: var(--base); }
+
+/* ── 빈 상태 ── */
+.empty {
+  display: flex; flex-direction: column; align-items: center;
+  padding: 80px 24px; text-align: center;
+}
+.emptyIcon { font-size: 48px; margin-bottom: 16px; }
+.emptyTitle { font-size: 16px; font-weight: 700; color: var(--ink); margin-bottom: 6px; }
+.emptyDesc  { font-size: 13px; color: var(--ink-3); }
+
+/* ── 목록 ── */
+.list { display: flex; flex-direction: column; gap: 12px; padding: 16px 16px 100px; }
+
+/* ── 카드 ── */
+.card {
+  display: flex; gap: 16px; align-items: flex-start;
+  background: var(--base-white); border-radius: 16px;
+  border: 1.5px solid var(--base-border);
+  padding: 16px; transition: border-color 0.15s;
+}
+.cardToday { border-color: var(--blue); }
+.cardPast  { opacity: 0.5; }
+
+/* D-day 뱃지 */
+.ddayBadge {
+  min-width: 60px; display: flex; flex-direction: column; align-items: center;
+  background: var(--blue-soft); border-radius: 12px;
+  padding: 10px 8px; gap: 4px;
+}
+.ddayToday { background: var(--blue); }
+.ddayPast  { background: var(--base-border); }
+
+.ddayNum {
+  font-size: 14px; font-weight: 800; color: var(--blue);
+  .ddayToday & { color: #fff; }
+  .ddayPast  & { color: var(--ink-4); }
+}
+.ddayDate { font-size: 10px; color: var(--ink-3); font-weight: 500; }
+.ddayToday .ddayDate { color: rgba(255,255,255,0.8); }
+
+/* 정보 */
+.info { flex: 1; display: flex; flex-direction: column; gap: 6px; }
+
+.clubRow { display: flex; align-items: center; gap: 6px; }
+.clubEmoji { font-size: 18px; }
+.clubName  { font-size: 15px; font-weight: 700; color: var(--ink); }
+.todayBadge {
+  font-size: 11px; font-weight: 700; color: #fff;
+  background: var(--blue); border-radius: 99px; padding: 2px 8px;
+}
+
+.meta { font-size: 13px; color: var(--ink-3); }

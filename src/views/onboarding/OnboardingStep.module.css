@@ -1,0 +1,226 @@
+.step {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding: 32px 20px 40px;
+}
+
+.header {
+  margin-bottom: 40px;
+  text-align: center;
+}
+
+.logo {
+  font-family: var(--font-display);
+  font-size: 32px;
+  font-weight: 700;
+  color: var(--color-primary);
+  letter-spacing: 1px;
+  margin-bottom: 8px;
+}
+
+.subtitle {
+  font-size: 16px;
+  color: var(--text-secondary);
+}
+
+.stepTitle {
+  font-size: var(--text-title);
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 6px;
+}
+
+.stepDesc {
+  font-size: 14px;
+  color: var(--text-secondary);
+  line-height: 1.6;
+  margin-bottom: 32px;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  flex: 1;
+}
+
+.tabRow {
+  display: flex;
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  margin-bottom: 8px;
+}
+
+.tabBtn {
+  flex: 1;
+  height: 44px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  background: transparent;
+  transition: background-color 0.15s, color 0.15s;
+}
+
+.tabActive {
+  background-color: var(--color-primary);
+  color: #fff;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.input {
+  height: 48px;
+  border-radius: 12px;
+  border: 1.5px solid var(--border);
+  padding: 0 14px;
+  background: var(--bg-card);
+  color: var(--text-primary);
+  font-size: 15px;
+  transition: border-color 0.15s;
+  outline: none;
+}
+
+.input:focus {
+  border-color: var(--color-primary);
+}
+
+.input.error {
+  border-color: var(--color-error);
+}
+
+.errorMsg {
+  font-size: 12px;
+  color: var(--color-error);
+}
+
+.cta {
+  width: 100%;
+  margin-top: auto;
+}
+
+/* Terms */
+.allAgreeRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 16px;
+  background: var(--bg-soft);
+  border-radius: 12px;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text-primary);
+  cursor: pointer;
+}
+
+.termsList {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin-bottom: auto;
+}
+
+.termRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 4px;
+  border-bottom: 1px solid var(--border);
+  cursor: pointer;
+}
+
+.termLabel {
+  font-size: 14px;
+  color: var(--text-primary);
+}
+
+.required {
+  color: var(--color-primary);
+  font-size: 12px;
+  margin-left: 4px;
+}
+
+/* Checkbox */
+.checkbox {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: 2px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: all 0.15s;
+}
+
+.checkboxChecked {
+  background-color: var(--color-primary);
+  border-color: var(--color-primary);
+  color: #fff;
+}
+
+/* Emoji picker */
+.emojiGrid {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 8px;
+  margin-bottom: 24px;
+}
+
+.emojiBtn {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  font-size: 22px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg-soft);
+  cursor: pointer;
+  transition: background-color 0.15s;
+}
+
+.emojiSelected {
+  background: var(--chip-active-bg);
+  outline: 2px solid var(--color-primary);
+}
+
+/* Welcome */
+.welcomeCenter {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  gap: 16px;
+  padding-bottom: 40px;
+}
+
+.welcomeEmoji {
+  font-size: 64px;
+  margin-bottom: 8px;
+}
+
+.welcomeTitle {
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.welcomeDesc {
+  font-size: 15px;
+  color: var(--text-secondary);
+  line-height: 1.6;
+}

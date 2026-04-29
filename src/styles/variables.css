@@ -1,0 +1,136 @@
+/* ============================================================
+   LINKIT Design Tokens — 4-color system
+   Base #F1F4F9 · Blue #0088FF · Pink #FF668A · Mint #00C3D0
+   ============================================================ */
+
+/* 라이트모드 (기본값) */
+:root,
+:root[data-theme='light'] {
+  /* Background */
+  --base:          #F1F4F9;
+  --base-white:    #FFFFFF;
+  --base-border:   #E4E9F2;
+  --base-soft:     #F7F9FC;
+
+  /* Brand */
+  --blue:          #0088FF;
+  --blue-hover:    #0074DC;
+  --blue-soft:     #E3F1FF;
+  --pink:          #FF668A;
+  --pink-hover:    #E54F74;
+  --pink-soft:     #FFE6ED;
+  --mint:          #00C3D0;
+  --mint-soft:     #DFF7F9;
+
+  /* Gradient */
+  --grad-blue-mint: linear-gradient(135deg, #0088FF 0%, #00C3D0 100%);
+
+  /* Ink (text) */
+  --ink:   #0A1628;
+  --ink-2: #41536B;
+  --ink-3: #7A8699;
+  --ink-4: #A8B2C1;
+
+  /* Semantic aliases (keep existing code working) */
+  --bg-primary:        var(--base);
+  --bg-card:           var(--base-white);
+  --bg-secondary:      var(--base-soft);
+  --bg-soft:           var(--base-soft);
+  --border:            var(--base-border);
+  --color-primary:     var(--blue);
+  --color-primary-hover: var(--blue-hover);
+  --color-accent:      var(--mint);
+  --color-error:       var(--pink);
+  --text-primary:      var(--ink);
+  --text-secondary:    var(--ink-3);
+  --text-on-primary:   #FFFFFF;
+
+  --chip-active-bg:    var(--blue-soft);
+  --chip-active-text:  var(--blue);
+  --chip-default-bg:   var(--base-border);
+  --chip-default-text: var(--ink-3);
+
+  --tab-bar-bg:        var(--base-white);
+  --tab-icon-active:   var(--blue);
+  --tab-icon-inactive: var(--ink-4);
+
+  --shadow-card:  0 4px 16px rgba(0, 0, 0, 0.06);
+  --shadow-bar:   0 -1px 0 var(--base-border);
+  --shadow-pink:  0 4px 12px rgba(255, 102, 138, 0.28);
+  --shadow-blue:  0 4px 12px rgba(0, 136, 255, 0.24);
+}
+
+/* 다크모드 — Midnight Breeze */
+:root[data-theme='dark'] {
+  --base:          #0B1525;
+  --base-white:    #13203A;
+  --base-border:   #1F2D47;
+  --base-soft:     #162035;
+
+  --blue:          #2E9BFF;
+  --blue-hover:    #1A8DEF;
+  --blue-soft:     #0E2040;
+  --pink:          #FF668A;
+  --pink-hover:    #E54F74;
+  --pink-soft:     #2A1020;
+  --mint:          #28D6E0;
+  --mint-soft:     #082830;
+
+  --ink:   #EAF2FC;
+  --ink-2: #B5C3D6;
+  --ink-3: #7A8BA5;
+  --ink-4: #4A5C73;
+
+  /* Semantic aliases */
+  --bg-primary:        var(--base);
+  --bg-card:           var(--base-white);
+  --bg-secondary:      var(--base-soft);
+  --bg-soft:           var(--base-soft);
+  --border:            var(--base-border);
+  --color-primary:     var(--blue);
+  --color-primary-hover: var(--blue-hover);
+  --color-accent:      var(--mint);
+  --color-error:       var(--pink);
+  --text-primary:      var(--ink);
+  --text-secondary:    var(--ink-3);
+  --text-on-primary:   #FFFFFF;
+
+  --chip-active-bg:    var(--blue-soft);
+  --chip-active-text:  var(--blue);
+  --chip-default-bg:   var(--base-border);
+  --chip-default-text: var(--ink-3);
+
+  --tab-bar-bg:        var(--base-white);
+  --tab-icon-active:   var(--blue);
+  --tab-icon-inactive: var(--ink-4);
+
+  --shadow-card:  0 4px 16px rgba(0, 0, 0, 0.4);
+  --shadow-bar:   0 -1px 0 var(--base-border);
+  --shadow-pink:  0 4px 12px rgba(255, 102, 138, 0.22);
+  --shadow-blue:  0 4px 12px rgba(46, 155, 255, 0.20);
+}
+
+/* 타이포그래피 & 치수 */
+:root {
+  --font-sans:    'Noto Sans KR', sans-serif;
+  --font-display: 'Space Grotesk', 'Noto Sans KR', sans-serif;
+
+  --text-title: 20px;
+  --text-body:  16px;
+  --text-meta:  13px;
+  --lh-title:   28px;
+  --lh-body:    24px;
+  --lh-meta:    18px;
+
+  --r-chip: 999px;
+  --r-card: 16px;
+  --r-btn:  14px;
+
+  /* legacy aliases */
+  --radius-btn:      var(--r-btn);
+  --radius-card:     var(--r-card);
+  --radius-chip:     var(--r-chip);
+  --height-btn:      48px;
+  --height-tab-bar:  64px;
+  --max-width:       480px;
+}

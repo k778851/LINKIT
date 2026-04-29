@@ -1,0 +1,56 @@
+.page { min-height: 100dvh; background: var(--base); }
+
+.saveBtn {
+  font-size: 14px; font-weight: 600; color: var(--ink-3);
+  padding: 6px 14px;
+}
+.saveBtnActive { color: var(--blue); }
+
+.body { padding: 20px 16px 80px; display: flex; flex-direction: column; gap: 4px; }
+
+.section { display: flex; flex-direction: column; gap: 6px; margin-bottom: 12px; }
+
+.label { font-size: 13px; font-weight: 700; color: var(--ink-2); }
+
+/* 카테고리 칩 */
+.chipRow { display: flex; gap: 8px; flex-wrap: wrap; }
+.chip {
+  height: 34px; padding: 0 16px; border-radius: 999px;
+  font-size: 13px; font-weight: 500;
+  background: var(--base-white); color: var(--ink-3);
+  border: 1.5px solid var(--base-border);
+  transition: all 0.15s;
+}
+.chipActive {
+  background: var(--blue-soft); color: var(--blue);
+  border-color: var(--blue); font-weight: 700;
+}
+
+/* 입력 */
+.input, .textarea {
+  width: 100%;
+  border: 1.5px solid var(--base-border);
+  border-radius: 12px;
+  padding: 12px 14px;
+  background: var(--base-white);
+  color: var(--ink); font-size: 15px;
+  outline: none; font-family: inherit;
+  transition: border-color 0.15s;
+  resize: none;
+}
+.input { height: 50px; }
+.input:focus, .textarea:focus { border-color: var(--blue); }
+.inputErr { border-color: var(--pink) !important; }
+
+.errMsg  { font-size: 12px; color: var(--pink); }
+.counter { font-size: 12px; color: var(--ink-3); text-align: right; }
+
+/* CTA */
+.ctaBtn {
+  width: 100%; height: 52px; border-radius: var(--r-btn);
+  font-size: 16px; font-weight: 700;
+  margin-top: 12px;
+  transition: background 0.2s;
+}
+.ctaActive   { background: var(--blue); color: #fff; }
+.ctaDisabled { background: var(--base-border); color: var(--ink-3); }

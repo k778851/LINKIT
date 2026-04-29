@@ -1,0 +1,337 @@
+.page {
+  padding-bottom: 16px;
+  background: var(--base);
+  min-height: 100dvh;
+}
+
+/* ── Header ── */
+.header {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 16px;
+  height: 52px;
+  background: var(--base-white);
+  border-bottom: 1px solid var(--base-border);
+}
+
+.headerRight {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.iconBtn {
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+}
+
+.bellDot {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--pink);
+  border: 1.5px solid var(--base-white);
+}
+
+/* ── Banner ── */
+.bannerWrap {
+  margin: 16px 16px 0;
+  border-radius: 20px;
+  overflow: hidden;
+  position: relative;
+  height: 160px;
+}
+
+.banner {
+  width: 100%;
+  height: 160px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding: 18px 20px;
+  gap: 2px;
+  top: 0; left: 0; right: 0; bottom: 0;
+}
+
+.bannerTag {
+  font-size: 11px;
+  font-weight: 600;
+  color: rgba(255,255,255,0.85);
+  background: rgba(255,255,255,0.15);
+  padding: 3px 10px;
+  border-radius: 999px;
+  width: fit-content;
+  margin-bottom: 4px;
+}
+
+.bannerTitle {
+  font-size: 12px;
+  font-weight: 500;
+  color: rgba(255,255,255,0.75);
+}
+
+.bannerSubtitle {
+  font-size: 17px;
+  font-weight: 700;
+  color: #fff;
+}
+
+.dots {
+  position: absolute;
+  bottom: 12px;
+  right: 14px;
+  display: flex;
+  gap: 4px;
+  align-items: center;
+}
+
+.dotBtn {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.45);
+  transition: all 0.25s;
+}
+
+.dotActive {
+  background: #fff;
+  width: 18px;
+  border-radius: 3px;
+}
+
+/* ── Next schedule card ── */
+.scheduleCard {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 12px 16px 0;
+  padding: 12px 14px;
+  background: var(--base-white);
+  border: 1px solid var(--base-border);
+  border-radius: 14px;
+  text-align: left;
+  width: calc(100% - 32px);
+}
+
+.scheduleLeft {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  flex-shrink: 0;
+}
+
+.scheduleLabel {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--blue);
+  white-space: nowrap;
+}
+
+.scheduleMiddle {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+}
+
+.scheduleEmoji {
+  font-size: 13px;
+  line-height: 1;
+}
+
+.scheduleName {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ink);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.scheduleMeta {
+  font-size: 11px;
+  color: var(--ink-3);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.scheduleDday {
+  flex-shrink: 0;
+  font-size: 13px;
+  font-weight: 800;
+  color: var(--blue);
+  background: var(--blue-soft);
+  padding: 4px 10px;
+  border-radius: 999px;
+}
+
+/* ── Stat row ── */
+.statRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 16px 8px;
+}
+
+.statText {
+  font-size: 14px;
+  color: var(--ink-2);
+  font-weight: 500;
+}
+
+.statGrad {
+  font-weight: 700;
+  background: linear-gradient(90deg, #0088FF 0%, #00C3D0 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.exploreBtn {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--blue);
+  padding: 6px 14px;
+  background: var(--blue-soft);
+  border-radius: 999px;
+}
+
+/* ── Section ── */
+.section {
+  padding: 20px 16px 0;
+}
+
+.sectionHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 14px;
+}
+
+.sectionTitle {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--ink);
+}
+
+.moreBtn {
+  font-size: 13px;
+  color: var(--blue);
+  font-weight: 500;
+}
+
+/* ── Horizontal scroll (HomeClubCard) ── */
+.hScroll {
+  display: flex;
+  gap: 12px;
+  overflow-x: auto;
+  padding-bottom: 4px;
+  margin: 0 -4px;
+  padding-left: 4px;
+}
+
+.clubCard {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  flex-shrink: 0;
+  width: 120px;
+  text-align: left;
+}
+
+.clubPoster {
+  width: 120px;
+  height: 90px;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.clubEmoji {
+  font-size: 36px;
+}
+
+.clubName {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ink);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.clubMeta {
+  font-size: 11px;
+  color: var(--ink-3);
+}
+
+/* ── Popular row ── */
+.popularList {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.popularRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--base-border);
+  text-align: left;
+  width: 100%;
+}
+
+.popularRow:last-child { border-bottom: none; }
+
+.popularRank {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--ink-4);
+  width: 18px;
+  text-align: center;
+  flex-shrink: 0;
+}
+
+.popularEmoji {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+  flex-shrink: 0;
+}
+
+.popularInfo {
+  flex: 1;
+  min-width: 0;
+}
+
+.popularName {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.popularMeta {
+  font-size: 12px;
+  color: var(--ink-3);
+  margin-top: 2px;
+}
