@@ -26,6 +26,10 @@ public class Club {
     @Column(length = 10)
     private String emoji;
 
+    /** 클럽 커버 이미지 URL */
+    @Column(length = 500)
+    private String coverImage;
+
     @Column(length = 30)
     private String category;
 

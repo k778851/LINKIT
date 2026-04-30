@@ -32,6 +32,12 @@
 
 .previewEmoji { font-size: 36px; }
 
+.previewCoverImg {
+  width: 100%; height: 100%;
+  object-fit: cover;
+  border-radius: 16px;
+}
+
 .previewInfo {
   display: flex; flex-direction: column; gap: 4px; min-width: 0;
 }

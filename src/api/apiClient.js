@@ -60,4 +60,20 @@ export const api = {
   put:    (path, body, opts) => request('PUT',    path, body, opts),
   patch:  (path, body, opts) => request('PATCH',  path, body, opts),
   delete: (path, opts)       => request('DELETE', path, null, opts),
+
+  /** 파일 업로드 전용 — Content-Type을 브라우저가 자동 설정 (multipart boundary 포함) */
+  upload: async (path, formData) => {
+    const headers = {};
+    const token = tokenStorage.get();
+    if (token) headers['Authorization'] = `Bearer ${token}`;
+    let res;
+    try {
+      res = await fetch(`${BASE_URL}${path}`, { method: 'POST', headers, body: formData });
+    } catch {
+      throw new ApiError('서버에 연결할 수 없습니다.', 0);
+    }
+    const json = await res.json().catch(() => ({}));
+    if (!res.ok) throw new ApiError(json.message ?? '업로드에 실패했어요.', res.status);
+    return json.data ?? json;
+  },
 };

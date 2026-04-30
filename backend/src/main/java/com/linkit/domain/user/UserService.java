@@ -66,9 +66,10 @@ public class UserService {
     public UserDto.ProfileResponse updateProfile(String userId, String requesterId, UserDto.UpdateRequest req) {
         if (!userId.equals(requesterId)) throw new AccessDeniedException("권한이 없습니다.");
         User user = getUser(userId);
-        if (req.getNickname() != null) user.setNickname(req.getNickname());
-        if (req.getEmoji()    != null) user.setEmoji(req.getEmoji());
-        if (req.getBio()      != null) user.setBio(req.getBio());
+        if (req.getNickname()     != null) user.setNickname(req.getNickname());
+        if (req.getEmoji()        != null) user.setEmoji(req.getEmoji());
+        if (req.getBio()          != null) user.setBio(req.getBio());
+        if (req.getProfileImage() != null) user.setProfileImage(req.getProfileImage());
         return UserDto.ProfileResponse.from(user);
     }
 

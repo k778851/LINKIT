@@ -42,9 +42,16 @@ jwt:
   secret: linkit-secret-key-must-be-at-least-256-bits-long-for-hs256-algorithm
   expiration: 86400000   # 24시간 (ms)
 
+  servlet:
+    multipart:
+      max-file-size: 5MB
+      max-request-size: 10MB
+
 app:
   cors:
     allowed-origins: "http://localhost:3000"
+  upload:
+    dir: uploads
 
 ---
 # ── 운영 환경 (MySQL) ────────────────────────────────────
@@ -74,6 +81,13 @@ jwt:
   secret: ${JWT_SECRET}
   expiration: 86400000
 
+  servlet:
+    multipart:
+      max-file-size: 5MB
+      max-request-size: 10MB
+
 app:
   cors:
     allowed-origins: ${CORS_ORIGINS:http://localhost:3000}
+  upload:
+    dir: ${UPLOAD_DIR:uploads}

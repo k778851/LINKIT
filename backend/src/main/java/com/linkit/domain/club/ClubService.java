@@ -44,6 +44,7 @@ public class ClubService {
                 .id("club-" + UUID.randomUUID().toString().substring(0, 8))
                 .name(req.getName())
                 .emoji(req.getEmoji() != null ? req.getEmoji() : "📌")
+                .coverImage(req.getCoverImage())
                 .category(req.getCategory())
                 .description(req.getDescription())
                 .schedule(req.getSchedule())
@@ -63,6 +64,7 @@ public class ClubService {
 
         if (req.getName()        != null) club.setName(req.getName());
         if (req.getEmoji()       != null) club.setEmoji(req.getEmoji());
+        if (req.getCoverImage()  != null) club.setCoverImage(req.getCoverImage());
         if (req.getCategory()    != null) club.setCategory(req.getCategory());
         if (req.getDescription() != null) club.setDescription(req.getDescription());
         if (req.getSchedule()    != null) club.setSchedule(req.getSchedule());

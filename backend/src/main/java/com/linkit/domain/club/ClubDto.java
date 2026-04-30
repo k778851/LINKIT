@@ -19,6 +19,7 @@ public class ClubDto {
         private String name;
 
         private String emoji;
+        private String coverImage;
 
         @NotBlank(message = "카테고리를 선택해주세요.")
         private String category;
@@ -38,6 +39,7 @@ public class ClubDto {
         private String name;
 
         private String emoji;
+        private String coverImage;
         private String category;
 
         @Size(max = 500)
@@ -56,6 +58,7 @@ public class ClubDto {
         private String id;
         private String name;
         private String emoji;
+        private String coverImage;
         private String category;
         private String description;
         private int memberCount;
@@ -72,6 +75,7 @@ public class ClubDto {
                     .id(c.getId())
                     .name(c.getName())
                     .emoji(c.getEmoji())
+                    .coverImage(c.getCoverImage())
                     .category(c.getCategory())
                     .description(c.getDescription())
                     .memberCount(c.getMemberCount())

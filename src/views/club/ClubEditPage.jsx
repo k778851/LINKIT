@@ -7,6 +7,7 @@ import { useAuthStore } from '../../store/authStore';
 import { useToastContext } from '../../context/ToastContext';
 import { Header } from '../../components/layout/Header';
 import { EmptyState } from '../../components/common/EmptyState';
+import { ImageUpload } from '../../components/ui/ImageUpload';
 import { CLUB_EMOJIS } from '../../data/sampleData';
 import styles from './ClubEditPage.module.css';
 
@@ -24,6 +25,7 @@ export function ClubEditPage({ clubId }) {
 
   const [form, setForm] = useState({
     name: '', category: '', emoji: '🏃',
+    coverImage: null,
     description: '', location: '', schedule: '', isPrivate: false,
   });
   const [errors, setErrors] = useState({});
@@ -35,6 +37,7 @@ export function ClubEditPage({ clubId }) {
         name:        club.name,
         category:    club.category,
         emoji:       club.emoji,
+        coverImage:  club.coverImage ?? null,
         description: club.description,
         location:    club.location ?? '',
         schedule:    club.schedule ?? '',
@@ -94,10 +97,27 @@ export function ClubEditPage({ clubId }) {
       />
 
       <div className={styles.body}>
+        {/* 커버 이미지 업로드 */}
+        <div className={styles.section}>
+          <p className={styles.label}>커버 이미지 <span className={styles.optional}>(선택)</span></p>
+          <ImageUpload
+            value={form.coverImage}
+            onChange={(url) => set('coverImage', url)}
+            shape="square"
+            placeholder={form.emoji}
+          />
+        </div>
+
         {/* 미리보기 */}
         <div className={styles.previewCard}>
-          <div className={styles.previewPoster} style={{ background: previewGrad }}>
-            <span className={styles.previewEmoji}>{form.emoji}</span>
+          <div
+            className={styles.previewPoster}
+            style={form.coverImage ? {} : { background: previewGrad }}
+          >
+            {form.coverImage
+              ? <img src={form.coverImage} alt="커버" className={styles.previewCoverImg} />
+              : <span className={styles.previewEmoji}>{form.emoji}</span>
+            }
           </div>
           <div className={styles.previewInfo}>
             {form.category && <span className={styles.previewCategory}>{form.category}</span>}

@@ -10,21 +10,20 @@
 
 .body { padding: 20px; display: flex; flex-direction: column; gap: 24px; padding-bottom: 48px; }
 
-/* ── Avatar preview ── */
+/* ── Avatar section ── */
 .avatarSection {
   display: flex; flex-direction: column; align-items: center; gap: 8px;
   padding: 24px 0 8px;
 }
 
-.avatarPreview {
-  width: 84px; height: 84px;
-  border-radius: 50%;
-  background: var(--blue-soft);
-  display: flex; align-items: center; justify-content: center;
-  box-shadow: 0 4px 16px rgba(0,136,255,0.15);
+.avatarUploadWrap {
+  width: 88px;
+  height: 88px;
 }
 
-.avatarEmoji { font-size: 44px; }
+.avatarUpload {
+  width: 88px !important;
+}
 
 .avatarName {
   font-size: 18px; font-weight: 700; color: var(--ink);

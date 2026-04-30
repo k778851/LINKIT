@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useAuthStore } from '../../store/authStore';
 import { useToastContext } from '../../context/ToastContext';
 import { Header } from '../../components/layout/Header';
+import { ImageUpload } from '../../components/ui/ImageUpload';
 import styles from './ProfileEditPage.module.css';
 
 const EMOJIS = ['😊', '😎', '🙌', '🔥', '🌟', '💪', '🎵', '📚', '⚽', '🍕', '📸', '🌿', '💃', '🎨', '🧗', '🏊'];
@@ -17,6 +18,7 @@ export function ProfileEditPage() {
 
   const [form, setForm] = useState({
     emoji: user?.emoji ?? '😊',
+    profileImage: user?.profileImage ?? null,
     nickname: user?.nickname ?? '',
     handle: user?.handle ?? '',
     bio: user?.bio ?? '',
@@ -60,18 +62,24 @@ export function ProfileEditPage() {
       />
 
       <div className={styles.body}>
-        {/* 아바타 미리보기 */}
+        {/* 프로필 이미지 업로드 */}
         <div className={styles.avatarSection}>
-          <div className={styles.avatarPreview}>
-            <span className={styles.avatarEmoji}>{form.emoji}</span>
+          <div className={styles.avatarUploadWrap}>
+            <ImageUpload
+              value={form.profileImage}
+              onChange={(url) => set('profileImage', url)}
+              shape="circle"
+              placeholder={form.emoji}
+              className={styles.avatarUpload}
+            />
           </div>
           <p className={styles.avatarName}>{form.nickname || '닉네임'}</p>
           {form.handle ? <p className={styles.avatarHandle}>@{form.handle}</p> : null}
         </div>
 
-        {/* 이모지 선택 */}
+        {/* 이모지 선택 (이미지 없을 때 사용) */}
         <div className={styles.section}>
-          <p className={styles.label}>프로필 이모지</p>
+          <p className={styles.label}>프로필 이모지 <span className={styles.optional}>(이미지 미설정 시)</span></p>
           <div className={styles.emojiGrid}>
             {EMOJIS.map((e) => (
               <button

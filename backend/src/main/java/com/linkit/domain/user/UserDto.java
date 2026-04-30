@@ -42,6 +42,7 @@ public class UserDto {
         private String nickname;
         private String emoji;
         private String bio;
+        private String profileImage;
     }
 
     /* ── 응답 ─────────────────────────────────────────── */
@@ -59,6 +60,7 @@ public class UserDto {
         private String handle;
         private String emoji;
         private String bio;
+        private String profileImage;
         private Set<String> joinedClubs;
         private Set<String> bookmarkedClubs;
         private LocalDateTime createdAt;
@@ -70,6 +72,7 @@ public class UserDto {
                     .handle(u.getHandle())
                     .emoji(u.getEmoji())
                     .bio(u.getBio())
+                    .profileImage(u.getProfileImage())
                     .joinedClubs(u.getJoinedClubs())
                     .bookmarkedClubs(u.getBookmarkedClubs())
                     .createdAt(u.getCreatedAt())

@@ -39,6 +39,8 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.GET, "/api/posts/{id}/comments").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/clubs/{id}/posts").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/search").permitAll()
+                // 업로드 파일 정적 서빙 (인증 불필요)
+                .requestMatchers(HttpMethod.GET, "/uploads/**").permitAll()
                 // 관리자 전용
                 .requestMatchers("/api/admin/**").hasRole("ADMIN")
                 // H2 콘솔 (개발용)
