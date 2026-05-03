@@ -16,12 +16,12 @@ export const CLUB_EMOJIS = {
 };
 
 export const SAMPLE_CLUB_IMAGES = {
-  'club-1': '/sample-clubs/club-1-running.svg',
-  'club-2': '/sample-clubs/club-2-food.svg',
-  'club-3': '/sample-clubs/club-3-photo.svg',
-  'club-4': '/sample-clubs/club-4-band.svg',
-  'club-5': '/sample-clubs/club-5-book.svg',
-  'club-6': '/sample-clubs/club-6-futsal.svg',
+  'club-1': 'https://images.unsplash.com/photo-1571902943202-507ec2618e8f?w=400&h=400&q=80&auto=format&fit=crop',
+  'club-2': 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=400&h=400&q=80&auto=format&fit=crop',
+  'club-3': 'https://images.unsplash.com/photo-1516035069371-29a1b244cc32?w=400&h=400&q=80&auto=format&fit=crop',
+  'club-4': 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=400&h=400&q=80&auto=format&fit=crop',
+  'club-5': 'https://images.unsplash.com/photo-1481627834876-b7833e8f5570?w=400&h=400&q=80&auto=format&fit=crop',
+  'club-6': 'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=400&h=400&q=80&auto=format&fit=crop',
 };
 
 export const sampleClubs = [
