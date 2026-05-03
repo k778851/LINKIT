@@ -7,7 +7,8 @@ import { useClubStore } from '../store/clubStore';
 import { useAuthStore } from '../store/authStore';
 import { useNotificationStore } from '../store/notificationStore';
 import { calcDdayNum, getDdayLabel } from '../utils/formatDate';
-import { sampleBanners, CLUB_EMOJIS } from '../data/sampleData';
+import { sampleBanners, CLUB_EMOJIS, SAMPLE_CLUB_IMAGES } from '../data/sampleData';
+import { assetPath } from '../lib/assetPath';
 import { LinkitWordmark } from '../components/common/LinkitWordmark';
 import styles from './HomePage.module.css';
 
@@ -165,13 +166,18 @@ export function HomePage() {
 
 function HomeClubCard({ club, onClick }) {
   const colors = CLUB_EMOJIS[club.emoji] ?? ['#8EC6FF', '#0088FF'];
+  const coverImage = club.coverImage ?? club.posterImages?.[0] ?? SAMPLE_CLUB_IMAGES[club.id];
+  const coverSrc = coverImage?.startsWith('/') ? assetPath(coverImage) : coverImage;
   return (
     <button className={styles.clubCard} onClick={onClick}>
       <div
         className={styles.clubPoster}
-        style={{ background: `linear-gradient(135deg, ${colors[0]} 0%, ${colors[1]} 100%)` }}
+        style={coverSrc
+          ? { backgroundImage: `url("${coverSrc}")`, backgroundSize: 'cover', backgroundPosition: 'center' }
+          : { background: `linear-gradient(135deg, ${colors[0]} 0%, ${colors[1]} 100%)` }
+        }
       >
-        <span className={styles.clubEmoji}>{club.emoji}</span>
+        {!coverSrc && <span className={styles.clubEmoji}>{club.emoji}</span>}
       </div>
       <p className={styles.clubName}>{club.name}</p>
       <p className={styles.clubMeta}>{club.memberCount.toLocaleString()}명</p>
@@ -181,14 +187,19 @@ function HomeClubCard({ club, onClick }) {
 
 function PopularRow({ club, rank, onClick }) {
   const colors = CLUB_EMOJIS[club.emoji] ?? ['#8EC6FF', '#0088FF'];
+  const coverImage = club.coverImage ?? club.posterImages?.[0] ?? SAMPLE_CLUB_IMAGES[club.id];
+  const coverSrc = coverImage?.startsWith('/') ? assetPath(coverImage) : coverImage;
   return (
     <button className={styles.popularRow} onClick={onClick}>
       <span className={styles.popularRank}>{rank}</span>
       <div
         className={styles.popularEmoji}
-        style={{ background: `linear-gradient(135deg, ${colors[0]} 0%, ${colors[1]} 100%)` }}
+        style={coverSrc
+          ? { backgroundImage: `url("${coverSrc}")`, backgroundSize: 'cover', backgroundPosition: 'center' }
+          : { background: `linear-gradient(135deg, ${colors[0]} 0%, ${colors[1]} 100%)` }
+        }
       >
-        {club.emoji}
+        {!coverSrc && club.emoji}
       </div>
       <div className={styles.popularInfo}>
         <p className={styles.popularName}>{club.name}</p>
