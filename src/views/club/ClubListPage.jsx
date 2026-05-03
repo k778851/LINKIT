@@ -85,7 +85,6 @@ export function ClubListPage() {
         label="클럽 만들기"
         icon={<Plus size={16} />}
         onClick={() => router.push('/clubs/new')}
-        pinned
       />
     </div>
   );
