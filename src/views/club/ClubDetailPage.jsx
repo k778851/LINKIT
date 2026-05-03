@@ -2,9 +2,10 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Heart, MapPin, Clock, Users, ChevronLeft, Calendar, Pencil, Link2 } from 'lucide-react';
+import { Heart, MapPin, Clock, Users, ChevronLeft, Calendar, Pencil, Link2, Plus } from 'lucide-react';
 import { useClubStore } from '../../store/clubStore';
 import { useAuthStore } from '../../store/authStore';
+import { calcDdayNum, getDdayLabel, formatShortDate } from '../../utils/formatDate';
 import { useToastContext } from '../../context/ToastContext';
 import { EmptyState } from '../../components/common/EmptyState';
 import { ClubBoardTab } from './tabs/ClubBoardTab';
@@ -20,6 +21,7 @@ export function ClubDetailPage({ clubId }) {
   const getClubMembers = useClubStore((s) => s.getClubMembers);
   const setMemberRole = useClubStore((s) => s.setMemberRole);
   const removeMember = useClubStore((s) => s.removeMember);
+  const schedules = useClubStore((s) => s.schedules);
   const club = getClubById(clubId);
   const user = useAuthStore((s) => s.user);
   const [openMenuUserId, setOpenMenuUserId] = useState(null);
@@ -105,15 +107,15 @@ export function ClubDetailPage({ clubId }) {
           <InfoBox icon={<Users size={16} color="var(--blue)" />} text={`${club.memberCount.toLocaleString()}명`} />
         </div>
 
-        {/* 서브탭 — 소개/게시판/멤버 */}
+        {/* 서브탭 — 소개/게시판/일정/멤버 */}
         <div className={styles.subTabs}>
-          {['intro', 'board', 'members'].map((t) => (
+          {['intro', 'board', 'schedules', 'members'].map((t) => (
             <button
               key={t}
               className={`${styles.subTab} ${tab === t ? styles.subTabActive : ''}`}
               onClick={() => setTab(t)}
             >
-              {{ intro: '소개', board: '게시판', members: '멤버' }[t]}
+              {{ intro: '소개', board: '게시판', schedules: '일정', members: '멤버' }[t]}
             </button>
           ))}
         </div>
@@ -129,44 +131,71 @@ export function ClubDetailPage({ clubId }) {
                 ))}
               </div>
             )}
-
-            {/* 방장 전용: 모임 개설 버튼 */}
-            {isCreator && (
-              <button
-                className={styles.scheduleCreateBtn}
-                onClick={() => router.push(`/clubs/${clubId}/schedule`)}
-              >
-                + 새 모임 일정 추가
-              </button>
-            )}
-
-            {/* 다음 일정 미니 카드 */}
-            <div className={styles.scheduleMini}>
-              <div className={styles.scheduleMiniLeft}>
-                <Calendar size={16} color="#fff" />
-                <div>
-                  <p className={styles.scheduleMiniTitle}>다음 모임</p>
-                  <p className={styles.scheduleMiniDate}>
-                    {club.schedule ?? '대기중'}
-                  </p>
-                </div>
-              </div>
-              <button
-                className={styles.scheduleWhiteBtn}
-                onClick={() => {
-                  if (!isJoined) {
-                    joinClubStore(clubId, { name: club.name, emoji: club.emoji, memberCount: club.memberCount });
-                    incrementMemberCount(clubId);
-                    joinClubApi(clubId).catch(() => {});
-                  }
-                  showToast(`${club.name} 일정에 신청했어요 📅`, 'success');
-                }}
-              >
-                신청
-              </button>
-            </div>
           </div>
         )}
+
+        {tab === 'schedules' && (() => {
+          const clubSchedules = schedules
+            .filter((s) => s.clubId === clubId)
+            .map((s) => ({ ...s, dday: calcDdayNum(s.startAt) }))
+            .sort((a, b) => a.dday - b.dday);
+          return (
+            <div className={styles.scheduleTab}>
+              {/* 방장 전용: 모임 개설 버튼 */}
+              {isCreator && (
+                <button
+                  className={styles.scheduleCreateBtn}
+                  onClick={() => router.push(`/clubs/${clubId}/schedule`)}
+                >
+                  <Plus size={15} style={{ display: 'inline', marginRight: 4 }} />
+                  새 모임 일정 추가
+                </button>
+              )}
+
+              {clubSchedules.length === 0 ? (
+                <div className={styles.scheduleEmpty}>
+                  <p className={styles.scheduleEmptyIcon}>📅</p>
+                  <p className={styles.scheduleEmptyText}>예정된 일정이 없어요</p>
+                </div>
+              ) : (
+                <div className={styles.scheduleList}>
+                  {clubSchedules.map((sch) => {
+                    const isToday = sch.dday === 0;
+                    const isPast  = sch.dday < 0;
+                    return (
+                      <div key={sch.id} className={`${styles.scheduleCard} ${isToday ? styles.scheduleCardToday : ''} ${isPast ? styles.scheduleCardPast : ''}`}>
+                        <div className={`${styles.scheduleDday} ${isToday ? styles.scheduleDdayToday : isPast ? styles.scheduleDdayPast : ''}`}>
+                          <span className={styles.scheduleDdayNum}>{getDdayLabel(sch.dday)}</span>
+                          <span className={styles.scheduleDdayDate}>{formatShortDate(sch.startAt)}</span>
+                        </div>
+                        <div className={styles.scheduleInfo}>
+                          <p className={styles.scheduleTitle}>{sch.title ?? club.name} 정기 모임</p>
+                          <p className={styles.scheduleMeta}>🕐 {sch.time}</p>
+                          <p className={styles.scheduleMeta}>📍 {sch.location}</p>
+                        </div>
+                        {!isPast && (
+                          <button
+                            className={styles.scheduleApplyBtn}
+                            onClick={() => {
+                              if (!isJoined) {
+                                joinClubStore(clubId, { name: club.name, emoji: club.emoji, memberCount: club.memberCount });
+                                incrementMemberCount(clubId);
+                                joinClubApi(clubId).catch(() => {});
+                              }
+                              showToast(`${club.name} 일정에 신청했어요 📅`, 'success');
+                            }}
+                          >
+                            신청
+                          </button>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+          );
+        })()}
 
         {tab === 'board' && (
           <ClubBoardTab clubId={clubId} />

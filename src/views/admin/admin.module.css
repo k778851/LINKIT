@@ -128,3 +128,47 @@
   text-align: center; padding: 48px 0;
   color: #aaa; font-size: 14px;
 }
+
+/* ── 탭 (클럽 관리) ──────────────────────────────────── */
+.tabRow {
+  display: flex; gap: 0;
+  border-bottom: 2px solid #eee;
+  margin-bottom: 16px;
+}
+.tabBtn {
+  padding: 10px 20px;
+  font-size: 14px; font-weight: 600; color: #aaa;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -2px;
+  display: flex; align-items: center; gap: 6px;
+  transition: color 0.15s;
+}
+.tabActive { color: #0088FF; border-bottom-color: #0088FF; }
+
+.tabDot {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 18px; height: 18px; border-radius: 50%;
+  background: #FF668A; color: #fff;
+  font-size: 10px; font-weight: 700;
+}
+
+.pendingBadge { color: #FF668A; font-weight: 700; }
+
+/* ── 승인/반려 버튼 ────────────────────────────────── */
+.approveBtn {
+  display: flex; align-items: center; gap: 4px;
+  padding: 5px 10px; border-radius: 8px;
+  font-size: 12px; font-weight: 600;
+  color: #0088FF; background: #e8f4ff;
+  transition: background 0.15s;
+}
+.approveBtn:hover { background: #c8e6ff; }
+
+.rejectBtn {
+  display: flex; align-items: center; gap: 4px;
+  padding: 5px 10px; border-radius: 8px;
+  font-size: 12px; font-weight: 600;
+  color: #e03131; background: #fff0f0;
+  transition: background 0.15s;
+}
+.rejectBtn:hover { background: #ffe3e3; }

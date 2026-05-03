@@ -8,6 +8,7 @@ export const useClubStore = create(
   persist(
     (set, get) => ({
       clubs:            sampleClubs,
+      pendingClubs:     [],      // 관리자 승인 대기 중인 클럽
       schedules:        sampleSchedules,
       selectedCategory: '전체',
       selectedSort:     '최신순',
@@ -79,6 +80,36 @@ export const useClubStore = create(
             return { ...c, members: [...(c.members ?? []), { userId, role: 'member', joinedAt: new Date().toISOString() }] };
           })
         })),
+
+      /* ── 승인 대기 클럽 추가 (클럽 개설 신청) ─────────── */
+      submitClubForApproval: (club) => {
+        const pending = {
+          id: club.id ?? `club-${Date.now()}`,
+          ...club,
+          status: 'pending',
+          createdAt: new Date().toISOString(),
+          appliedAt: new Date().toISOString(),
+        };
+        set((s) => ({ pendingClubs: [pending, ...s.pendingClubs] }));
+        return pending;
+      },
+
+      /* ── 관리자: 클럽 승인 ────────────────────────────── */
+      approveClub: (clubId) => {
+        const { pendingClubs } = get();
+        const club = pendingClubs.find((c) => c.id === clubId);
+        if (!club) return;
+        const approved = { ...club, status: 'active' };
+        set((s) => ({
+          pendingClubs: s.pendingClubs.filter((c) => c.id !== clubId),
+          clubs: [approved, ...s.clubs],
+        }));
+      },
+
+      /* ── 관리자: 클럽 반려 ────────────────────────────── */
+      rejectClub: (clubId) => {
+        set((s) => ({ pendingClubs: s.pendingClubs.filter((c) => c.id !== clubId) }));
+      },
 
       /* ── API: 클럽 생성 ───────────────────────────────── */
       addClub: async (club) => {

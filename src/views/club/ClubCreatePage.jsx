@@ -15,9 +15,7 @@ const EMOJIS = ['🏃', '🍕', '📸', '🎵', '📚', '⚽', '🎨', '🏊', '
 
 export function ClubCreatePage() {
   const router = useRouter();
-  const addClub = useClubStore((s) => s.addClub);
-  const incrementMemberCount = useClubStore((s) => s.incrementMemberCount);
-  const joinClub = useAuthStore((s) => s.joinClub);
+  const submitClubForApproval = useClubStore((s) => s.submitClubForApproval);
   const user = useAuthStore((s) => s.user);
   const { showToast } = useToastContext();
   const [form, setForm] = useState({
@@ -47,19 +45,14 @@ export function ClubCreatePage() {
     if (!validate() || submitting) return;
     setSubmitting(true);
     try {
-      // 관리자 승인 후 개설 — 로컬에 즉시 추가하지 않음
-      // (백엔드 연결 시에는 API로 신청서 제출)
       const parsedTags = form.tags
         .split(',').map((t) => t.trim()).filter(Boolean).slice(0, 3);
-      try {
-        await addClub({
-          id: `club-${Date.now()}`, ...form,
-          tags: parsedTags,
-          memberCount: 1, newCount: 0, posterImages: [],
-          createdBy: user?.id,
-          status: 'pending',
-        });
-      } catch { /* 오프라인이면 무시 */ }
+      submitClubForApproval({
+        id: `club-${Date.now()}`, ...form,
+        tags: parsedTags,
+        memberCount: 1, newCount: 0, posterImages: [],
+        createdBy: user?.id,
+      });
       showToast('클럽신청이 완료되었습니다. 관리자 승인 후 개설돼요 😊', 'success');
       router.replace('/clubs');
     } catch {

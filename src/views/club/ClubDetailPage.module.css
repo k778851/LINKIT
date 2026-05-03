@@ -143,6 +143,50 @@
   padding: 4px 10px; border-radius: 999px;
 }
 
+/* ── Schedule tab ── */
+.scheduleTab { display: flex; flex-direction: column; gap: 12px; }
+
+.scheduleList { display: flex; flex-direction: column; gap: 10px; }
+
+.scheduleCard {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 16px;
+  border-radius: 14px;
+  background: var(--base-white);
+  border: 1px solid var(--base-border);
+}
+.scheduleCardToday { border-color: var(--blue); background: var(--blue-soft); }
+.scheduleCardPast  { opacity: 0.5; }
+
+.scheduleDday {
+  display: flex; flex-direction: column; align-items: center;
+  min-width: 52px; gap: 2px;
+}
+.scheduleDdayNum  { font-size: 13px; font-weight: 800; color: var(--blue); }
+.scheduleDdayDate { font-size: 10px; color: var(--ink-3); }
+.scheduleDdayToday .scheduleDdayNum { color: var(--blue); }
+.scheduleDdayPast  .scheduleDdayNum { color: var(--ink-4); }
+
+.scheduleInfo { flex: 1; min-width: 0; }
+.scheduleTitle { font-size: 14px; font-weight: 600; color: var(--ink); margin-bottom: 4px; }
+.scheduleMeta  { font-size: 12px; color: var(--ink-3); line-height: 1.6; }
+
+.scheduleApplyBtn {
+  flex-shrink: 0;
+  font-size: 13px; font-weight: 700;
+  color: var(--blue); background: var(--blue-soft);
+  padding: 7px 14px; border-radius: 999px;
+}
+
+.scheduleEmpty {
+  display: flex; flex-direction: column; align-items: center;
+  padding: 48px 0; gap: 8px;
+}
+.scheduleEmptyIcon { font-size: 40px; }
+.scheduleEmptyText { font-size: 14px; color: var(--ink-3); }
+
 /* 방장 모임 개설 버튼 */
 .scheduleCreateBtn {
   display: block; width: 100%;
