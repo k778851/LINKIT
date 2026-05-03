@@ -41,6 +41,12 @@ export const sampleClubs = [
     location: '여의도',
     createdBy: 'user-1',
     createdAt: '2026-03-01T00:00:00.000Z',
+    members: [
+      { userId: 'user-1', role: 'owner', joinedAt: '2026-03-01T00:00:00.000Z' },
+      { userId: 'user-5', role: 'admin', joinedAt: '2026-03-02T00:00:00.000Z' },
+      { userId: 'user-6', role: 'admin', joinedAt: '2026-03-03T00:00:00.000Z' },
+      { userId: 'user-me', role: 'member', joinedAt: '2026-03-10T00:00:00.000Z' },
+    ],
   },
   {
     id: 'club-2',
@@ -58,6 +64,11 @@ export const sampleClubs = [
     location: '서울 전역',
     createdBy: 'user-2',
     createdAt: '2026-03-05T00:00:00.000Z',
+    members: [
+      { userId: 'user-2', role: 'owner', joinedAt: '2026-03-05T00:00:00.000Z' },
+      { userId: 'user-3', role: 'admin', joinedAt: '2026-03-06T00:00:00.000Z' },
+      { userId: 'user-1', role: 'member', joinedAt: '2026-03-07T00:00:00.000Z' },
+    ],
   },
   {
     id: 'club-3',
@@ -75,6 +86,10 @@ export const sampleClubs = [
     location: '성수동',
     createdBy: 'user-3',
     createdAt: '2026-03-10T00:00:00.000Z',
+    members: [
+      { userId: 'user-3', role: 'owner', joinedAt: '2026-03-10T00:00:00.000Z' },
+      { userId: 'user-4', role: 'admin', joinedAt: '2026-03-11T00:00:00.000Z' },
+    ],
   },
   {
     id: 'club-4',
@@ -92,6 +107,11 @@ export const sampleClubs = [
     location: '홍대',
     createdBy: 'user-4',
     createdAt: '2026-03-12T00:00:00.000Z',
+    members: [
+      { userId: 'user-4', role: 'owner', joinedAt: '2026-03-12T00:00:00.000Z' },
+      { userId: 'user-2', role: 'admin', joinedAt: '2026-03-13T00:00:00.000Z' },
+      { userId: 'user-5', role: 'member', joinedAt: '2026-03-14T00:00:00.000Z' },
+    ],
   },
   {
     id: 'club-5',
@@ -109,6 +129,11 @@ export const sampleClubs = [
     location: '강남',
     createdBy: 'user-5',
     createdAt: '2026-03-15T00:00:00.000Z',
+    members: [
+      { userId: 'user-5', role: 'owner', joinedAt: '2026-03-15T00:00:00.000Z' },
+      { userId: 'user-6', role: 'admin', joinedAt: '2026-03-16T00:00:00.000Z' },
+      { userId: 'user-3', role: 'member', joinedAt: '2026-03-17T00:00:00.000Z' },
+    ],
   },
   {
     id: 'club-6',
@@ -126,6 +151,11 @@ export const sampleClubs = [
     location: '오치동',
     createdBy: 'user-6',
     createdAt: '2026-03-20T00:00:00.000Z',
+    members: [
+      { userId: 'user-6', role: 'owner', joinedAt: '2026-03-20T00:00:00.000Z' },
+      { userId: 'user-1', role: 'admin', joinedAt: '2026-03-21T00:00:00.000Z' },
+      { userId: 'user-me', role: 'member', joinedAt: '2026-03-22T00:00:00.000Z' },
+    ],
   },
 ];
 
@@ -411,6 +441,7 @@ export const SAMPLE_USERS = {
   'user-4': { emoji: '🎵', nickname: '밴드마스터' },
   'user-5': { emoji: '📚', nickname: '독서왕' },
   'user-6': { emoji: '⚽', nickname: '풋살왕' },
+  'user-me': { emoji: '😊', nickname: '링킷유저' },
 };
 
 export const defaultUser = {

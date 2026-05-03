@@ -10,7 +10,7 @@ spring:
       on-profile: dev
 
   datasource:
-    url: jdbc:h2:mem:linkitdb;DB_CLOSE_DELAY=-1;MODE=MySQL
+    url: jdbc:h2:mem:linkitdb;DB_CLOSE_DELAY=-1;MODE=MySQL;NON_KEYWORDS=VALUE
     driver-class-name: org.h2.Driver
     username: sa
     password:
@@ -33,6 +33,7 @@ spring:
   sql:
     init:
       mode: always
+      encoding: UTF-8
       data-locations: classpath:data.sql
 
 server:
@@ -49,7 +50,8 @@ jwt:
 
 app:
   cors:
-    allowed-origins: "http://localhost:3000"
+    # 개발: 로컬 Next.js + GitHub Pages 미리보기
+    allowed-origins: "http://localhost:3000,https://k7788.github.io"
   upload:
     dir: uploads
 

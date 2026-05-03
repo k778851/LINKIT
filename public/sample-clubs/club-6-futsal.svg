@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 480" role="img" aria-label="Futsal club sample image">
+  <defs>
+    <linearGradient id="field" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#4ac258"/>
+      <stop offset="1" stop-color="#0088ff"/>
+    </linearGradient>
+  </defs>
+  <rect width="480" height="480" fill="url(#field)"/>
+  <path d="M40 76h400v328H40z" fill="none" stroke="#eafff0" stroke-width="12" opacity=".8"/>
+  <path d="M240 76v328M40 240h400" stroke="#eafff0" stroke-width="8" opacity=".55"/>
+  <circle cx="240" cy="240" r="72" fill="none" stroke="#eafff0" stroke-width="8" opacity=".65"/>
+  <circle cx="240" cy="240" r="78" fill="#f8fafc"/>
+  <path d="M240 176l58 42-22 68h-72l-22-68z" fill="#172033"/>
+  <g fill="#172033">
+    <path d="M240 176l-22 42h44z"/>
+    <path d="M298 218l-22 68 45-24z"/>
+    <path d="M204 286l-45-24 23-44z"/>
+    <path d="M276 286l-36 34-36-34z"/>
+  </g>
+</svg>

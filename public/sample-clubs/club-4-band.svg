@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 480" role="img" aria-label="Band club sample image">
+  <defs>
+    <linearGradient id="stage" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#3e2a78"/>
+      <stop offset="1" stop-color="#00c3d0"/>
+    </linearGradient>
+  </defs>
+  <rect width="480" height="480" fill="url(#stage)"/>
+  <path d="M84 0l92 302M396 0L272 302" stroke="#ffe66d" stroke-width="42" opacity=".28"/>
+  <rect x="0" y="330" width="480" height="150" fill="#111827" opacity=".72"/>
+  <g fill="none" stroke="#f8fafc" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M156 166v150" stroke-width="16"/>
+    <path d="M156 170c56 6 94 28 116 68-38-10-76-6-116 12z" fill="#ff668a" stroke-width="10"/>
+    <path d="M262 302c14-30 30-52 50-66 12 30 10 58-4 84" stroke-width="14"/>
+    <circle cx="316" cy="226" r="18" fill="#f8fafc" stroke="none"/>
+    <path d="M108 336h260" stroke-width="12"/>
+  </g>
+  <circle cx="104" cy="308" r="38" fill="#8ec6ff"/>
+  <circle cx="376" cy="308" r="38" fill="#ffd166"/>
+</svg>

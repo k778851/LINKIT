@@ -32,7 +32,7 @@ public class UserController {
 
     @GetMapping("/users/me")
     public ApiResponse<UserDto.ProfileResponse> getMe(@AuthenticationPrincipal UserDetails principal) {
-        return ApiResponse.ok(userService.getProfile(principal.getUsername()));
+        return ApiResponse.ok(userService.getProfile(principal.getUsername(), principal.getUsername()));
     }
 
     @PutMapping("/users/me")
@@ -45,33 +45,11 @@ public class UserController {
     /* ── 특정 유저 프로필 조회 ─────────────────────────── */
 
     @GetMapping("/users/{userId}")
-    public ApiResponse<UserDto.ProfileResponse> getUser(@PathVariable String userId) {
-        return ApiResponse.ok(userService.getProfile(userId));
-    }
-
-    /* ── 클럽 멤버십 ───────────────────────────────────── */
-
-    @PostMapping("/clubs/{clubId}/join")
-    public ApiResponse<Void> joinClub(
+    public ApiResponse<UserDto.ProfileResponse> getUser(
             @AuthenticationPrincipal UserDetails principal,
-            @PathVariable String clubId) {
-        userService.joinClub(principal.getUsername(), clubId);
-        return ApiResponse.ok("모임에 신청했어요 🎉");
+            @PathVariable String userId) {
+        String requesterId = principal != null ? principal.getUsername() : null;
+        return ApiResponse.ok(userService.getProfile(userId, requesterId));
     }
 
-    @DeleteMapping("/clubs/{clubId}/join")
-    public ApiResponse<Void> leaveClub(
-            @AuthenticationPrincipal UserDetails principal,
-            @PathVariable String clubId) {
-        userService.leaveClub(principal.getUsername(), clubId);
-        return ApiResponse.ok("참여를 취소했어요.");
-    }
-
-    @PostMapping("/clubs/{clubId}/bookmark")
-    public ApiResponse<Void> toggleBookmark(
-            @AuthenticationPrincipal UserDetails principal,
-            @PathVariable String clubId) {
-        boolean added = userService.toggleBookmark(principal.getUsername(), clubId);
-        return ApiResponse.ok(added ? "찜 목록에 추가했어요 💖" : "찜 목록에서 제거했어요");
-    }
 }

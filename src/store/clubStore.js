@@ -46,6 +46,40 @@ export const useClubStore = create(
 
       getClubById: (id) => get().clubs.find((c) => c.id === id),
 
+      /* ── 멤버 관리 ────────────────────────────────────── */
+      getClubMembers: (clubId) => {
+        const club = get().clubs.find(c => c.id === clubId);
+        return club?.members ?? [];
+      },
+
+      setMemberRole: (clubId, userId, newRole) =>
+        set(s => ({
+          clubs: s.clubs.map(c =>
+            c.id === clubId
+              ? { ...c, members: c.members.map(m => m.userId === userId ? { ...m, role: newRole } : m) }
+              : c
+          )
+        })),
+
+      removeMember: (clubId, userId) =>
+        set(s => ({
+          clubs: s.clubs.map(c =>
+            c.id === clubId
+              ? { ...c, members: c.members.filter(m => m.userId !== userId), memberCount: Math.max(0, c.memberCount - 1) }
+              : c
+          )
+        })),
+
+      addMember: (clubId, userId) =>
+        set(s => ({
+          clubs: s.clubs.map(c => {
+            if (c.id !== clubId) return c;
+            const already = c.members?.some(m => m.userId === userId);
+            if (already) return c;
+            return { ...c, members: [...(c.members ?? []), { userId, role: 'member', joinedAt: new Date().toISOString() }] };
+          })
+        })),
+
       /* ── API: 클럽 생성 ───────────────────────────────── */
       addClub: async (club) => {
         try {

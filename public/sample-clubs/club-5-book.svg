@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 480" role="img" aria-label="Book club sample image">
+  <defs>
+    <linearGradient id="paper" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#8ee3eb"/>
+      <stop offset="1" stop-color="#9ce5a3"/>
+    </linearGradient>
+  </defs>
+  <rect width="480" height="480" fill="url(#paper)"/>
+  <circle cx="92" cy="94" r="42" fill="#fff" opacity=".38"/>
+  <circle cx="388" cy="132" r="62" fill="#fff" opacity=".24"/>
+  <path d="M96 142c56-24 104-16 144 24 40-40 88-48 144-24v206c-56-22-104-14-144 24-40-38-88-46-144-24z" fill="#fffaf0"/>
+  <path d="M240 166v206" stroke="#d7c8ac" stroke-width="6"/>
+  <path d="M128 200h78M128 232h78M128 264h66M274 200h78M274 232h78M274 264h66" stroke="#7a6b5d" stroke-width="10" stroke-linecap="round" opacity=".65"/>
+  <path d="M318 322l18 18 44-54" fill="none" stroke="#ff668a" stroke-width="14" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

@@ -17,8 +17,12 @@ export function ClubDetailPage({ clubId }) {
   const getClubById = useClubStore((s) => s.getClubById);
   const incrementMemberCount = useClubStore((s) => s.incrementMemberCount);
   const decrementMemberCount = useClubStore((s) => s.decrementMemberCount);
+  const getClubMembers = useClubStore((s) => s.getClubMembers);
+  const setMemberRole = useClubStore((s) => s.setMemberRole);
+  const removeMember = useClubStore((s) => s.removeMember);
   const club = getClubById(clubId);
   const user = useAuthStore((s) => s.user);
+  const [openMenuUserId, setOpenMenuUserId] = useState(null);
   const toggleBookmarkWithApi = useAuthStore((s) => s.toggleBookmarkWithApi);
   const joinClubStore  = useAuthStore((s) => s.joinClub);
   const leaveClubStore = useAuthStore((s) => s.leaveClub);
@@ -168,37 +172,104 @@ export function ClubDetailPage({ clubId }) {
           <ClubBoardTab clubId={clubId} />
         )}
 
-        {tab === 'members' && (
-          <div className={styles.memberList}>
-            <p className={styles.memberCount}>모임멤버 ({club.memberCount.toLocaleString()})</p>
-            {/* 클럽장 */}
-            <div className={styles.memberRow}>
-              <span className={styles.memberEmoji}>{creator.emoji}</span>
-              <div>
-                <p className={styles.memberName}>{creator.nickname}</p>
-                <p className={styles.memberMeta}>클럽 개설자 👑</p>
-              </div>
-            </div>
+        {tab === 'members' && (() => {
+          const members = getClubMembers(clubId);
+          const ROLE_ORDER = { owner: 0, admin: 1, member: 2 };
+          const sorted = [...members].sort((a, b) => ROLE_ORDER[a.role] - ROLE_ORDER[b.role]);
+          const owners = sorted.filter(m => m.role === 'owner');
+          const admins = sorted.filter(m => m.role === 'admin');
+          const regularMembers = sorted.filter(m => m.role === 'member');
+          const isOwner = members.some(m => m.userId === user?.id && m.role === 'owner');
+          const isAdminUser = members.some(m => m.userId === user?.id && m.role === 'admin');
 
-            {/* 현재 유저 (가입 시) */}
-            {isJoined && user && (
-              <div className={styles.memberRow}>
-                <span className={styles.memberEmoji}>{user.emoji}</span>
-                <div>
-                  <p className={styles.memberName}>{user.nickname}</p>
-                  <p className={styles.memberMeta}>참여 중</p>
+          const renderMember = (m) => {
+            const info = SAMPLE_USERS[m.userId] ?? { emoji: '👤', nickname: '알 수 없음' };
+            const isSelf = m.userId === user?.id;
+            const showMenu = !isSelf && isOwner;
+            const menuOpen = openMenuUserId === m.userId;
+
+            const badgeClass = m.role === 'owner'
+              ? styles.badgeOwner
+              : m.role === 'admin'
+              ? styles.badgeAdmin
+              : styles.badgeMember;
+            const badgeText = m.role === 'owner' ? '👑 방장' : m.role === 'admin' ? '🛡 관리자' : '회원';
+
+            return (
+              <div key={m.userId}>
+                <div className={styles.memberRow}>
+                  <span className={styles.memberEmoji}>{info.emoji}</span>
+                  <span className={styles.memberName}>{info.nickname}</span>
+                  <div className={styles.memberRowRight}>
+                    <span className={badgeClass}>{badgeText}</span>
+                    {showMenu && (
+                      <button
+                        className={styles.menuBtn}
+                        onClick={() => setOpenMenuUserId(menuOpen ? null : m.userId)}
+                        aria-label="멤버 관리"
+                      >
+                        ⋮
+                      </button>
+                    )}
+                  </div>
                 </div>
+                {showMenu && menuOpen && (
+                  <div className={styles.actionRow}>
+                    {m.role === 'member' && (
+                      <button
+                        className={styles.actionPromote}
+                        onClick={() => { setMemberRole(clubId, m.userId, 'admin'); setOpenMenuUserId(null); }}
+                      >
+                        관리자로 승급
+                      </button>
+                    )}
+                    {m.role === 'admin' && (
+                      <button
+                        className={styles.actionDemote}
+                        onClick={() => { setMemberRole(clubId, m.userId, 'member'); setOpenMenuUserId(null); }}
+                      >
+                        회원으로 강등
+                      </button>
+                    )}
+                    <button
+                      className={styles.actionKick}
+                      onClick={() => { removeMember(clubId, m.userId); setOpenMenuUserId(null); }}
+                    >
+                      내보내기
+                    </button>
+                  </div>
+                )}
               </div>
-            )}
+            );
+          };
 
-            {/* 나머지 멤버 수 */}
-            {club.memberCount > (isJoined ? 2 : 1) && (
-              <p className={styles.memberMore}>
-                외 {(club.memberCount - (isJoined ? 2 : 1)).toLocaleString()}명이 함께하고 있어요
-              </p>
-            )}
-          </div>
-        )}
+          return (
+            <div className={styles.memberList}>
+              <p className={styles.memberCount}>모임멤버 ({members.length})</p>
+
+              {owners.length > 0 && (
+                <div className={styles.roleSection}>
+                  <p className={styles.roleSectionTitle}>방장</p>
+                  {owners.map(renderMember)}
+                </div>
+              )}
+
+              {admins.length > 0 && (
+                <div className={styles.roleSection}>
+                  <p className={styles.roleSectionTitle}>관리자</p>
+                  {admins.map(renderMember)}
+                </div>
+              )}
+
+              {regularMembers.length > 0 && (
+                <div className={styles.roleSection}>
+                  <p className={styles.roleSectionTitle}>회원</p>
+                  {regularMembers.map(renderMember)}
+                </div>
+              )}
+            </div>
+          );
+        })()}
 
         <div style={{ height: 100 }} />
       </div>
