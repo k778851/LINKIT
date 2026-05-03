@@ -1,8 +1,10 @@
 'use client';
 
 import Link from 'next/link';
+import Image from 'next/image';
 import { usePathname } from 'next/navigation';
-import { LayoutDashboard, Users, BookOpen, FileText, LogOut, Shield } from 'lucide-react';
+import { assetPath } from '../../lib/assetPath';
+import { LayoutDashboard, Users, BookOpen, FileText, LogOut } from 'lucide-react';
 import { useAuthStore } from '../../store/authStore';
 import { useRouter } from 'next/navigation';
 import styles from './AdminLayout.module.css';
@@ -26,8 +28,15 @@ export function AdminLayout({ children }) {
       {/* 사이드바 */}
       <aside className={styles.sidebar}>
         <div className={styles.brand}>
-          <Shield size={22} color="#fff" />
-          <span className={styles.brandText}>LINKIT<br /><small>관리자</small></span>
+          <Image
+            src={assetPath('/logo-sig-white.png')}
+            alt="LINKIT"
+            width={108}
+            height={32}
+            style={{ objectFit: 'contain' }}
+            priority
+          />
+          <span className={styles.brandBadge}>관리자</span>
         </div>
 
         <nav className={styles.nav}>
@@ -53,8 +62,15 @@ export function AdminLayout({ children }) {
 
       {/* 모바일 탑바 */}
       <header className={styles.topbar}>
-        <Shield size={18} color="var(--blue)" />
-        <span className={styles.topbarTitle}>LINKIT 관리자</span>
+        <Image
+          src={assetPath('/logo-sig-color.png')}
+          alt="LINKIT"
+          width={72}
+          height={22}
+          style={{ objectFit: 'contain' }}
+          priority
+        />
+        <span className={styles.topbarTitle}>관리자</span>
         <div className={styles.topbarNav}>
           {NAV.map(({ href, label, icon: Icon }) => {
             const active = href === '/admin'

@@ -10,6 +10,7 @@ const TYPE_COLORS = {
   like:       'var(--pink)',
   club:       'var(--mint)',
   new_member: '#7B61FF',
+  follow:     '#FF9500',
   system:     'var(--ink-3)',
 };
 
@@ -53,10 +54,11 @@ export function NotificationPage() {
         </div>
       ) : (
         <div className={styles.list}>
-          {notifications.map((notif) => (
+          {notifications.map((notif, idx) => (
             <button
               key={notif.id}
-              className={`${styles.row} ${!notif.read ? styles.unread : ''}`}
+              className={`${styles.row} ${!notif.read ? styles.unread : ''} card-animate`}
+              style={{ animationDelay: `${Math.min(idx * 30, 210)}ms` }}
               onClick={() => handleClick(notif)}
             >
               {!notif.read && (

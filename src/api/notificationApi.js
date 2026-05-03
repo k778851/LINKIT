@@ -12,4 +12,7 @@ export const notificationApi = {
 
   /** 전체 읽음 */
   markAllRead: () => api.patch('/api/notifications/read-all'),
+
+  /** 단건 삭제 */
+  remove:      (id) => api.delete(`/api/notifications/${id}`),
 };

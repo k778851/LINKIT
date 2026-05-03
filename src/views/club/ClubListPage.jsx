@@ -68,8 +68,14 @@ export function ClubListPage() {
         />
       ) : (
         <div className={styles.grid}>
-          {clubs.map((club) => (
-            <ClubCard key={club.id} club={club} onClick={() => router.push(`/clubs/${club.id}`)} />
+          {clubs.map((club, idx) => (
+            <div
+              key={club.id}
+              className="card-animate"
+              style={{ animationDelay: `${Math.min(idx * 40, 280)}ms` }}
+            >
+              <ClubCard club={club} onClick={() => router.push(`/clubs/${club.id}`)} />
+            </div>
           ))}
         </div>
       )}

@@ -14,14 +14,18 @@ export function JoinedClubsPage() {
   const user = useAuthStore((s) => s.user);
   const leaveClub = useAuthStore((s) => s.leaveClub);
   const clubs = useClubStore((s) => s.clubs);
+  const leaveClubApi = useClubStore((s) => s.leaveClubApi);
   const decrementMemberCount = useClubStore((s) => s.decrementMemberCount);
 
   const joinedClubs = clubs.filter((c) => user?.joinedClubs?.includes(c.id));
 
-  function handleLeave(club) {
+  async function handleLeave(club) {
+    // 낙관적 업데이트
     leaveClub(club.id);
     decrementMemberCount(club.id);
     showToast(`${club.name}에서 나왔어요`, 'success');
+    // API 호출 (실패해도 UX는 유지)
+    leaveClubApi(club.id).catch(() => {});
   }
 
   return (

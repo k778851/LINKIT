@@ -32,7 +32,12 @@
   padding-bottom: 16px;
   border-bottom: 1px solid var(--base-border);
   margin-bottom: 20px;
+  width: 100%;
+  text-align: left;
+  border-radius: 10px;
+  transition: background 0.12s;
 }
+.authorRow:active { background: var(--base-soft); }
 
 .authorEmoji { font-size: 36px; }
 .authorName { font-size: 14px; font-weight: 600; color: var(--ink); margin-bottom: 3px; }

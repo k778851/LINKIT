@@ -93,7 +93,10 @@ export function PostDetailPage({ postId }) {
         </div>
         <h1 className={styles.title}>{post.title}</h1>
 
-        <div className={styles.authorRow}>
+        <button
+          className={styles.authorRow}
+          onClick={() => post.authorId && router.push(`/users?userId=${post.authorId}`)}
+        >
           <span className={styles.authorEmoji}>{post.authorEmoji}</span>
           <div>
             <p className={styles.authorName}>{post.authorNickname}</p>
@@ -103,7 +106,7 @@ export function PostDetailPage({ postId }) {
               <Eye size={11} /><span>{post.viewCount}</span>
             </div>
           </div>
-        </div>
+        </button>
 
         <p className={styles.content}>{post.content}</p>
 

@@ -18,7 +18,11 @@ export function ClubDetailPage({ clubId }) {
   const decrementMemberCount = useClubStore((s) => s.decrementMemberCount);
   const club = getClubById(clubId);
   const user = useAuthStore((s) => s.user);
-  const toggleBookmark = useAuthStore((s) => s.toggleBookmark);
+  const toggleBookmarkWithApi = useAuthStore((s) => s.toggleBookmarkWithApi);
+  const joinClubStore  = useAuthStore((s) => s.joinClub);
+  const leaveClubStore = useAuthStore((s) => s.leaveClub);
+  const joinClubApi    = useClubStore((s) => s.joinClubApi);
+  const leaveClubApi   = useClubStore((s) => s.leaveClubApi);
   const { showToast } = useToastContext();
   const [tab, setTab] = useState('intro');
 
@@ -49,7 +53,7 @@ export function ClubDetailPage({ clubId }) {
             <button
               className={styles.navBtn}
               onClick={() => {
-                toggleBookmark(clubId);
+                toggleBookmarkWithApi(clubId);
                 showToast(isBookmarked ? '찜 목록에서 제거했어요' : '찜 목록에 추가했어요 💖', isBookmarked ? 'info' : 'success');
               }}
               aria-label={isBookmarked ? '찜 해제' : '찜하기'}
@@ -117,8 +121,11 @@ export function ClubDetailPage({ clubId }) {
               <button
                 className={styles.scheduleWhiteBtn}
                 onClick={() => {
-                  const joinClub = useAuthStore.getState().joinClub;
-                  joinClub(clubId);
+                  if (!isJoined) {
+                    joinClubStore(clubId, { name: club.name, emoji: club.emoji, memberCount: club.memberCount });
+                    incrementMemberCount(clubId);
+                    joinClubApi(clubId).catch(() => {});
+                  }
                   showToast(`${club.name} 일정에 신청했어요 📅`, 'success');
                 }}
               >
@@ -171,7 +178,7 @@ export function ClubDetailPage({ clubId }) {
         <button
           className={styles.bookmarkCta}
           onClick={() => {
-            toggleBookmark(clubId);
+            toggleBookmarkWithApi(clubId);
             showToast(isBookmarked ? '찜 목록에서 제거했어요' : '찜 목록에 추가했어요 💖', isBookmarked ? 'info' : 'success');
           }}
           aria-label={isBookmarked ? '찜 해제' : '찜하기'}
@@ -181,15 +188,15 @@ export function ClubDetailPage({ clubId }) {
         <button
           className={`${styles.joinBtn} ${isJoined ? styles.joinedBtn : ''}`}
           onClick={() => {
-            const joinClub = useAuthStore.getState().joinClub;
-            const leaveClub = useAuthStore.getState().leaveClub;
             if (isJoined) {
-              leaveClub(clubId);
+              leaveClubStore(clubId);
               decrementMemberCount(clubId);
+              leaveClubApi(clubId).catch(() => {});
               showToast('모임 참여를 취소했어요', 'info');
             } else {
-              joinClub(clubId, { name: club.name, emoji: club.emoji, memberCount: club.memberCount });
+              joinClubStore(clubId, { name: club.name, emoji: club.emoji, memberCount: club.memberCount });
               incrementMemberCount(clubId);
+              joinClubApi(clubId).catch(() => {});
               showToast(`${club.name}에 신청했어요 🎉`, 'success');
             }
           }}

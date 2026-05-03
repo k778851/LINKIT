@@ -1,0 +1,140 @@
+.page { min-height: 100dvh; background: var(--base); }
+
+/* ── 헤더 ── */
+.header {
+  position: sticky; top: 0; z-index: 50;
+  display: flex; align-items: center; gap: 8px;
+  padding: 0 16px; height: 52px;
+  background: var(--base-white);
+  border-bottom: 1px solid var(--base-border);
+}
+
+.backBtn {
+  display: flex; align-items: center; justify-content: center;
+  width: 36px; height: 36px;
+  border-radius: 10px;
+  color: var(--ink);
+  transition: background 0.12s;
+}
+.backBtn:active { background: var(--base-soft); }
+
+.title {
+  font-size: 17px; font-weight: 700; color: var(--ink);
+  flex: 1;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+
+/* ── 프로필 카드 ── */
+.profileCard {
+  margin: 16px 16px 10px;
+  padding: 20px;
+  background: var(--base-white);
+  border-radius: var(--r-card);
+  border: 1px solid var(--base-border);
+  box-shadow: var(--shadow-card);
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.avatarWrap {
+  width: 64px; height: 64px;
+  border-radius: 50%;
+  background: var(--base-soft);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 36px;
+  flex-shrink: 0;
+}
+
+.avatar { line-height: 1; }
+
+.info { flex: 1; min-width: 0; }
+.nickname { font-size: 16px; font-weight: 700; color: var(--ink); }
+.handle   { font-size: 13px; color: var(--ink-3); margin-top: 2px; }
+.bio      { font-size: 13px; color: var(--ink-3); margin-top: 4px; line-height: 1.4; }
+
+/* ── 팔로우 버튼 ── */
+.followBtn {
+  display: flex; align-items: center; gap: 6px;
+  padding: 8px 16px;
+  border-radius: 999px;
+  font-size: 14px; font-weight: 600;
+  background: var(--blue);
+  color: #fff;
+  white-space: nowrap; flex-shrink: 0;
+  transition: opacity 0.15s, transform 0.1s;
+}
+.followBtn:active { opacity: 0.8; transform: scale(0.96); }
+
+.followingBtn {
+  background: var(--base-soft);
+  color: var(--ink-3);
+  border: 1px solid var(--base-border);
+}
+
+/* ── 소셜 행 ── */
+.socialRow {
+  margin: 0 16px 10px;
+  padding: 12px 0;
+  background: var(--base-white);
+  border-radius: var(--r-card);
+  border: 1px solid var(--base-border);
+  display: flex;
+  align-items: center;
+}
+
+.socialBtn {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 6px 0;
+  border-radius: 10px;
+  transition: background 0.12s;
+}
+.socialBtn:active { background: var(--base-soft); }
+
+.socialNum   { font-size: 18px; font-weight: 700; color: var(--blue); }
+.socialLabel { font-size: 11px; color: var(--ink-3); }
+
+.socialDivider {
+  width: 1px; height: 28px;
+  background: var(--base-border);
+}
+
+/* ── 통계 카드 ── */
+.statCard {
+  margin: 0 16px;
+  padding: 18px 20px;
+  background: var(--base-white);
+  border-radius: var(--r-card);
+  border: 1px solid var(--base-border);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.statNum   { font-size: 20px; font-weight: 700; color: var(--ink); }
+.statLabel { font-size: 14px; color: var(--ink-3); }
+
+/* ── 상태 ── */
+.skeleton {
+  margin: 16px;
+  height: 120px;
+  background: var(--base-soft);
+  border-radius: var(--r-card);
+  animation: shimmer 1.2s infinite linear;
+}
+
+@keyframes shimmer {
+  0%   { opacity: 1; }
+  50%  { opacity: 0.5; }
+  100% { opacity: 1; }
+}
+
+.empty {
+  display: flex; align-items: center; justify-content: center;
+  min-height: 200px;
+  font-size: 14px; color: var(--ink-3);
+}

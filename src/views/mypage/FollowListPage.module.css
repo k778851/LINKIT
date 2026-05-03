@@ -1,0 +1,92 @@
+.page { min-height: 100dvh; background: var(--base); }
+
+/* ── 헤더 ── */
+.header {
+  position: sticky; top: 0; z-index: 50;
+  display: flex; align-items: center; gap: 8px;
+  padding: 0 16px; height: 52px;
+  background: var(--base-white);
+  border-bottom: 1px solid var(--base-border);
+}
+
+.backBtn {
+  display: flex; align-items: center; justify-content: center;
+  width: 36px; height: 36px;
+  border-radius: 10px;
+  color: var(--ink);
+  transition: background 0.12s;
+}
+.backBtn:active { background: var(--base-soft); }
+
+.title {
+  font-size: 17px; font-weight: 700; color: var(--ink);
+  flex: 1;
+}
+
+/* ── 목록 ── */
+.list {
+  padding: 8px 16px 32px;
+  display: flex; flex-direction: column; gap: 4px;
+}
+
+.row {
+  display: flex; align-items: center; gap: 12px;
+  padding: 12px 16px;
+  background: var(--base-white);
+  border-radius: 16px;
+  border: 1px solid var(--base-border);
+  transition: box-shadow 0.15s;
+}
+.row:active { box-shadow: var(--shadow-card); }
+
+.avatarBtn { flex-shrink: 0; }
+
+.avatar {
+  width: 48px; height: 48px;
+  border-radius: 50%;
+  background: var(--base-soft);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 26px;
+  transition: transform 0.12s;
+}
+.avatarBtn:active .avatar { transform: scale(0.93); }
+
+.info { flex: 1; min-width: 0; }
+
+.nickname {
+  font-size: 15px; font-weight: 600; color: var(--ink);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+
+.handle {
+  font-size: 12px; color: var(--ink-3); margin-top: 2px;
+}
+
+/* ── 팔로우 버튼 ── */
+.followBtn {
+  display: flex; align-items: center; gap: 5px;
+  padding: 7px 14px;
+  border-radius: 999px;
+  font-size: 13px; font-weight: 600;
+  background: var(--blue);
+  color: #fff;
+  white-space: nowrap; flex-shrink: 0;
+  transition: opacity 0.15s, transform 0.1s;
+}
+.followBtn:active { opacity: 0.8; transform: scale(0.96); }
+
+.followingBtn {
+  background: var(--base-soft);
+  color: var(--ink-3);
+  border: 1px solid var(--base-border);
+}
+
+/* ── 비어있음 ── */
+.empty {
+  display: flex; align-items: center; justify-content: center;
+  min-height: 240px;
+}
+
+.emptyText {
+  font-size: 14px; color: var(--ink-3);
+}

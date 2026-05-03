@@ -9,13 +9,18 @@
   cursor: pointer;
   border: none;
   white-space: nowrap;
-  transition: background-color 0.15s, color 0.15s;
+  transition: background-color 0.18s, color 0.18s, transform 0.12s, box-shadow 0.15s;
   background-color: var(--chip-default-bg);
   color: var(--chip-default-text);
+}
+
+.chip:active {
+  transform: scale(0.93);
 }
 
 .active {
   background-color: var(--chip-active-bg);
   color: var(--chip-active-text);
   font-weight: 600;
+  box-shadow: 0 2px 8px rgba(22, 119, 255, 0.22);
 }

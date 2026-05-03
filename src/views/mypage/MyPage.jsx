@@ -1,10 +1,11 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuthStore } from '../../store/authStore';
 import { useClubStore } from '../../store/clubStore';
 import { useCommunityStore } from '../../store/communityStore';
+import { useFollowStore } from '../../store/followStore';
 import { ActivityTab } from './tabs/ActivityTab';
 import { SettingsTab } from './tabs/SettingsTab';
 import styles from './MyPage.module.css';
@@ -12,15 +13,23 @@ import styles from './MyPage.module.css';
 export function MyPage() {
   const router = useRouter();
   const user = useAuthStore((s) => s.user);
-  const clubs = useClubStore((s) => s.clubs);
   const posts = useCommunityStore((s) => s.posts);
   const [tab, setTab] = useState('activity');
 
+  const fetchStats   = useFollowStore((s) => s.fetchStats);
+  const followStats  = useFollowStore((s) => user ? s.stats[user.id] : null);
+
+  useEffect(() => {
+    if (user?.id) fetchStats(user.id);
+  }, [user?.id]);
+
   if (!user) return null;
 
-  const joinedCount = user.joinedClubs?.length ?? 0;
+  const joinedCount     = user.joinedClubs?.length ?? 0;
   const bookmarkedCount = user.bookmarkedClubs?.length ?? 0;
-  const myPostsCount = posts.filter((p) => p.authorId === user.id).length;
+  const myPostsCount    = posts.filter((p) => p.authorId === user.id).length;
+  const followerCount   = followStats?.followerCount  ?? 0;
+  const followingCount  = followStats?.followingCount ?? 0;
 
   return (
     <div className={styles.page}>
@@ -36,11 +45,24 @@ export function MyPage() {
         </div>
         <div className={styles.profileInfo}>
           <p className={styles.nickname}>{user.nickname}</p>
-          <p className={styles.handle}>@{user.handle}</p>
+          <p className={styles.handle}>고유번호 {user.handle}</p>
           {user.bio && <p className={styles.bio}>{user.bio}</p>}
         </div>
         <button className={styles.editBtn} onClick={() => router.push('/mypage/edit')}>
           프로필 수정
+        </button>
+      </div>
+
+      {/* 팔로워/팔로잉 행 */}
+      <div className={styles.socialRow}>
+        <button className={styles.socialBtn} onClick={() => router.push(`/mypage/followers?userId=${user.id}`)}>
+          <span className={styles.socialNum}>{followerCount.toLocaleString()}</span>
+          <span className={styles.socialLabel}>팔로워</span>
+        </button>
+        <div className={styles.socialDivider} />
+        <button className={styles.socialBtn} onClick={() => router.push(`/mypage/following?userId=${user.id}`)}>
+          <span className={styles.socialNum}>{followingCount.toLocaleString()}</span>
+          <span className={styles.socialLabel}>팔로잉</span>
         </button>
       </div>
 

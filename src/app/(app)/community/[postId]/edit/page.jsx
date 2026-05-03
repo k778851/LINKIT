@@ -1,4 +1,3 @@
-'use client';
 import { PostEditPage } from '../../../../../views/community/PostEditPage';
 
 export default function Page({ params }) {
@@ -6,14 +5,6 @@ export default function Page({ params }) {
 }
 
 export function generateStaticParams() {
-  return [
-    { postId: 'post-1' },
-    { postId: 'post-2' },
-    { postId: 'post-3' },
-    { postId: 'post-4' },
-    { postId: 'post-5' },
-    { postId: 'post-6' },
-    { postId: 'post-7' },
-    { postId: 'post-8' },
-  ];
+  return ['post-1','post-2','post-3','post-4','post-5','post-6','post-7','post-8']
+    .map((postId) => ({ postId }));
 }

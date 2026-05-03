@@ -2,16 +2,17 @@
 -- LINKIT 샘플 데이터 (H2 개발용)
 -- ============================================================
 
--- 유저
+-- 유저 (비밀번호는 DataInitializer 에서 실제 BCrypt 해시로 교체됨)
+-- 고유번호 포맷: YYYYMMDD-NNNNN
 INSERT INTO users (id, nickname, handle, emoji, bio, password, role, created_at) VALUES
-  ('admin',   '관리자',    'admin',          '🛡️', 'LINKIT 관리자',            '$2a$12$dummyhash_admin', 'ADMIN', NOW()),
-  ('user-1',  '러닝장',    'running_master', '🏃', '매주 달리는 러닝 크루장', '$2a$12$dummyhash1', 'USER', NOW()),
-  ('user-2',  '피자러버',  'pizza_lover',    '🍕', '맛집 탐방 전문가',         '$2a$12$dummyhash2', 'USER', NOW()),
-  ('user-3',  '필름감성',  'film_feel',      '📷', '필름 사진 모임장',         '$2a$12$dummyhash3', 'USER', NOW()),
-  ('user-4',  '밴드마스터','band_master',    '🎵', '홍대 밴드 클럽장',         '$2a$12$dummyhash4', 'USER', NOW()),
-  ('user-5',  '독서왕',    'book_king',      '📚', '한 달에 한 권 독서모임',   '$2a$12$dummyhash5', 'USER', NOW()),
-  ('user-6',  '풋살왕',    'futsal_king',    '⚽', '주말 풋살 크루장',         '$2a$12$dummyhash6', 'USER', NOW()),
-  ('user-me', '링킷유저',  'linkit_user',    '😊', '소모임을 사랑하는 사람 🙌','$2a$12$dummyhash0', 'USER', NOW());
+  ('admin',   '관리자',    '00000000-00000', '🛡️', 'LINKIT 관리자',            '$2a$10$dummyhash_admin', 'ADMIN', NOW()),
+  ('user-1',  '러닝장',    '20240001-00001', '🏃', '매주 달리는 러닝 크루장',  '$2a$10$dummyhash1',     'USER',  NOW()),
+  ('user-2',  '피자러버',  '20240001-00002', '🍕', '맛집 탐방 전문가',          '$2a$10$dummyhash2',     'USER',  NOW()),
+  ('user-3',  '필름감성',  '20240001-00003', '📷', '필름 사진 모임장',          '$2a$10$dummyhash3',     'USER',  NOW()),
+  ('user-4',  '밴드마스터','20240001-00004', '🎵', '홍대 밴드 클럽장',          '$2a$10$dummyhash4',     'USER',  NOW()),
+  ('user-5',  '독서왕',    '20240001-00005', '📚', '한 달에 한 권 독서모임',    '$2a$10$dummyhash5',     'USER',  NOW()),
+  ('user-6',  '풋살왕',    '20240001-00006', '⚽', '주말 풋살 크루장',          '$2a$10$dummyhash6',     'USER',  NOW()),
+  ('user-me', '링킷유저',  '20240001-00099', '😊', '소모임을 사랑하는 사람 🙌', '$2a$10$dummyhash0',     'USER',  NOW());
 
 -- 클럽
 INSERT INTO clubs (id, name, emoji, category, description, member_count, new_count, is_private, schedule, location, created_by, created_at) VALUES

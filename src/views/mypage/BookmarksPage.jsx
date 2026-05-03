@@ -12,7 +12,7 @@ import styles from './BookmarksPage.module.css';
 export function BookmarksPage() {
   const router = useRouter();
   const user = useAuthStore((s) => s.user);
-  const toggleBookmark = useAuthStore((s) => s.toggleBookmark);
+  const toggleBookmarkWithApi = useAuthStore((s) => s.toggleBookmarkWithApi);
   const clubs = useClubStore((s) => s.clubs);
   const { showToast } = useToastContext();
 
@@ -58,7 +58,7 @@ export function BookmarksPage() {
                     className={styles.heartBtn}
                     onClick={(e) => {
                       e.stopPropagation();
-                      toggleBookmark(club.id);
+                      toggleBookmarkWithApi(club.id);
                       showToast('찜 목록에서 제거했어요', 'info');
                     }}
                     aria-label="찜 해제"

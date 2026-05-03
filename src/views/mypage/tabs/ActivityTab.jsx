@@ -1,10 +1,13 @@
 'use client';
 
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Heart, MessageCircle, Users } from 'lucide-react';
 import { useAuthStore } from '../../../store/authStore';
 import { useClubStore } from '../../../store/clubStore';
 import { useCommunityStore } from '../../../store/communityStore';
+import { scheduleApi } from '../../../api/scheduleApi';
+import { ApiError } from '../../../api/apiClient';
 import { formatRelativeTime, calcDdayNum, getDdayLabel, formatShortDate } from '../../../utils/formatDate';
 import { CLUB_EMOJIS } from '../../../data/sampleData';
 import styles from './ActivityTab.module.css';
@@ -12,17 +15,31 @@ import styles from './ActivityTab.module.css';
 export function ActivityTab() {
   const router = useRouter();
   const user = useAuthStore((s) => s.user);
-  const toggleBookmark = useAuthStore((s) => s.toggleBookmark);
+  const toggleBookmarkWithApi = useAuthStore((s) => s.toggleBookmarkWithApi);
   const leaveClub = useAuthStore((s) => s.leaveClub);
   const allSchedules = useClubStore((s) => s.schedules);
+  const leaveClubApi = useClubStore((s) => s.leaveClubApi);
   const decrementMemberCount = useClubStore((s) => s.decrementMemberCount);
   const clubs = useClubStore((s) => s.clubs);
   const allPosts = useCommunityStore((s) => s.posts);
   const myPosts = allPosts.filter((p) => p.authorId === user?.id);
 
-  // 참여 클럽 일정만, 동적 D-day 계산
-  const schedules = allSchedules
-    .filter((s) => user?.joinedClubs?.includes(s.clubId))
+  const [apiSchedules, setApiSchedules] = useState(null);
+
+  useEffect(() => {
+    scheduleApi.getMine()
+      .then((data) => setApiSchedules(data))
+      .catch((e) => {
+        if (!(e instanceof ApiError && e.status === 0)) console.warn('일정 로드 실패', e);
+      });
+  }, []);
+
+  // API 성공이면 사용, 아니면 로컬 store fallback
+  const rawSchedules = apiSchedules ?? allSchedules.filter(
+    (s) => user?.joinedClubs?.includes(s.clubId)
+  );
+
+  const schedules = rawSchedules
     .map((s) => ({ ...s, dday: calcDdayNum(s.startAt) }))
     .sort((a, b) => a.dday - b.dday);
 
@@ -68,7 +85,7 @@ export function ActivityTab() {
                     {/* 탈퇴 버튼 */}
                     <span
                       className={styles.leaveOverlay}
-                      onClick={(e) => { e.stopPropagation(); leaveClub(club.id); decrementMemberCount(club.id); }}
+                      onClick={(e) => { e.stopPropagation(); leaveClub(club.id); decrementMemberCount(club.id); leaveClubApi(club.id).catch(() => {}); }}
                       role="button"
                       tabIndex={0}
                       aria-label="클럽 나가기"
@@ -136,7 +153,7 @@ export function ActivityTab() {
                       <span className={styles.bookmarkEmoji}>{club.emoji}</span>
                       <span
                         className={styles.heartOverlay}
-                        onClick={(e) => { e.stopPropagation(); toggleBookmark(club.id); }}
+                        onClick={(e) => { e.stopPropagation(); toggleBookmarkWithApi(club.id); }}
                         role="button"
                         tabIndex={0}
                         aria-label="찜 해제"

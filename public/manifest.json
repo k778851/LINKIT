@@ -1,0 +1,28 @@
+{
+  "name": "LINKIT — 우리 동네 소모임",
+  "short_name": "LINKIT",
+  "description": "동네 주민들이 소모임을 자유롭게 생성하고 참여할 수 있는 모바일 커뮤니티",
+  "start_url": "/LINKIT/",
+  "scope": "/LINKIT/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#F6FAFF",
+  "theme_color": "#1677FF",
+  "lang": "ko",
+  "icons": [
+    {
+      "src": "/LINKIT/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/LINKIT/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["social", "lifestyle"],
+  "screenshots": []
+}

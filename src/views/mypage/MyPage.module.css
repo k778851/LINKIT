@@ -46,6 +46,46 @@
   white-space: nowrap; flex-shrink: 0;
 }
 
+/* ── Social row (팔로워/팔로잉) ── */
+.socialRow {
+  margin: 0 16px 10px;
+  padding: 12px 0;
+  background: var(--base-white);
+  border-radius: var(--r-card);
+  border: 1px solid var(--base-border);
+  display: flex;
+  align-items: center;
+}
+
+.socialBtn {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 6px 0;
+  border-radius: 10px;
+  transition: background 0.12s;
+}
+.socialBtn:active { background: var(--base-soft); }
+
+.socialNum {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--blue);
+}
+
+.socialLabel {
+  font-size: 11px;
+  color: var(--ink-3);
+}
+
+.socialDivider {
+  width: 1px;
+  height: 28px;
+  background: var(--base-border);
+}
+
 /* ── Stat blocks ── */
 .statRow {
   margin: 0 16px 16px;

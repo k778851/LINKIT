@@ -175,11 +175,19 @@ export function SearchPage() {
             ))}
           </div>
 
-          {/* 로딩 */}
+          {/* 로딩 스켈레톤 */}
           {searching && (
-            <p style={{ textAlign: 'center', padding: '32px 0', color: 'var(--ink-3)', fontSize: 14 }}>
-              검색 중...
-            </p>
+            <div style={{ padding: '8px 0', display: 'flex', flexDirection: 'column', gap: 10 }}>
+              {[1,2,3,4].map((i) => (
+                <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '4px 0' }}>
+                  <div className="skeleton" style={{ width: 48, height: 48, borderRadius: 14, flexShrink: 0 }} />
+                  <div style={{ flex: 1 }}>
+                    <div className="skeleton skeleton-title" style={{ width: `${50 + i * 10}%` }} />
+                    <div className="skeleton skeleton-text" style={{ width: '40%' }} />
+                  </div>
+                </div>
+              ))}
+            </div>
           )}
 
           {/* 결과 없음 */}

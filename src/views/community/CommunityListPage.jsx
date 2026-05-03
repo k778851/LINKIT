@@ -33,8 +33,14 @@ export function CommunityListPage() {
       <div className={styles.list}>
         {posts.length === 0
           ? <EmptyState emoji="📭" title="게시글이 없어요" description="첫 번째 글을 작성해 보세요!" />
-          : posts.map((post) => (
-              <PostCard key={post.id} post={post} onClick={() => router.push(`/community/${post.id}`)} />
+          : posts.map((post, idx) => (
+              <div
+                key={post.id}
+                className="card-animate"
+                style={{ animationDelay: `${Math.min(idx * 40, 280)}ms` }}
+              >
+                <PostCard post={post} onClick={() => router.push(`/community/${post.id}`)} />
+              </div>
             ))
         }
       </div>

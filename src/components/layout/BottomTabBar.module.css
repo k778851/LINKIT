@@ -22,8 +22,13 @@
   gap: 3px;
   color: var(--tab-icon-inactive);
   text-decoration: none;
-  transition: color 0.15s;
+  transition: color 0.2s, transform 0.15s;
   min-height: 44px;
+  position: relative;
+}
+
+.tab:active {
+  transform: scale(0.88);
 }
 
 .active {
@@ -33,4 +38,26 @@
 .label {
   font-size: 10px;
   font-weight: 500;
+  transition: font-weight 0.15s;
+}
+
+.active .label {
+  font-weight: 700;
+}
+
+/* active 탭 위 점(dot) 인디케이터 */
+.active::before {
+  content: '';
+  position: absolute;
+  top: 6px;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: var(--tab-icon-active);
+  animation: dotPop 0.25s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@keyframes dotPop {
+  from { transform: scale(0); opacity: 0; }
+  to   { transform: scale(1); opacity: 1; }
 }

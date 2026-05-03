@@ -2,13 +2,41 @@ import { ClientProviders } from '../components/ClientProviders';
 import '../styles/global.css';
 
 export const metadata = {
-  title: 'LINKIT',
-  description: '우리 동네 소모임 커뮤니티',
+  title: 'LINKIT — 우리 동네 소모임',
+  description: '동네 주민들이 소모임을 자유롭게 생성하고 참여할 수 있는 모바일 커뮤니티',
+  manifest: '/LINKIT/manifest.json',
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: 'default',
+    title: 'LINKIT',
+  },
+  icons: {
+    icon: '/LINKIT/favicon.svg',
+    apple: '/LINKIT/icons/icon-192.png',
+  },
+  themeColor: '#1677FF',
+};
+
+export const viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
+  viewportFit: 'cover',          // 노치/홈바 영역 활용
+  themeColor: '#1677FF',
 };
 
 export default function RootLayout({ children }) {
   return (
     <html lang="ko" suppressHydrationWarning>
+      <head>
+        {/* PWA iOS 추가 메타 */}
+        <meta name="mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+        <meta name="apple-mobile-web-app-title" content="LINKIT" />
+        <link rel="apple-touch-icon" href="/LINKIT/icons/icon-192.png" />
+      </head>
       <body>
         <ClientProviders>
           {children}
