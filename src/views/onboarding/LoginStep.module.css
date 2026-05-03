@@ -107,3 +107,93 @@
   font-weight: 600;
   color: var(--blue);
 }
+
+/* 구분선 */
+.divider {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 2px 0;
+}
+
+.divider::before,
+.divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--base-border);
+}
+
+.dividerText {
+  font-size: 12px;
+  color: var(--ink-3);
+  white-space: nowrap;
+}
+
+/* 데모 버튼 */
+.demoBtn {
+  width: 100%;
+  height: 50px;
+  border-radius: 14px;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--blue);
+  background: var(--blue-soft, #EBF3FF);
+  border: 1.5px solid var(--blue);
+  transition: all 0.15s;
+}
+
+.demoBtn:active {
+  opacity: 0.8;
+}
+
+/* 테스트 계정 힌트 */
+.testHint {
+  border: 1.5px dashed var(--base-border);
+  border-radius: 14px;
+  padding: 14px;
+  background: var(--base-bg);
+}
+
+.testHintTitle {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--ink-3);
+  margin-bottom: 10px;
+  letter-spacing: 0.02em;
+}
+
+.testHintRows {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.testHintRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--base-white);
+  border: 1px solid var(--base-border);
+  border-radius: 10px;
+  padding: 9px 12px;
+  cursor: pointer;
+  transition: background 0.12s;
+  text-align: left;
+}
+
+.testHintRow:active {
+  background: var(--blue-soft);
+}
+
+.testHintLabel {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--ink-2);
+}
+
+.testHintValue {
+  font-size: 11px;
+  color: var(--ink-3);
+  font-family: monospace;
+}

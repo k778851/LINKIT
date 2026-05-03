@@ -3,11 +3,13 @@
 import { useState } from 'react';
 import Image from 'next/image';
 import { useAuthStore } from '../../store/authStore';
+import { defaultUser } from '../../data/sampleData';
 import { assetPath } from '../../lib/assetPath';
 import styles from './LoginStep.module.css';
 
 export function LoginStep({ onNext }) {
   const loginWithApi = useAuthStore((s) => s.loginWithApi);
+  const loginLocal   = useAuthStore((s) => s.login);
 
   const [zionId,   setZionId]   = useState('');
   const [password, setPassword] = useState('');
@@ -38,8 +40,10 @@ export function LoginStep({ onNext }) {
       onNext({ skipToHome: true });
     } catch (e) {
       if (e?.status === 0) {
-        // 서버 미응답 → 오프라인 데모 모드
-        setError('서버에 연결할 수 없어요. 네트워크를 확인해주세요.');
+        // 서버 미응답 → 자동으로 데모 모드로 전환
+        loginLocal(defaultUser);
+        onNext({ skipToHome: true });
+        return;
       } else {
         setError('고유번호 또는 비밀번호가 올바르지 않습니다.');
       }
@@ -121,6 +125,39 @@ export function LoginStep({ onNext }) {
             프로필 설정하기
           </button>
         </p>
+
+        {/* 데모 모드 */}
+        <div className={styles.divider}>
+          <span className={styles.dividerText}>또는</span>
+        </div>
+
+        <button
+          className={styles.demoBtn}
+          onClick={() => { loginLocal(defaultUser); onNext({ skipToHome: true }); }}
+        >
+          🎨 로그인 없이 UI 둘러보기
+        </button>
+
+        {/* 테스트 계정 힌트 */}
+        <div className={styles.testHint}>
+          <p className={styles.testHintTitle}>🧪 테스트 계정</p>
+          <div className={styles.testHintRows}>
+            <button
+              className={styles.testHintRow}
+              onClick={() => { setZionId('20240001-00099'); setPassword('linkit1234'); setError(''); }}
+            >
+              <span className={styles.testHintLabel}>일반 유저</span>
+              <span className={styles.testHintValue}>20240001-00099 · linkit1234</span>
+            </button>
+            <button
+              className={styles.testHintRow}
+              onClick={() => { setZionId('00000000-00000'); setPassword('admin1234'); setError(''); }}
+            >
+              <span className={styles.testHintLabel}>관리자</span>
+              <span className={styles.testHintValue}>00000000-00000 · admin1234</span>
+            </button>
+          </div>
+        </div>
       </div>
     </div>
   );
