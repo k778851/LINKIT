@@ -45,10 +45,12 @@ export function CommunityListPage() {
         }
       </div>
 
+      <div style={{ height: 88 }} />
       <FAB
         label="글쓰기"
         icon={<Plus size={16} />}
         onClick={() => router.push('/community/new')}
+        pinned
       />
     </div>
   );

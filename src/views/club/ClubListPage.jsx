@@ -80,10 +80,12 @@ export function ClubListPage() {
         </div>
       )}
 
+      <div style={{ height: 88 }} />
       <FAB
         label="클럽 만들기"
         icon={<Plus size={16} />}
         onClick={() => router.push('/clubs/new')}
+        pinned
       />
     </div>
   );

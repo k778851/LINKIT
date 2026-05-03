@@ -47,19 +47,20 @@ export function ClubCreatePage() {
     if (!validate() || submitting) return;
     setSubmitting(true);
     try {
-      const newId = `club-${Date.now()}`;
-      // 해시태그 파싱 (쉼표 구분, 최대 3개)
+      // 관리자 승인 후 개설 — 로컬에 즉시 추가하지 않음
+      // (백엔드 연결 시에는 API로 신청서 제출)
       const parsedTags = form.tags
         .split(',').map((t) => t.trim()).filter(Boolean).slice(0, 3);
-      const created = await addClub({
-        id: newId, ...form,
-        tags: parsedTags,
-        memberCount: 1, newCount: 0, posterImages: [],
-        createdBy: user?.id,
-      });
-      const clubId = created?.id ?? newId;
-      joinClub(clubId);
-      showToast('클럽신청이 완료되었습니다.', 'success');
+      try {
+        await addClub({
+          id: `club-${Date.now()}`, ...form,
+          tags: parsedTags,
+          memberCount: 1, newCount: 0, posterImages: [],
+          createdBy: user?.id,
+          status: 'pending',
+        });
+      } catch { /* 오프라인이면 무시 */ }
+      showToast('클럽신청이 완료되었습니다. 관리자 승인 후 개설돼요 😊', 'success');
       router.replace('/clubs');
     } catch {
       showToast('클럽 생성에 실패했어요. 다시 시도해주세요.', 'error');

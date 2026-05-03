@@ -1,0 +1,100 @@
+.page {
+  min-height: 100dvh;
+  background: var(--base);
+  display: flex;
+  flex-direction: column;
+}
+
+.body {
+  flex: 1;
+  padding: 20px 20px 120px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* ── 클럽 배지 ── */
+.clubBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--base-white);
+  border: 1px solid var(--base-border);
+  border-radius: 999px;
+  padding: 8px 16px;
+  align-self: flex-start;
+}
+.clubEmoji { font-size: 18px; }
+.clubName { font-size: 14px; font-weight: 600; color: var(--ink-2); }
+
+/* ── 섹션 ── */
+.section { display: flex; flex-direction: column; gap: 6px; }
+
+.label {
+  font-size: 13px; font-weight: 600; color: var(--ink-2);
+}
+
+.req { color: var(--pink); }
+.optional { font-size: 12px; font-weight: 400; color: var(--ink-4); }
+
+.input {
+  width: 100%; height: 50px;
+  border-radius: 12px;
+  border: 1.5px solid var(--base-border);
+  padding: 0 14px;
+  font-size: 15px;
+  color: var(--ink);
+  background: var(--base-white);
+  outline: none;
+  font-family: inherit;
+  transition: border-color 0.15s;
+}
+.input:focus { border-color: var(--blue); }
+
+.textarea {
+  width: 100%;
+  border-radius: 12px;
+  border: 1.5px solid var(--base-border);
+  padding: 12px 14px;
+  font-size: 14px;
+  color: var(--ink);
+  background: var(--base-white);
+  outline: none;
+  font-family: inherit;
+  resize: none;
+  line-height: 1.6;
+  transition: border-color 0.15s;
+}
+.textarea:focus { border-color: var(--blue); }
+
+.counter { font-size: 12px; color: var(--ink-4); text-align: right; }
+
+.locationHint {
+  font-size: 13px; color: var(--blue); font-weight: 500;
+}
+
+/* ── 하단 CTA ── */
+.ctaWrap {
+  position: fixed;
+  bottom: var(--height-tab-bar);
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(100%, var(--max-width));
+  padding: 12px 20px;
+  background: linear-gradient(to top, var(--base-white) 70%, transparent);
+  z-index: 40;
+}
+
+.ctaBtn {
+  width: 100%; height: 52px;
+  border-radius: 14px;
+  font-size: 16px; font-weight: 700;
+  background: var(--base-border);
+  color: var(--ink-3);
+  transition: all 0.15s;
+}
+
+.ctaActive {
+  background: var(--blue);
+  color: #fff;
+}

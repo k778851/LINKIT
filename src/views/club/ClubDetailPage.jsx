@@ -118,12 +118,22 @@ export function ClubDetailPage({ clubId }) {
         {tab === 'intro' && (
           <div className={styles.introBody}>
             <p className={styles.desc}>{club.description}</p>
-            {club.tags && (
+            {club.tags?.length > 0 && (
               <div className={styles.tagRow}>
                 {club.tags.map((tag) => (
                   <span key={tag} className={styles.hashTag}>#{tag}</span>
                 ))}
               </div>
+            )}
+
+            {/* 방장 전용: 모임 개설 버튼 */}
+            {isCreator && (
+              <button
+                className={styles.scheduleCreateBtn}
+                onClick={() => router.push(`/clubs/${clubId}/schedule`)}
+              >
+                + 새 모임 일정 추가
+              </button>
             )}
 
             {/* 다음 일정 미니 카드 */}
@@ -214,10 +224,7 @@ export function ClubDetailPage({ clubId }) {
               leaveClubApi(clubId).catch(() => {});
               showToast('모임 참여를 취소했어요', 'info');
             } else {
-              joinClubStore(clubId, { name: club.name, emoji: club.emoji, memberCount: club.memberCount });
-              incrementMemberCount(clubId);
-              joinClubApi(clubId).catch(() => {});
-              showToast(`${club.name}에 신청했어요 🎉`, 'success');
+              router.push(`/clubs/${clubId}/join`);
             }
           }}
         >
