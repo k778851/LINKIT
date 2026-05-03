@@ -24,6 +24,8 @@ export function ClubCreatePage() {
     name: '', category: '', emoji: '🏃',
     coverImage: null,
     description: '', location: '', schedule: '', isPrivate: false,
+    tags: '',          // 해시태그 (쉼표 구분, 최대 3개)
+    joinQuestion: '',  // 가입질문
   });
   const [errors, setErrors] = useState({});
   const [submitting, setSubmitting] = useState(false);
@@ -33,7 +35,7 @@ export function ClubCreatePage() {
   const validate = () => {
     const e = {};
     if (!form.name.trim()) e.name = '클럽 이름을 입력하세요.';
-    if (form.name.length > 20) e.name = '최대 20자까지 입력 가능해요.';
+    if (form.name.length > 15) e.name = '최대 15자까지 입력 가능해요.';
     if (!form.category) e.category = '카테고리를 선택하세요.';
     if (!form.description.trim()) e.description = '소개를 입력하세요.';
     if (form.description.length > 100) e.description = '최대 100자까지 입력 가능해요.';
@@ -46,11 +48,18 @@ export function ClubCreatePage() {
     setSubmitting(true);
     try {
       const newId = `club-${Date.now()}`;
-      const created = await addClub({ id: newId, ...form, memberCount: 1, newCount: 0, posterImages: [], tags: [], createdBy: user?.id });
+      // 해시태그 파싱 (쉼표 구분, 최대 3개)
+      const parsedTags = form.tags
+        .split(',').map((t) => t.trim()).filter(Boolean).slice(0, 3);
+      const created = await addClub({
+        id: newId, ...form,
+        tags: parsedTags,
+        memberCount: 1, newCount: 0, posterImages: [],
+        createdBy: user?.id,
+      });
       const clubId = created?.id ?? newId;
-      // 개설자는 자동으로 클럽에 가입
       joinClub(clubId);
-      showToast(`${form.name} 클럽을 만들었어요 🎉`, 'success');
+      showToast('클럽신청이 완료되었습니다.', 'success');
       router.replace('/clubs');
     } catch {
       showToast('클럽 생성에 실패했어요. 다시 시도해주세요.', 'error');
@@ -127,10 +136,10 @@ export function ClubCreatePage() {
         <div className={styles.section}>
           <label className={styles.label}>클럽 이름 <span className={styles.req}>*</span></label>
           <input className={`${styles.input} ${errors.name ? styles.inputErr : ''}`}
-            placeholder="최대 20자" maxLength={20} value={form.name}
+            placeholder="한글·영어·숫자 최대 15자" maxLength={15} value={form.name}
             onChange={(e) => set('name', e.target.value)} />
           {errors.name && <p className={styles.errMsg}>{errors.name}</p>}
-          <p className={styles.counter}>{form.name.length}/20</p>
+          <p className={styles.counter}>{form.name.length}/15</p>
         </div>
 
         {/* 카테고리 */}
@@ -170,6 +179,36 @@ export function ClubCreatePage() {
           <label className={styles.label}>정기 일정 <span className={styles.optional}>(선택)</span></label>
           <input className={styles.input} placeholder="예: 매주 금요일 20:00"
             value={form.schedule} onChange={(e) => set('schedule', e.target.value)} />
+        </div>
+
+        {/* 해시태그 */}
+        <div className={styles.section}>
+          <label className={styles.label}>
+            해시태그 <span className={styles.optional}>(선택 · 최대 3개)</span>
+          </label>
+          <input className={styles.input}
+            placeholder="예: 러닝, 아웃도어, 여의도"
+            value={form.tags}
+            onChange={(e) => set('tags', e.target.value)} />
+          {form.tags && (
+            <div className={styles.tagPreview}>
+              {form.tags.split(',').map((t) => t.trim()).filter(Boolean).slice(0, 3).map((t, i) => (
+                <span key={i} className={styles.tagChip}>#{t}</span>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* 가입질문 */}
+        <div className={styles.section}>
+          <label className={styles.label}>
+            가입 질문 <span className={styles.optional}>(선택)</span>
+          </label>
+          <input className={styles.input}
+            placeholder="신청자에게 물어볼 질문 (예: 운동 경력이 어떻게 되시나요?)"
+            maxLength={100}
+            value={form.joinQuestion}
+            onChange={(e) => set('joinQuestion', e.target.value)} />
         </div>
 
         {/* 공개 범위 */}

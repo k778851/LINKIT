@@ -111,6 +111,13 @@
   font-weight: 600;
 }
 
+/* ── Tag preview ── */
+.tagPreview { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+.tagChip {
+  font-size: 12px; font-weight: 600; color: var(--blue);
+  background: var(--blue-soft); padding: 3px 10px; border-radius: 999px;
+}
+
 /* ── Toggle row ── */
 .toggleRow { display: flex; border-radius: 12px; overflow: hidden; border: 1.5px solid var(--base-border); }
 .toggleBtn { flex: 1; height: 44px; font-size: 14px; font-weight: 600; color: var(--ink-3); transition: all 0.15s; }

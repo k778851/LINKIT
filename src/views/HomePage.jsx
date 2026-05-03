@@ -29,12 +29,28 @@ export function HomePage() {
     .filter((s) => s.dday >= 0)
     .sort((a, b) => a.dday - b.dday)[0] ?? null;
 
+  // 배너 5초 자동전환
   useEffect(() => {
     timerRef.current = setInterval(() => {
       setBannerIdx((i) => (i + 1) % sampleBanners.length);
-    }, 4000);
+    }, 5000);
     return () => clearInterval(timerRef.current);
   }, []);
+
+  // 배너 스와이프
+  const touchStartX = useRef(null);
+  const handleTouchStart = (e) => { touchStartX.current = e.touches[0].clientX; };
+  const handleTouchEnd = (e) => {
+    if (touchStartX.current === null) return;
+    const dx = e.changedTouches[0].clientX - touchStartX.current;
+    if (Math.abs(dx) < 40) return;
+    clearInterval(timerRef.current);
+    setBannerIdx((i) => (dx < 0
+      ? (i + 1) % sampleBanners.length
+      : (i - 1 + sampleBanners.length) % sampleBanners.length));
+    touchStartX.current = null;
+    timerRef.current = setInterval(() => setBannerIdx((i) => (i + 1) % sampleBanners.length), 5000);
+  };
 
   const popularClubs = clubs.slice(0, 4);
 
@@ -55,7 +71,7 @@ export function HomePage() {
       </header>
 
       {/* 배너 캐러셀 */}
-      <div className={styles.bannerWrap}>
+      <div className={styles.bannerWrap} onTouchStart={handleTouchStart} onTouchEnd={handleTouchEnd}>
         {sampleBanners.map((b, i) => (
           <div
             key={b.id}

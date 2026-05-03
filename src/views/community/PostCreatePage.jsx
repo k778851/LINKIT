@@ -6,6 +6,7 @@ import { useCommunityStore } from '../../store/communityStore';
 import { useAuthStore } from '../../store/authStore';
 import { Header } from '../../components/layout/Header';
 import { useToastContext } from '../../context/ToastContext';
+import { ImageUpload } from '../../components/ui/ImageUpload';
 import styles from './PostCreatePage.module.css';
 
 const CATEGORIES = ['일상', '질문', '모임', '나눔', '생활정보'];
@@ -14,7 +15,7 @@ export function PostCreatePage() {
   const router = useRouter();
   const addPost = useCommunityStore((s) => s.addPost);
   const user = useAuthStore((s) => s.user);
-  const [form, setForm] = useState({ category: '', title: '', content: '', location: '' });
+  const [form, setForm] = useState({ category: '', title: '', content: '', location: '', image: null });
   const [errors, setErrors] = useState({});
   const { showToast } = useToastContext();
 
@@ -90,6 +91,19 @@ export function PostCreatePage() {
             value={form.content} onChange={(e) => set('content', e.target.value)} />
           {errors.content && <p className={styles.errMsg}>{errors.content}</p>}
           <p className={styles.counter}>{form.content.length}/500</p>
+        </div>
+
+        {/* 사진 */}
+        <div className={styles.section}>
+          <label className={styles.label}>
+            사진 <span className={styles.optional}>(선택)</span>
+          </label>
+          <ImageUpload
+            value={form.image}
+            onChange={(url) => set('image', url)}
+            shape="rect"
+            placeholder="📷"
+          />
         </div>
 
         {/* 위치 */}

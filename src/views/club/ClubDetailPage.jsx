@@ -2,13 +2,14 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Heart, MapPin, Clock, Users, ChevronLeft, Calendar, Pencil } from 'lucide-react';
+import { Heart, MapPin, Clock, Users, ChevronLeft, Calendar, Pencil, Link2 } from 'lucide-react';
 import { useClubStore } from '../../store/clubStore';
 import { useAuthStore } from '../../store/authStore';
 import { useToastContext } from '../../context/ToastContext';
 import { EmptyState } from '../../components/common/EmptyState';
 import { ClubBoardTab } from './tabs/ClubBoardTab';
-import { CLUB_EMOJIS, SAMPLE_USERS } from '../../data/sampleData';
+import { CLUB_EMOJIS, SAMPLE_CLUB_IMAGES, SAMPLE_USERS } from '../../data/sampleData';
+import { assetPath } from '../../lib/assetPath';
 import styles from './ClubDetailPage.module.css';
 
 export function ClubDetailPage({ clubId }) {
@@ -33,12 +34,17 @@ export function ClubDetailPage({ clubId }) {
   const colors = CLUB_EMOJIS[club.emoji] ?? ['#8EC6FF', '#0088FF'];
   const creator = SAMPLE_USERS[club.createdBy] ?? { emoji: club.emoji, nickname: '클럽장' };
   const gradient = `linear-gradient(135deg, ${colors[0]} 0%, ${colors[1]} 100%)`;
+  const coverImage = club.coverImage ?? club.posterImages?.[0] ?? SAMPLE_CLUB_IMAGES[club.id];
+  const coverSrc = coverImage?.startsWith('/') ? assetPath(coverImage) : coverImage;
+  const heroStyle = coverSrc
+    ? { backgroundImage: `url("${coverSrc}")` }
+    : { background: gradient };
 
   return (
     <div className={styles.page}>
       {/* 히어로 */}
-      <div className={styles.hero} style={{ background: gradient }}>
-        <span className={styles.heroEmoji}>{club.emoji}</span>
+      <div className={`${styles.hero} ${coverSrc ? styles.heroWithImage : ''}`} style={heroStyle}>
+        {!coverSrc && <span className={styles.heroEmoji}>{club.emoji}</span>}
         {/* 헤더 버튼 */}
         <div className={styles.heroNav}>
           <button className={styles.navBtn} onClick={() => router.back()} aria-label="뒤로">
@@ -50,6 +56,17 @@ export function ClubDetailPage({ clubId }) {
                 <Pencil size={18} color="#fff" />
               </button>
             )}
+            <button
+              className={styles.navBtn}
+              onClick={() => {
+                const url = `${window.location.origin}/clubs/${clubId}`;
+                navigator.clipboard?.writeText(url).catch(() => {});
+                showToast('복사가 되었습니다.', 'success');
+              }}
+              aria-label="링크 복사"
+            >
+              <Link2 size={18} color="#fff" />
+            </button>
             <button
               className={styles.navBtn}
               onClick={() => {
@@ -115,7 +132,9 @@ export function ClubDetailPage({ clubId }) {
                 <Calendar size={16} color="#fff" />
                 <div>
                   <p className={styles.scheduleMiniTitle}>다음 모임</p>
-                  <p className={styles.scheduleMiniDate}>{club.schedule}</p>
+                  <p className={styles.scheduleMiniDate}>
+                    {club.schedule ?? '대기중'}
+                  </p>
                 </div>
               </div>
               <button
@@ -141,6 +160,7 @@ export function ClubDetailPage({ clubId }) {
 
         {tab === 'members' && (
           <div className={styles.memberList}>
+            <p className={styles.memberCount}>모임멤버 ({club.memberCount.toLocaleString()})</p>
             {/* 클럽장 */}
             <div className={styles.memberRow}>
               <span className={styles.memberEmoji}>{creator.emoji}</span>
