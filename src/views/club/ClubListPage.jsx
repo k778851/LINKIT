@@ -2,7 +2,7 @@
 
 import { useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { Plus, SlidersHorizontal } from 'lucide-react';
+import { Plus, SlidersHorizontal, X } from 'lucide-react';
 import { useClubStore } from '../../store/clubStore';
 import { Chip } from '../../components/common/Chip';
 import { ClubCard } from '../../components/club/ClubCard';
@@ -16,8 +16,11 @@ const SORTS = ['최신순', '인기순', '신규순'];
 export function ClubListPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { selectedCategory, setCategory, selectedSort, setSort, getFilteredClubs } = useClubStore();
+  const { selectedCategory, setCategory, selectedSort, setSort, getFilteredClubs, clubs: allClubs } = useClubStore();
   const clubs = getFilteredClubs();
+  const isFiltered = selectedCategory !== '전체' || selectedSort !== '최신순';
+
+  const resetFilter = () => { setCategory('전체'); setSort('최신순'); };
 
   useEffect(() => {
     const cat = searchParams.get('category');
@@ -41,13 +44,21 @@ export function ClubListPage() {
         ))}
       </div>
 
-      {/* 정렬 바 */}
+      {/* 정렬 + 결과 수 바 */}
       <div className={styles.sortBar}>
-        <span className={styles.sortLabel}>
-          <SlidersHorizontal size={13} strokeWidth={2.2} />
-          정렬
+        <span className={styles.resultCount}>
+          {isFiltered
+            ? <><span className={styles.resultNum}>{clubs.length}</span>개 결과</>
+            : <><span className={styles.resultNum}>{allClubs.length}</span>개 모임</>
+          }
+          {isFiltered && (
+            <button className={styles.resetBtn} onClick={resetFilter}>
+              <X size={11} strokeWidth={2.5} /> 초기화
+            </button>
+          )}
         </span>
         <div className={styles.sortBtns}>
+          <SlidersHorizontal size={13} strokeWidth={2.2} color="var(--ink-3)" />
           {SORTS.map((s) => (
             <button
               key={s}

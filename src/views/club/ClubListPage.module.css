@@ -28,12 +28,20 @@
   padding: 0 16px 10px;
 }
 
-.sortLabel {
-  display: flex; align-items: center; gap: 5px;
-  font-size: 12px; font-weight: 600; color: var(--ink-3);
+.resultCount {
+  display: flex; align-items: center; gap: 6px;
+  font-size: 13px; color: var(--ink-3);
+}
+.resultNum { font-weight: 700; color: var(--blue); }
+
+.resetBtn {
+  display: flex; align-items: center; gap: 3px;
+  font-size: 11px; font-weight: 600; color: var(--ink-3);
+  background: var(--base-border); border-radius: 999px;
+  padding: 3px 8px;
 }
 
-.sortBtns { display: flex; gap: 4px; }
+.sortBtns { display: flex; align-items: center; gap: 4px; }
 
 .sortBtn {
   height: 28px; padding: 0 12px;

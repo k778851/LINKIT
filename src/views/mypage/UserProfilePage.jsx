@@ -78,7 +78,10 @@ export function UserProfilePage({ userId }) {
       {/* 프로필 카드 */}
       <div className={styles.profileCard}>
         <div className={styles.avatarWrap}>
-          <span className={styles.avatar}>{profile.emoji ?? '😊'}</span>
+          {profile.profileImage
+            ? <img src={profile.profileImage} alt={profile.nickname} className={styles.avatarImg} />
+            : <span className={styles.avatar}>{profile.emoji ?? '😊'}</span>
+          }
         </div>
         <div className={styles.info}>
           <p className={styles.nickname}>{profile.nickname}</p>

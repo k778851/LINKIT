@@ -41,7 +41,10 @@ export function MyPage() {
       {/* 프로필 카드 */}
       <div className={styles.profileCard}>
         <div className={styles.avatarWrap}>
-          <span className={styles.avatar}>{user.emoji}</span>
+          {user.profileImage
+            ? <img src={user.profileImage} alt={user.nickname} className={styles.avatarImg} />
+            : <span className={styles.avatar}>{user.emoji}</span>
+          }
         </div>
         <div className={styles.profileInfo}>
           <p className={styles.nickname}>{user.nickname}</p>
