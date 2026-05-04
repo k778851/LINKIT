@@ -8,6 +8,7 @@ import { Chip } from '../../components/common/Chip';
 import { ClubCard } from '../../components/club/ClubCard';
 import { FAB } from '../../components/common/FAB';
 import { EmptyState } from '../../components/common/EmptyState';
+import { ClubCardSkeleton } from '../../components/common/SkeletonList';
 import styles from './ClubListPage.module.css';
 
 const CATEGORIES = ['전체', '운동', '음식', '아트', '스터디', '음악', '기타'];
@@ -16,10 +17,15 @@ const SORTS = ['최신순', '인기순', '신규순'];
 export function ClubListPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { selectedCategory, setCategory, selectedSort, setSort, getFilteredClubs, clubs: allClubs } = useClubStore();
+  const {
+    selectedCategory, setCategory,
+    selectedSort, setSort,
+    getFilteredClubs,
+    clubs: allClubs,
+    loaded, fetchClubs,
+  } = useClubStore();
   const clubs = getFilteredClubs();
   const isFiltered = selectedCategory !== '전체' || selectedSort !== '최신순';
-
   const resetFilter = () => { setCategory('전체'); setSort('최신순'); };
 
   useEffect(() => {
@@ -28,11 +34,16 @@ export function ClubListPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchParams]);
 
+  useEffect(() => {
+    if (!loaded) fetchClubs();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [loaded]);
+
   return (
     <div className={styles.page}>
       <header className={styles.header}>
         <h1 className={styles.title}>클럽</h1>
-        <span className={styles.headerCount}>{clubs.length}개</span>
+        <span className={styles.headerCount}>{allClubs.length}개</span>
       </header>
 
       {/* 카테고리 필터 */}
@@ -71,11 +82,27 @@ export function ClubListPage() {
         </div>
       </div>
 
-      {clubs.length === 0 ? (
+      {!loaded ? (
+        <div className={styles.grid}>
+          {Array.from({ length: 6 }).map((_, i) => <ClubCardSkeleton key={i} />)}
+        </div>
+      ) : clubs.length === 0 ? (
         <EmptyState
           emoji="🔍"
           title="클럽이 없어요"
           description="조건에 맞는 클럽이 없어요. 직접 만들어 보세요!"
+          action={
+            <button
+              onClick={resetFilter}
+              style={{
+                marginTop: 4, padding: '10px 24px', borderRadius: 999,
+                background: 'var(--blue-soft)', color: 'var(--blue)',
+                fontSize: 14, fontWeight: 700,
+              }}
+            >
+              필터 초기화
+            </button>
+          }
         />
       ) : (
         <div className={styles.grid}>

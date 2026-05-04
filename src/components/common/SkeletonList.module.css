@@ -1,0 +1,44 @@
+/* 공통 bone 애니메이션 */
+.bone {
+  background: linear-gradient(90deg, var(--base-border) 25%, var(--base-soft) 50%, var(--base-border) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.4s infinite;
+  border-radius: 8px;
+  flex-shrink: 0;
+}
+
+@keyframes shimmer {
+  0%   { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* ── 게시글 카드 ── */
+.postCard {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 16px 20px;
+  background: var(--base-white);
+  border-bottom: 1px solid var(--base-border);
+}
+.postMain { flex: 1; display: flex; flex-direction: column; gap: 8px; }
+.row      { display: flex; align-items: center; gap: 8px; }
+
+.badge  { width: 44px; height: 18px; border-radius: 999px; }
+.author { width: 60px; height: 14px; margin-left: auto; }
+.title  { width: 75%; height: 16px; }
+.line   { width: 55%; height: 13px; }
+.meta   { width: 48px; height: 12px; border-radius: 4px; }
+.thumb  { width: 72px; height: 72px; border-radius: 10px; flex-shrink: 0; }
+
+/* ── 클럽 카드 ── */
+.clubCard { display: flex; flex-direction: column; }
+.clubPoster { width: 100%; aspect-ratio: 1; border-radius: 14px; }
+.clubCat  { width: 36px; height: 12px; border-radius: 4px; }
+.clubName { width: 80%; height: 15px; }
+.clubMeta { width: 40px; height: 12px; border-radius: 4px; }
+
+/* ── 행 스켈레톤 ── */
+.avatar   { width: 44px; height: 44px; border-radius: 12px; }
+.rowTitle { width: 60%; height: 15px; }
+.rowMeta  { width: 40%; height: 12px; }
