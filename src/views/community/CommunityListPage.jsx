@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Plus } from 'lucide-react';
 import { useCommunityStore } from '../../store/communityStore';
+import { tokenStorage } from '../../api/apiClient';
 import { Chip } from '../../components/common/Chip';
 import { PostCard } from '../../components/community/PostCard';
 import { FAB } from '../../components/common/FAB';
@@ -20,6 +21,10 @@ export function CommunityListPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    if (!tokenStorage.get()) {
+      setLoading(false);
+      return;
+    }
     setLoading(true);
     fetchPosts(selectedCategory)
       .catch(() => {})

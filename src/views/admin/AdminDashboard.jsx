@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { Users, BookOpen, FileText, MessageCircle } from 'lucide-react';
 import { adminApi } from '../../api/adminApi';
+import { tokenStorage } from '../../api/apiClient';
 import { useClubStore } from '../../store/clubStore';
 import { useCommunityStore } from '../../store/communityStore';
 import { useAuthStore } from '../../store/authStore';
@@ -36,6 +37,11 @@ export function AdminDashboard() {
   const user  = useAuthStore((s) => s.user);
 
   useEffect(() => {
+    if (!tokenStorage.get()) {
+      setStats(buildLocalStats(clubs, posts, user));
+      setLoading(false);
+      return;
+    }
     adminApi.getStats()
       .then(setStats)
       .catch(() => setStats(buildLocalStats(clubs, posts, user)))

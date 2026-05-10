@@ -6,6 +6,7 @@ import { Search, X, Clock, TrendingUp } from 'lucide-react';
 import { useClubStore } from '../store/clubStore';
 import { useCommunityStore } from '../store/communityStore';
 import { searchApi } from '../api/searchApi';
+import { tokenStorage } from '../api/apiClient';
 import { CATEGORY_COLORS, SAMPLE_CLUB_IMAGES } from '../data/sampleData';
 import { assetPath } from '../lib/assetPath';
 import styles from './SearchPage.module.css';
@@ -35,6 +36,7 @@ export function SearchPage() {
   /* ── 디바운스 API 검색 ──────────────────────────────── */
   const fetchSearch = useCallback(async (q) => {
     if (!q.trim()) { setApiClubs(null); setApiPosts(null); return; }
+    if (!tokenStorage.get()) { setApiClubs(null); setApiPosts(null); setSearching(false); return; }
     setSearching(true);
     try {
       const result = await searchApi.search(q.trim());

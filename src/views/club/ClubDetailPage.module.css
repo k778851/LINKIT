@@ -176,9 +176,23 @@
 
 .scheduleApplyBtn {
   flex-shrink: 0;
-  font-size: 13px; font-weight: 700;
+  font-size: 0; font-weight: 700;
   color: var(--blue); background: var(--blue-soft);
   padding: 7px 14px; border-radius: 999px;
+}
+
+.scheduleApplyBtn::after {
+  content: '신청';
+  font-size: 13px;
+}
+
+.scheduleAppliedBtn {
+  color: #fff;
+  background: var(--blue);
+}
+
+.scheduleAppliedBtn::after {
+  content: '신청 완료';
 }
 
 .scheduleEmpty {

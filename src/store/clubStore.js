@@ -2,7 +2,7 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { sampleClubs, sampleSchedules } from '../data/sampleData';
 import { clubApi } from '../api/clubApi';
-import { ApiError } from '../api/apiClient';
+import { ApiError, tokenStorage } from '../api/apiClient';
 
 /** 백엔드 미연결 or 미인증 — 로컬 fallback 허용 */
 const shouldFallback = (e) =>
@@ -23,6 +23,10 @@ export const useClubStore = create(
 
       /* ── API: 클럽 목록 로드 ──────────────────────────── */
       fetchClubs: async () => {
+        if (!tokenStorage.get()) {
+          set({ loaded: true });
+          return;
+        }
         const { selectedCategory, selectedSort } = get();
         try {
           const clubs = await clubApi.getAll(selectedCategory, selectedSort);

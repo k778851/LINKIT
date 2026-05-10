@@ -3,6 +3,7 @@
 'use client';
 
 import { useState } from 'react';
+import { createPortal } from 'react-dom';
 import { useRouter } from 'next/navigation';
 import { Heart, MessageCircle, Eye, Send, X, ChevronDown, ChevronUp } from 'lucide-react';
 import { useCommunityStore } from '../../../store/communityStore';
@@ -198,7 +199,7 @@ export function ClubBoardTab({ clubId }) {
       )}
 
       {/* 글쓰기 바텀시트 */}
-      {showWrite && (
+      {showWrite && createPortal(
         <div className={styles.sheetOverlay} onClick={() => setShowWrite(false)}>
           <div className={styles.sheet} onClick={(e) => e.stopPropagation()}>
             <div className={styles.sheetHeader}>
@@ -257,7 +258,8 @@ export function ClubBoardTab({ clubId }) {
               등록하기
             </button>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   );

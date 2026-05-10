@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { Heart, Share2, Eye, MessageCircle, Send, Trash2, Pencil } from 'lucide-react';
 import { useCommunityStore } from '../../store/communityStore';
@@ -25,7 +25,11 @@ function badgeClass(cat) {
 export function PostDetailPage({ postId }) {
   const router = useRouter();
   const post = useCommunityStore((s) => s.posts.find((p) => p.id === postId));
-  const comments = useCommunityStore((s) => s.comments.filter((c) => c.postId === postId));
+  const allComments = useCommunityStore((s) => s.comments);
+  const comments = useMemo(
+    () => allComments.filter((c) => c.postId === postId),
+    [allComments, postId]
+  );
   const { toggleLike, likedPosts, incrementView, addComment, deletePost } = useCommunityStore();
   const user = useAuthStore((s) => s.user);
   const [commentText, setCommentText] = useState('');

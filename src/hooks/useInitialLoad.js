@@ -5,6 +5,7 @@ import { useAuthStore } from '../store/authStore';
 import { useClubStore } from '../store/clubStore';
 import { useCommunityStore } from '../store/communityStore';
 import { useNotificationStore } from '../store/notificationStore';
+import { tokenStorage } from '../api/apiClient';
 
 /**
  * 앱 최초 진입 시 서버에서 핵심 데이터를 한 번만 로드
@@ -24,6 +25,8 @@ export function useInitialLoad() {
 
     // 병렬 로드 — 실패해도 서로 영향 없도록
     syncProfile().catch(() => {});
+    if (!tokenStorage.get()) return;
+
     fetchClubs().catch(() => {});
     fetchPosts().catch(() => {});
     fetchNotifications().catch(() => {});

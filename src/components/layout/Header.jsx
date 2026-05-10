@@ -16,7 +16,7 @@ export function Header({ title, left, right, transparent }) {
   return (
     <header className={`${styles.header} ${transparent ? styles.transparent : ''}`}>
       <div className={styles.left}>{left !== undefined ? left : defaultLeft}</div>
-      {title && <h1 className={styles.title}>{title}</h1>}
+      <h1 className={styles.title}>{title}</h1>
       <div className={styles.right}>{right}</div>
     </header>
   );

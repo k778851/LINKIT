@@ -1,19 +1,21 @@
 import { ClientProviders } from '../components/ClientProviders';
 import '../styles/global.css';
 
+const basePath = process.env.NODE_ENV === 'production' ? '/LINKIT' : '';
+
 export const metadata = {
   title: 'LINKIT — 우리 동네 소모임',
   description: '동네 주민들이 소모임을 자유롭게 생성하고 참여할 수 있는 모바일 커뮤니티',
   // 로컬 dev: /manifest.json, 프로덕션(GitHub Pages): /LINKIT/manifest.json
-  manifest: process.env.NODE_ENV === 'production' ? '/LINKIT/manifest.json' : '/manifest.json',
+  manifest: `${basePath}/manifest.json`,
   appleWebApp: {
     capable: true,
     statusBarStyle: 'default',
     title: 'LINKIT',
   },
   icons: {
-    icon: '/LINKIT/favicon.svg',
-    apple: '/LINKIT/icons/icon-192.png',
+    icon: `${basePath}/favicon.svg`,
+    apple: `${basePath}/icons/icon-192.png`,
   },
 };
 
@@ -35,7 +37,7 @@ export default function RootLayout({ children }) {
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="default" />
         <meta name="apple-mobile-web-app-title" content="LINKIT" />
-        <link rel="apple-touch-icon" href="/LINKIT/icons/icon-192.png" />
+        <link rel="apple-touch-icon" href={`${basePath}/icons/icon-192.png`} />
       </head>
       <body>
         <ClientProviders>

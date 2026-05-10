@@ -3,6 +3,7 @@
 import { useEffect, useState, useCallback } from 'react';
 import { Search, Trash2, CheckCircle, XCircle } from 'lucide-react';
 import { adminApi } from '../../api/adminApi';
+import { tokenStorage } from '../../api/apiClient';
 import { useClubStore } from '../../store/clubStore';
 import { Modal } from '../../components/common/Modal';
 import { useToastContext } from '../../context/ToastContext';
@@ -25,6 +26,14 @@ export function AdminClubsPage() {
 
   const load = useCallback(async (q = '') => {
     setLoading(true);
+    if (!tokenStorage.get()) {
+      const q2 = q.toLowerCase();
+      setClubs(localClubs.filter((c) =>
+        !q2 || c.name.toLowerCase().includes(q2) || c.category?.toLowerCase().includes(q2)
+      ));
+      setLoading(false);
+      return;
+    }
     try {
       const data = await adminApi.getClubs(q);
       setClubs(data);

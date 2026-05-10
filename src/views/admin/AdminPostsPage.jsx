@@ -3,6 +3,7 @@
 import { useEffect, useState, useCallback } from 'react';
 import { Search, Trash2, Eye, Heart, MessageCircle } from 'lucide-react';
 import { adminApi } from '../../api/adminApi';
+import { tokenStorage } from '../../api/apiClient';
 import { useCommunityStore } from '../../store/communityStore';
 import { Modal } from '../../components/common/Modal';
 import { useToastContext } from '../../context/ToastContext';
@@ -22,6 +23,15 @@ export function AdminPostsPage() {
 
   const load = useCallback(async (q = '') => {
     setLoading(true);
+    if (!tokenStorage.get()) {
+      const q2 = q.toLowerCase();
+      setPosts(localPosts
+        .filter((p) => !q2 || p.title.toLowerCase().includes(q2) || p.content.toLowerCase().includes(q2))
+        .map((p) => ({ id: p.id, category: p.category, title: p.title, authorId: p.authorId, likeCount: p.likeCount, commentCount: p.commentCount, viewCount: p.viewCount, createdAt: p.createdAt }))
+      );
+      setLoading(false);
+      return;
+    }
     try {
       const data = await adminApi.getPosts(q);
       setPosts(data);

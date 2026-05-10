@@ -3,6 +3,7 @@
 import { useEffect, useState, useCallback } from 'react';
 import { Search, Trash2 } from 'lucide-react';
 import { adminApi } from '../../api/adminApi';
+import { tokenStorage } from '../../api/apiClient';
 import { useAuthStore } from '../../store/authStore';
 import { Modal } from '../../components/common/Modal';
 import { useToastContext } from '../../context/ToastContext';
@@ -30,6 +31,14 @@ export function AdminUsersPage() {
 
   const load = useCallback(async (q = '') => {
     setLoading(true);
+    if (!tokenStorage.get()) {
+      const q2 = q.toLowerCase();
+      setUsers(LOCAL_USERS.filter((u) =>
+        !q2 || u.nickname.toLowerCase().includes(q2) || u.handle.toLowerCase().includes(q2)
+      ));
+      setLoading(false);
+      return;
+    }
     try {
       const data = await adminApi.getUsers(q);
       setUsers(data);

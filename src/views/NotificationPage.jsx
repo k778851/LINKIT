@@ -58,11 +58,19 @@ export function NotificationPage() {
       ) : (
         <div className={styles.list}>
           {notifications.map((notif, idx) => (
-            <button
+            <div
               key={notif.id}
               className={`${styles.row} ${!notif.read ? styles.unread : ''} card-animate`}
               style={{ animationDelay: `${Math.min(idx * 30, 210)}ms` }}
+              role="button"
+              tabIndex={0}
               onClick={() => handleClick(notif)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault();
+                  handleClick(notif);
+                }
+              }}
             >
               {!notif.read && (
                 <span className={styles.dot} style={{ background: TYPE_COLORS[notif.type] }} />
@@ -85,7 +93,7 @@ export function NotificationPage() {
               >
                 ×
               </button>
-            </button>
+            </div>
           ))}
         </div>
       )}

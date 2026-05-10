@@ -4,9 +4,9 @@
   background: rgba(0, 0, 0, 0.5);
   z-index: 1000;
   display: flex;
-  align-items: flex-end;
+  align-items: center;
   justify-content: center;
-  padding: 0 16px 32px;
+  padding: 24px 16px calc(var(--height-tab-bar) + 24px);
   animation: fadeIn 0.2s ease;
 }
 
@@ -16,6 +16,8 @@
   padding: 24px 20px 20px;
   width: 100%;
   max-width: var(--max-width);
+  max-height: calc(100dvh - var(--height-tab-bar) - 48px);
+  overflow-y: auto;
   animation: slideUp 0.25s ease;
 }
 
@@ -48,6 +50,6 @@
 }
 
 @keyframes slideUp {
-  from { transform: translateY(40px); opacity: 0; }
+  from { transform: translateY(24px); opacity: 0; }
   to { transform: translateY(0); opacity: 1; }
 }

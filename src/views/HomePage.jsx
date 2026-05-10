@@ -20,6 +20,8 @@ export function HomePage() {
   const user = useAuthStore((s) => s.user);
   const unreadCount = useNotificationStore((s) => s.notifications.filter((n) => !n.read).length);
   const timerRef = useRef(null);
+  const dragStartX = useRef(null);
+  const draggingRef = useRef(false);
 
   // 무한 루프: [마지막 클론, ...원본, 첫 번째 클론]
   const total = sampleBanners.length;
@@ -52,6 +54,18 @@ export function HomePage() {
     return () => clearInterval(timerRef.current);
   }, []);
 
+  const resetBannerTimer = () => {
+    clearInterval(timerRef.current);
+    timerRef.current = setInterval(() => setSlideIdx((i) => i + 1), 5000);
+  };
+
+  const moveSlideByDelta = (dx) => {
+    if (Math.abs(dx) < 40) return;
+    setAnimated(true);
+    setSlideIdx((i) => dx < 0 ? i + 1 : i - 1);
+    resetBannerTimer();
+  };
+
   const goTo = (idx) => { // dot 클릭 (0-based 원본 인덱스)
     setAnimated(true);
     setSlideIdx(idx + 1);
@@ -60,17 +74,26 @@ export function HomePage() {
   };
 
   // 배너 스와이프
-  const touchStartX = useRef(null);
-  const handleTouchStart = (e) => { touchStartX.current = e.touches[0].clientX; };
+  const handleTouchStart = (e) => { dragStartX.current = e.touches[0].clientX; };
   const handleTouchEnd = (e) => {
-    if (touchStartX.current === null) return;
-    const dx = e.changedTouches[0].clientX - touchStartX.current;
-    if (Math.abs(dx) < 40) return;
-    setAnimated(true);
-    setSlideIdx((i) => dx < 0 ? i + 1 : i - 1);
-    touchStartX.current = null;
-    clearInterval(timerRef.current);
-    timerRef.current = setInterval(() => setSlideIdx((i) => i + 1), 5000);
+    if (dragStartX.current === null) return;
+    moveSlideByDelta(e.changedTouches[0].clientX - dragStartX.current);
+    dragStartX.current = null;
+  };
+  const handlePointerDown = (e) => {
+    if (e.pointerType === 'touch') return;
+    draggingRef.current = true;
+    dragStartX.current = e.clientX;
+  };
+  const handlePointerUp = (e) => {
+    if (!draggingRef.current || dragStartX.current === null) return;
+    moveSlideByDelta(e.clientX - dragStartX.current);
+    draggingRef.current = false;
+    dragStartX.current = null;
+  };
+  const handlePointerCancel = () => {
+    draggingRef.current = false;
+    dragStartX.current = null;
   };
 
   // 참여 중인 클럽의 가장 가까운 미래 일정
@@ -99,7 +122,15 @@ export function HomePage() {
       </header>
 
       {/* 배너 캐러셀 — 무한 루프 */}
-      <div className={styles.bannerWrap} onTouchStart={handleTouchStart} onTouchEnd={handleTouchEnd}>
+      <div
+        className={styles.bannerWrap}
+        onTouchStart={handleTouchStart}
+        onTouchEnd={handleTouchEnd}
+        onPointerDown={handlePointerDown}
+        onPointerUp={handlePointerUp}
+        onPointerCancel={handlePointerCancel}
+        onPointerLeave={handlePointerCancel}
+      >
         <div
           style={{
             display: 'flex',

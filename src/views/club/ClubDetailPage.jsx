@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Heart, MapPin, Clock, Users, ChevronLeft, Calendar, Pencil, Link2, Plus } from 'lucide-react';
+import { Heart, Clock, Users, ChevronLeft, Calendar, Pencil, Link2, Plus } from 'lucide-react';
 import { useClubStore } from '../../store/clubStore';
 import { useAuthStore } from '../../store/authStore';
 import { calcDdayNum, getDdayLabel, formatShortDate } from '../../utils/formatDate';
@@ -33,6 +33,7 @@ export function ClubDetailPage({ clubId }) {
   const { showToast } = useToastContext();
   const [tab, setTab] = useState('intro');
   const [showLeaveConfirm, setShowLeaveConfirm] = useState(false);
+  const [appliedScheduleIds, setAppliedScheduleIds] = useState([]);
 
   if (!club) return <EmptyState emoji="😢" title="클럽을 찾을 수 없어요" />;
   const isBookmarked = user?.bookmarkedClubs?.includes(clubId);
@@ -46,6 +47,28 @@ export function ClubDetailPage({ clubId }) {
   const heroStyle = coverSrc
     ? { backgroundImage: `url("${coverSrc}")` }
     : { background: gradient };
+  const copyClubLink = async () => {
+    const url = window.location.href;
+    try {
+      if (navigator.clipboard?.writeText) {
+        await navigator.clipboard.writeText(url);
+      } else {
+        throw new Error('Clipboard API unavailable');
+      }
+      showToast('복사가 되었습니다.', 'success');
+    } catch {
+      const textarea = document.createElement('textarea');
+      textarea.value = url;
+      textarea.setAttribute('readonly', '');
+      textarea.style.position = 'fixed';
+      textarea.style.top = '-9999px';
+      document.body.appendChild(textarea);
+      textarea.select();
+      const copied = document.execCommand('copy');
+      document.body.removeChild(textarea);
+      showToast(copied ? '복사가 되었습니다.' : '복사에 실패했어요.', copied ? 'success' : 'error');
+    }
+  };
 
   return (
     <div className={styles.page}>
@@ -64,11 +87,7 @@ export function ClubDetailPage({ clubId }) {
             )}
             <button
               className={styles.navBtn}
-              onClick={() => {
-                const url = `${window.location.origin}/clubs/${clubId}`;
-                navigator.clipboard?.writeText(url).catch(() => {});
-                showToast('복사가 되었습니다.', 'success');
-              }}
+              onClick={copyClubLink}
               aria-label="링크 복사"
             >
               <Link2 size={18} color="#fff" />
@@ -103,7 +122,6 @@ export function ClubDetailPage({ clubId }) {
         {/* 정보 행 */}
         <div className={styles.infoRow}>
           <InfoBox icon={<Clock size={16} color="var(--blue)" />} text={club.schedule} />
-          <InfoBox icon={<MapPin size={16} color="var(--blue)" />} text={club.location} />
           <InfoBox icon={<Users size={16} color="var(--blue)" />} text={`${club.memberCount.toLocaleString()}명`} />
         </div>
 
@@ -162,6 +180,7 @@ export function ClubDetailPage({ clubId }) {
                   {clubSchedules.map((sch) => {
                     const isToday = sch.dday === 0;
                     const isPast  = sch.dday < 0;
+                    const isApplied = appliedScheduleIds.includes(sch.id);
                     return (
                       <div key={sch.id} className={`${styles.scheduleCard} ${isToday ? styles.scheduleCardToday : ''} ${isPast ? styles.scheduleCardPast : ''}`}>
                         <div className={`${styles.scheduleDday} ${isToday ? styles.scheduleDdayToday : isPast ? styles.scheduleDdayPast : ''}`}>
@@ -175,8 +194,14 @@ export function ClubDetailPage({ clubId }) {
                         </div>
                         {!isPast && (
                           <button
-                            className={styles.scheduleApplyBtn}
+                            className={`${styles.scheduleApplyBtn} ${isApplied ? styles.scheduleAppliedBtn : ''}`}
                             onClick={() => {
+                              if (isApplied) {
+                                setAppliedScheduleIds((prev) => prev.filter((id) => id !== sch.id));
+                                showToast('일정 신청을 취소했어요.', 'info');
+                                return;
+                              }
+                              setAppliedScheduleIds((prev) => [...prev, sch.id]);
                               if (!isJoined) {
                                 joinClubStore(clubId, { name: club.name, memberCount: club.memberCount });
                                 incrementMemberCount(clubId);

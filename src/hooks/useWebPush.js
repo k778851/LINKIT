@@ -2,7 +2,7 @@
 
 import { useEffect, useRef } from 'react';
 import { useAuthStore } from '../store/authStore';
-import { api } from '../api/apiClient';
+import { api, tokenStorage } from '../api/apiClient';
 
 /**
  * Web Push 구독 훅
@@ -15,6 +15,7 @@ export function useWebPush() {
 
   useEffect(() => {
     if (!user || subscribedRef.current) return;
+    if (!tokenStorage.get()) return;
     if (!('serviceWorker' in navigator) || !('PushManager' in window)) return;
 
     async function setupPush() {
