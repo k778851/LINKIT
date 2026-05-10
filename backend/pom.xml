@@ -18,7 +18,7 @@
   <description>LINKIT - 동네 소모임 플랫폼 백엔드</description>
 
   <properties>
-    <java.version>17</java.version>
+    <java.version>21</java.version>
     <jjwt.version>0.12.5</jjwt.version>
   </properties>
 
@@ -47,19 +47,25 @@
       <artifactId>spring-boot-starter-validation</artifactId>
     </dependency>
 
-    <!-- H2 (개발용) -->
+    <!-- SQLite (개발·운영 공용) -->
     <dependency>
-      <groupId>com.h2database</groupId>
-      <artifactId>h2</artifactId>
+      <groupId>org.xerial</groupId>
+      <artifactId>sqlite-jdbc</artifactId>
+      <version>3.45.3.0</version>
       <scope>runtime</scope>
     </dependency>
 
-    <!-- MySQL (운영용, 필요 시 활성화) -->
+    <!-- Hibernate Community Dialect for SQLite -->
     <dependency>
-      <groupId>com.mysql</groupId>
-      <artifactId>mysql-connector-j</artifactId>
-      <scope>runtime</scope>
-      <optional>true</optional>
+      <groupId>org.hibernate.orm</groupId>
+      <artifactId>hibernate-community-dialects</artifactId>
+    </dependency>
+
+    <!-- H2 (테스트 전용) -->
+    <dependency>
+      <groupId>com.h2database</groupId>
+      <artifactId>h2</artifactId>
+      <scope>test</scope>
     </dependency>
 
     <!-- Lombok -->
@@ -86,6 +92,18 @@
       <artifactId>jjwt-jackson</artifactId>
       <version>${jjwt.version}</version>
       <scope>runtime</scope>
+    </dependency>
+
+    <!-- Web Push (VAPID) -->
+    <dependency>
+      <groupId>nl.martijndwars</groupId>
+      <artifactId>web-push</artifactId>
+      <version>5.1.1</version>
+    </dependency>
+    <dependency>
+      <groupId>org.bouncycastle</groupId>
+      <artifactId>bcprov-jdk18on</artifactId>
+      <version>1.78.1</version>
     </dependency>
 
     <!-- Test -->

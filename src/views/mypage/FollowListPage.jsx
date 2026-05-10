@@ -60,13 +60,12 @@ export function FollowListPage({ userId, mode }) {
                 className={styles.avatarBtn}
                 onClick={() => router.push(`/users?userId=${user.id}`)}
               >
-                <div className={styles.avatar}>{user.emoji ?? '😊'}</div>
+                <div className={styles.avatar}>{user.nickname?.[0]?.toUpperCase() ?? '?'}</div>
               </button>
 
               {/* 정보 */}
               <div className={styles.info}>
                 <p className={styles.nickname}>{user.nickname}</p>
-                <p className={styles.handle}>고유번호 {user.handle}</p>
               </div>
 
               {/* 팔로우 버튼 (본인 제외) */}

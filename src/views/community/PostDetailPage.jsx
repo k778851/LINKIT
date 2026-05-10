@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { Heart, Share2, MapPin, Eye, MessageCircle, Send, Trash2, Pencil } from 'lucide-react';
+import { Heart, Share2, Eye, MessageCircle, Send, Trash2, Pencil } from 'lucide-react';
 import { useCommunityStore } from '../../store/communityStore';
 import { useAuthStore } from '../../store/authStore';
 import { Header } from '../../components/layout/Header';
@@ -24,10 +24,10 @@ function badgeClass(cat) {
 
 export function PostDetailPage({ postId }) {
   const router = useRouter();
-  const { getPostById, getCommentsByPostId, toggleLike, likedPosts, incrementView, addComment, deletePost } = useCommunityStore();
+  const post = useCommunityStore((s) => s.posts.find((p) => p.id === postId));
+  const comments = useCommunityStore((s) => s.comments.filter((c) => c.postId === postId));
+  const { toggleLike, likedPosts, incrementView, addComment, deletePost } = useCommunityStore();
   const user = useAuthStore((s) => s.user);
-  const post = getPostById(postId);
-  const comments = getCommentsByPostId(postId);
   const [commentText, setCommentText] = useState('');
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const { showToast } = useToastContext();
@@ -41,7 +41,7 @@ export function PostDetailPage({ postId }) {
 
   const handleComment = () => {
     if (!canSend) return;
-    addComment({ postId, content: commentText.trim(), authorId: user?.id, authorNickname: user?.nickname, authorEmoji: user?.emoji });
+    addComment({ postId, content: commentText.trim(), authorId: user?.id, authorNickname: user?.nickname });
     setCommentText('');
     showToast('댓글을 등록했어요', 'success');
   };
@@ -97,11 +97,10 @@ export function PostDetailPage({ postId }) {
           className={styles.authorRow}
           onClick={() => post.authorId && router.push(`/users?userId=${post.authorId}`)}
         >
-          <span className={styles.authorEmoji}>{post.authorEmoji}</span>
+          <span className={styles.authorEmoji}>{post.authorNickname?.[0]?.toUpperCase() ?? '?'}</span>
           <div>
             <p className={styles.authorName}>{post.authorNickname}</p>
             <div className={styles.authorMeta}>
-              {post.location && <><MapPin size={11} /><span>{post.location}</span></>}
               <span>{formatDate(post.createdAt)}</span>
               <Eye size={11} /><span>{post.viewCount}</span>
             </div>
@@ -140,7 +139,7 @@ export function PostDetailPage({ postId }) {
             ? <p className={styles.noComment}>첫 댓글을 남겨보세요!</p>
             : comments.map((c) => (
                 <div key={c.id} className={styles.comment}>
-                  <span className={styles.commentEmoji}>{c.authorEmoji}</span>
+                  <span className={styles.commentEmoji}>{c.authorNickname?.[0]?.toUpperCase() ?? '?'}</span>
                   <div className={styles.commentBody}>
                     <div className={styles.commentTop}>
                       <span className={styles.commentName}>{c.authorNickname}</span>

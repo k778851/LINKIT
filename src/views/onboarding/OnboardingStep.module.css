@@ -208,8 +208,10 @@
   padding-bottom: 40px;
 }
 
-.welcomeEmoji {
-  font-size: 64px;
+.welcomeInitial {
+  font-size: 36px;
+  font-weight: 800;
+  color: var(--blue);
   margin-bottom: 8px;
 }
 
@@ -242,7 +244,9 @@
   width: 72px; height: 72px; border-radius: 50%;
   background: var(--blue-soft);
   display: flex; align-items: center; justify-content: center;
-  font-size: 40px;
+  font-size: 28px;
+  font-weight: 800;
+  color: var(--blue);
 }
 .emojiPreviewName {
   font-size: 15px; font-weight: 700; color: var(--ink);

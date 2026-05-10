@@ -7,15 +7,13 @@ import { useClubStore } from '../store/clubStore';
 import { useAuthStore } from '../store/authStore';
 import { useNotificationStore } from '../store/notificationStore';
 import { calcDdayNum, getDdayLabel } from '../utils/formatDate';
-import { sampleBanners, CLUB_EMOJIS, SAMPLE_CLUB_IMAGES } from '../data/sampleData';
+import { sampleBanners, CATEGORY_COLORS, SAMPLE_CLUB_IMAGES } from '../data/sampleData';
 import { assetPath } from '../lib/assetPath';
 import { LinkitWordmark } from '../components/common/LinkitWordmark';
 import styles from './HomePage.module.css';
 
-const CLUB_COUNT = 38;
 
 export function HomePage() {
-  const [bannerIdx, setBannerIdx] = useState(0);
   const router = useRouter();
   const clubs = useClubStore((s) => s.clubs);
   const schedules = useClubStore((s) => s.schedules);
@@ -23,20 +21,43 @@ export function HomePage() {
   const unreadCount = useNotificationStore((s) => s.notifications.filter((n) => !n.read).length);
   const timerRef = useRef(null);
 
-  // 참여 중인 클럽의 가장 가까운 미래 일정
-  const nextSchedule = schedules
-    .filter((s) => user?.joinedClubs?.includes(s.clubId))
-    .map((s) => ({ ...s, dday: calcDdayNum(s.startAt) }))
-    .filter((s) => s.dday >= 0)
-    .sort((a, b) => a.dday - b.dday)[0] ?? null;
+  // 무한 루프: [마지막 클론, ...원본, 첫 번째 클론]
+  const total = sampleBanners.length;
+  const slides = [sampleBanners[total - 1], ...sampleBanners, sampleBanners[0]];
+  // 실제 표시 인덱스 (1 ~ total, 0=마지막클론, total+1=첫번째클론)
+  const [slideIdx, setSlideIdx] = useState(1);
+  const [animated, setAnimated] = useState(true);
+  const bannerIdx = slideIdx === 0 ? total - 1 : slideIdx === total + 1 ? 0 : slideIdx - 1; // dot용
 
-  // 배너 5초 자동전환
+  // 클론 끝 도달 시 트랜지션 없이 반대편으로 점프
   useEffect(() => {
-    timerRef.current = setInterval(() => {
-      setBannerIdx((i) => (i + 1) % sampleBanners.length);
-    }, 5000);
+    if (slideIdx === 0) {
+      const t = setTimeout(() => { setAnimated(false); setSlideIdx(total); }, 500);
+      return () => clearTimeout(t);
+    }
+    if (slideIdx === total + 1) {
+      const t = setTimeout(() => { setAnimated(false); setSlideIdx(1); }, 500);
+      return () => clearTimeout(t);
+    }
+    // 점프 후 다시 애니메이션 활성화
+    if (!animated) {
+      const t = setTimeout(() => setAnimated(true), 20);
+      return () => clearTimeout(t);
+    }
+  }, [slideIdx, animated, total]);
+
+  // 5초 자동전환
+  useEffect(() => {
+    timerRef.current = setInterval(() => setSlideIdx((i) => i + 1), 5000);
     return () => clearInterval(timerRef.current);
   }, []);
+
+  const goTo = (idx) => { // dot 클릭 (0-based 원본 인덱스)
+    setAnimated(true);
+    setSlideIdx(idx + 1);
+    clearInterval(timerRef.current);
+    timerRef.current = setInterval(() => setSlideIdx((i) => i + 1), 5000);
+  };
 
   // 배너 스와이프
   const touchStartX = useRef(null);
@@ -45,13 +66,19 @@ export function HomePage() {
     if (touchStartX.current === null) return;
     const dx = e.changedTouches[0].clientX - touchStartX.current;
     if (Math.abs(dx) < 40) return;
-    clearInterval(timerRef.current);
-    setBannerIdx((i) => (dx < 0
-      ? (i + 1) % sampleBanners.length
-      : (i - 1 + sampleBanners.length) % sampleBanners.length));
+    setAnimated(true);
+    setSlideIdx((i) => dx < 0 ? i + 1 : i - 1);
     touchStartX.current = null;
-    timerRef.current = setInterval(() => setBannerIdx((i) => (i + 1) % sampleBanners.length), 5000);
+    clearInterval(timerRef.current);
+    timerRef.current = setInterval(() => setSlideIdx((i) => i + 1), 5000);
   };
+
+  // 참여 중인 클럽의 가장 가까운 미래 일정
+  const nextSchedule = schedules
+    .filter((s) => user?.joinedClubs?.includes(s.clubId))
+    .map((s) => ({ ...s, dday: calcDdayNum(s.startAt) }))
+    .filter((s) => s.dday >= 0)
+    .sort((a, b) => a.dday - b.dday)[0] ?? null;
 
   const popularClubs = clubs.slice(0, 4);
 
@@ -71,33 +98,41 @@ export function HomePage() {
         </div>
       </header>
 
-      {/* 배너 캐러셀 */}
+      {/* 배너 캐러셀 — 무한 루프 */}
       <div className={styles.bannerWrap} onTouchStart={handleTouchStart} onTouchEnd={handleTouchEnd}>
-        {sampleBanners.map((b, i) => (
-          <div
-            key={b.id}
-            className={styles.banner}
-            style={{
-              background: b.gradient,
-              opacity: i === bannerIdx ? 1 : 0,
-              transform: `translateX(${(i - bannerIdx) * 100}%)`,
-              transition: 'opacity 0.5s, transform 0.5s',
-              position: i === 0 ? 'relative' : 'absolute',
-              top: 0, left: 0, right: 0, bottom: 0,
-            }}
-          >
-            <span className={styles.bannerTag}>{b.tag}</span>
-            <p className={styles.bannerTitle}>{b.title}</p>
-            <p className={styles.bannerSubtitle}>{b.subtitle}</p>
-          </div>
-        ))}
+        <div
+          style={{
+            display: 'flex',
+            width: `${slides.length * 100}%`,
+            transform: `translateX(${(-slideIdx * 100) / slides.length}%)`,
+            transition: animated ? 'transform 0.4s cubic-bezier(0.25,0.46,0.45,0.94)' : 'none',
+            height: '100%',
+          }}
+        >
+          {slides.map((b, i) => (
+            <div
+              key={i}
+              className={styles.banner}
+              style={{
+                background: b.gradient,
+                width: `${100 / slides.length}%`,
+                flexShrink: 0,
+                position: 'relative',
+              }}
+            >
+              <span className={styles.bannerTag}>{b.tag}</span>
+              <p className={styles.bannerTitle}>{b.title}</p>
+              <p className={styles.bannerSubtitle}>{b.subtitle}</p>
+            </div>
+          ))}
+        </div>
         {/* Dot indicators */}
         <div className={styles.dots}>
           {sampleBanners.map((_, i) => (
             <button
               key={i}
               className={`${styles.dotBtn} ${i === bannerIdx ? styles.dotActive : ''}`}
-              onClick={() => setBannerIdx(i)}
+              onClick={() => goTo(i)}
               aria-label={`배너 ${i + 1}`}
             />
           ))}
@@ -112,7 +147,6 @@ export function HomePage() {
             <span className={styles.scheduleLabel}>내 다음 일정</span>
           </div>
           <div className={styles.scheduleMiddle}>
-            <span className={styles.scheduleEmoji}>{nextSchedule.clubEmoji}</span>
             <span className={styles.scheduleName}>{nextSchedule.clubName}</span>
             <span className={styles.scheduleMeta}>{nextSchedule.time} · {nextSchedule.location}</span>
           </div>
@@ -122,11 +156,10 @@ export function HomePage() {
         </button>
       )}
 
-      {/* 통계 */}
+      {/* 모임 탐색 바로가기 */}
       <div className={styles.statRow}>
         <span className={styles.statText}>
-          내 동네에{' '}
-          <span className={styles.statGrad}>{CLUB_COUNT}개</span>의 모임
+          지금 함께할 모임을 찾아보세요
         </span>
         <button className={styles.exploreBtn} onClick={() => router.push('/clubs')}>
           탐색하기
@@ -165,7 +198,7 @@ export function HomePage() {
 }
 
 function HomeClubCard({ club, onClick }) {
-  const colors = CLUB_EMOJIS[club.emoji] ?? ['#8EC6FF', '#0088FF'];
+  const colors = CATEGORY_COLORS[club.category] ?? ['#8EC6FF', '#0088FF'];
   const coverImage = club.coverImage ?? club.posterImages?.[0] ?? SAMPLE_CLUB_IMAGES[club.id];
   const coverSrc = coverImage?.startsWith('/') ? assetPath(coverImage) : coverImage;
   return (
@@ -176,9 +209,7 @@ function HomeClubCard({ club, onClick }) {
           ? { backgroundImage: `url("${coverSrc}")`, backgroundSize: 'cover', backgroundPosition: 'center' }
           : { background: `linear-gradient(135deg, ${colors[0]} 0%, ${colors[1]} 100%)` }
         }
-      >
-        {!coverSrc && <span className={styles.clubEmoji}>{club.emoji}</span>}
-      </div>
+      />
       <p className={styles.clubName}>{club.name}</p>
       <p className={styles.clubMeta}>{club.memberCount.toLocaleString()}명</p>
     </button>
@@ -186,7 +217,7 @@ function HomeClubCard({ club, onClick }) {
 }
 
 function PopularRow({ club, rank, onClick }) {
-  const colors = CLUB_EMOJIS[club.emoji] ?? ['#8EC6FF', '#0088FF'];
+  const colors = CATEGORY_COLORS[club.category] ?? ['#8EC6FF', '#0088FF'];
   const coverImage = club.coverImage ?? club.posterImages?.[0] ?? SAMPLE_CLUB_IMAGES[club.id];
   const coverSrc = coverImage?.startsWith('/') ? assetPath(coverImage) : coverImage;
   return (
@@ -198,9 +229,7 @@ function PopularRow({ club, rank, onClick }) {
           ? { backgroundImage: `url("${coverSrc}")`, backgroundSize: 'cover', backgroundPosition: 'center' }
           : { background: `linear-gradient(135deg, ${colors[0]} 0%, ${colors[1]} 100%)` }
         }
-      >
-        {!coverSrc && club.emoji}
-      </div>
+      />
       <div className={styles.popularInfo}>
         <p className={styles.popularName}>{club.name}</p>
         <p className={styles.popularMeta}>{club.category} · {club.memberCount.toLocaleString()}명</p>

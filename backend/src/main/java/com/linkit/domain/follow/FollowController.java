@@ -21,7 +21,7 @@ public class FollowController {
     public ApiResponse<Boolean> toggle(
             @AuthenticationPrincipal UserDetails principal,
             @PathVariable String userId) {
-        boolean followed = followService.toggle(principal.getName(), userId);
+        boolean followed = followService.toggle(principal.getUsername(), userId);
         return ApiResponse.ok(followed ? "팔로우했어요 👋" : "팔로우를 취소했어요", followed);
     }
 
@@ -31,7 +31,7 @@ public class FollowController {
     public ApiResponse<FollowDto.FollowStats> stats(
             @AuthenticationPrincipal UserDetails principal,
             @PathVariable String userId) {
-        String requesterId = principal != null ? principal.getName() : null;
+        String requesterId = principal != null ? principal.getUsername() : null;
         return ApiResponse.ok(followService.getStats(userId, requesterId));
     }
 
@@ -41,7 +41,7 @@ public class FollowController {
     public ApiResponse<List<FollowDto.UserSummary>> followers(
             @AuthenticationPrincipal UserDetails principal,
             @PathVariable String userId) {
-        String requesterId = principal != null ? principal.getName() : null;
+        String requesterId = principal != null ? principal.getUsername() : null;
         return ApiResponse.ok(followService.getFollowers(userId, requesterId));
     }
 
@@ -51,7 +51,7 @@ public class FollowController {
     public ApiResponse<List<FollowDto.UserSummary>> following(
             @AuthenticationPrincipal UserDetails principal,
             @PathVariable String userId) {
-        String requesterId = principal != null ? principal.getName() : null;
+        String requesterId = principal != null ? principal.getUsername() : null;
         return ApiResponse.ok(followService.getFollowing(userId, requesterId));
     }
 }

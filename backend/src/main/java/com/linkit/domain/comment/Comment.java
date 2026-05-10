@@ -21,6 +21,10 @@ public class Comment {
     @Column(nullable = false, length = 50)
     private String postId;
 
+    /** 대댓글의 경우 부모 댓글 ID, 최상위 댓글은 NULL */
+    @Column(length = 50)
+    private String parentId;
+
     @Column(nullable = false, columnDefinition = "TEXT")
     private String content;
 

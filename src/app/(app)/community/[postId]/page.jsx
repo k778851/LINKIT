@@ -1,7 +1,9 @@
+import { use } from 'react';
 import { PostDetailPage } from '../../../../views/community/PostDetailPage';
 
 export default function Page({ params }) {
-  return <PostDetailPage postId={params.postId} />;
+  const { postId } = use(params);
+  return <PostDetailPage postId={postId} />;
 }
 
 export function generateStaticParams() {

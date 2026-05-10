@@ -12,7 +12,7 @@ import { ClubCardSkeleton } from '../../components/common/SkeletonList';
 import styles from './ClubListPage.module.css';
 
 const CATEGORIES = ['전체', '운동', '음식', '아트', '스터디', '음악', '기타'];
-const SORTS = ['최신순', '인기순', '신규순'];
+const SORTS = ['최신순', '인기순'];
 
 export function ClubListPage() {
   const router = useRouter();

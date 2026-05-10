@@ -82,7 +82,6 @@ export function SchedulesPage() {
                 {/* 일정 정보 */}
                 <div className={styles.info}>
                   <div className={styles.clubRow}>
-                    <span className={styles.clubEmoji}>{sch.clubEmoji}</span>
                     <span className={styles.clubName}>{sch.clubName}</span>
                     {isToday && <span className={styles.todayBadge}>오늘!</span>}
                   </div>

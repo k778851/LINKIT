@@ -8,25 +8,22 @@ import { useToastContext } from '../../context/ToastContext';
 import { Header } from '../../components/layout/Header';
 import { EmptyState } from '../../components/common/EmptyState';
 import { ImageUpload } from '../../components/ui/ImageUpload';
-import { CLUB_EMOJIS } from '../../data/sampleData';
+import { CATEGORY_COLORS } from '../../data/sampleData';
 import styles from './ClubEditPage.module.css';
 
 const CATEGORIES = ['운동', '음식', '아트', '스터디', '음악', '기타'];
-const EMOJIS = ['🏃', '🍕', '📸', '🎵', '📚', '⚽', '🎨', '🏊', '🧗', '🎭', '🌿', '💃'];
 
 export function ClubEditPage({ clubId }) {
   const router = useRouter();
   const { showToast } = useToastContext();
-  const getClubById = useClubStore((s) => s.getClubById);
+  const club = useClubStore((s) => s.clubs.find((c) => c.id === clubId));
   const updateClub  = useClubStore((s) => s.updateClub);
   const user = useAuthStore((s) => s.user);
 
-  const club = getClubById(clubId);
-
   const [form, setForm] = useState({
-    name: '', category: '', emoji: '🏃',
+    name: '', category: '',
     coverImage: null,
-    description: '', location: '', schedule: '', isPrivate: false,
+    description: '', schedule: '', isPrivate: false,
   });
   const [errors, setErrors] = useState({});
   const [submitting, setSubmitting] = useState(false);
@@ -36,10 +33,8 @@ export function ClubEditPage({ clubId }) {
       setForm({
         name:        club.name,
         category:    club.category,
-        emoji:       club.emoji,
         coverImage:  club.coverImage ?? null,
         description: club.description,
-        location:    club.location ?? '',
         schedule:    club.schedule ?? '',
         isPrivate:   club.isPrivate ?? false,
       });
@@ -76,8 +71,8 @@ export function ClubEditPage({ clubId }) {
     }
   };
 
-  // 미리보기 그라디언트
-  const colors = CLUB_EMOJIS[form.emoji] ?? ['#8EC6FF', '#0088FF'];
+  // 미리보기 그라디언트 (카테고리 기반)
+  const colors = CATEGORY_COLORS[form.category] ?? ['#8EC6FF', '#0088FF'];
   const previewGrad = `linear-gradient(135deg, ${colors[0]} 0%, ${colors[1]} 100%)`;
   const isValid = form.name.trim() && form.category && form.description.trim();
 
@@ -104,7 +99,6 @@ export function ClubEditPage({ clubId }) {
             value={form.coverImage}
             onChange={(url) => set('coverImage', url)}
             shape="square"
-            placeholder={form.emoji}
           />
         </div>
 
@@ -112,31 +106,14 @@ export function ClubEditPage({ clubId }) {
         <div className={styles.previewCard}>
           <div
             className={styles.previewPoster}
-            style={form.coverImage ? {} : { background: previewGrad }}
-          >
-            {form.coverImage
-              ? <img src={form.coverImage} alt="커버" className={styles.previewCoverImg} />
-              : <span className={styles.previewEmoji}>{form.emoji}</span>
-            }
-          </div>
+            style={form.coverImage
+              ? { backgroundImage: `url("${form.coverImage}")`, backgroundSize: 'cover', backgroundPosition: 'center' }
+              : { background: previewGrad }}
+          />
           <div className={styles.previewInfo}>
             {form.category && <span className={styles.previewCategory}>{form.category}</span>}
             <p className={styles.previewName}>{form.name || '클럽 이름'}</p>
             <p className={styles.previewDesc}>{form.description || '클럽 소개가 여기 표시돼요'}</p>
-          </div>
-        </div>
-
-        {/* 이모지 선택 */}
-        <div className={styles.section}>
-          <p className={styles.label}>대표 이모지</p>
-          <div className={styles.emojiGrid}>
-            {EMOJIS.map((e) => (
-              <button key={e} type="button"
-                className={`${styles.emojiBtn} ${form.emoji === e ? styles.emojiSelected : ''}`}
-                onClick={() => set('emoji', e)}>
-                {e}
-              </button>
-            ))}
           </div>
         </div>
 
@@ -175,12 +152,6 @@ export function ClubEditPage({ clubId }) {
           <p className={styles.counter}>{form.description.length}/100</p>
         </div>
 
-        {/* 위치 */}
-        <div className={styles.section}>
-          <label className={styles.label}>활동 장소 <span className={styles.optional}>(선택)</span></label>
-          <input className={styles.input} placeholder="동네, 지역명 등"
-            value={form.location} onChange={(e) => set('location', e.target.value)} />
-        </div>
 
         {/* 정기 일정 */}
         <div className={styles.section}>

@@ -17,8 +17,15 @@ function normalize(n) {
   };
 }
 
+const DEMO_NOTIFICATIONS = [
+  { id: 'n-demo-1', type: 'club',    icon: '🏘️', title: '러닝 크루 모임이 곧 있어요',       body: '이번 주 금요일 20:00 · 여의도 한강공원',    path: '/clubs/club-1',          read: false, time: '1시간 전'  },
+  { id: 'n-demo-2', type: 'like',    icon: '❤️', title: '내 게시글에 좋아요가 달렸어요',      body: '"같이 꽃 보러 가실분!!!"',                 path: '/community/post-1',       read: false, time: '3시간 전'  },
+  { id: 'n-demo-3', type: 'comment', icon: '💬', title: '내 게시글에 댓글이 달렸어요',        body: '봄바람: 저도 가고 싶어요!!',               path: '/community/post-1',       read: true,  time: '3시간 전'  },
+  { id: 'n-demo-4', type: 'club',    icon: '⚽', title: '풋살 크루 새 모임이 열렸어요',       body: '5/17 (토) 15:00 · 오치동 풋살장',          path: '/clubs/club-6',          read: true,  time: '어제'      },
+];
+
 export const useNotificationStore = create((set, get) => ({
-  notifications: [],
+  notifications: DEMO_NOTIFICATIONS,
 
   /* ── API: 서버 알림 로드 ────────────────────────────── */
   fetchNotifications: async () => {

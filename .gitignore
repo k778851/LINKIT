@@ -39,3 +39,18 @@ lerna-debug.log*
 
 # Claude Code
 .claude/
+
+# Database files
+*.db
+*.db-shm
+*.db-wal
+*.sqbpro
+
+# Backend build artifacts
+backend/target/
+backend/uploads/
+
+# Java
+*.class
+*.jar
+!backend/.mvn/wrapper/maven-wrapper.jar

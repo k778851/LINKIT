@@ -6,10 +6,11 @@ import { Heart, MessageCircle, Users } from 'lucide-react';
 import { useAuthStore } from '../../../store/authStore';
 import { useClubStore } from '../../../store/clubStore';
 import { useCommunityStore } from '../../../store/communityStore';
+import { Modal } from '../../../components/common/Modal';
 import { scheduleApi } from '../../../api/scheduleApi';
 import { ApiError } from '../../../api/apiClient';
 import { formatRelativeTime, calcDdayNum, getDdayLabel, formatShortDate } from '../../../utils/formatDate';
-import { CLUB_EMOJIS } from '../../../data/sampleData';
+import { CATEGORY_COLORS } from '../../../data/sampleData';
 import styles from './ActivityTab.module.css';
 
 export function ActivityTab() {
@@ -20,6 +21,7 @@ export function ActivityTab() {
   const allSchedules = useClubStore((s) => s.schedules);
   const leaveClubApi = useClubStore((s) => s.leaveClubApi);
   const decrementMemberCount = useClubStore((s) => s.decrementMemberCount);
+  const [confirmLeaveClub, setConfirmLeaveClub] = useState(null);
   const clubs = useClubStore((s) => s.clubs);
   const allPosts = useCommunityStore((s) => s.posts);
   const myPosts = allPosts.filter((p) => p.authorId === user?.id);
@@ -71,21 +73,24 @@ export function ActivityTab() {
         ) : (
           <div className={`${styles.joinedRow} hide-scrollbar`}>
             {joinedClubs.slice(0, 5).map((club) => {
-              const colors = CLUB_EMOJIS[club.emoji] ?? ['#8EC6FF', '#0088FF'];
+              const colors = CATEGORY_COLORS[club.category] ?? ['#8EC6FF', '#0088FF'];
+              const coverImage = club.coverImage ?? club.posterImages?.[0];
+              const coverSrc = coverImage?.startsWith('/') ? coverImage : coverImage;
               return (
                 <div key={club.id} className={styles.joinedCard}>
                   <div
                     className={styles.joinedTile}
-                    style={{ background: `linear-gradient(135deg, ${colors[0]} 0%, ${colors[1]} 100%)` }}
+                    style={coverSrc
+                      ? { backgroundImage: `url("${coverSrc}")`, backgroundSize: 'cover', backgroundPosition: 'center' }
+                      : { background: `linear-gradient(135deg, ${colors[0]} 0%, ${colors[1]} 100%)` }}
                     onClick={() => router.push(`/clubs/${club.id}`)}
                     role="button"
                     tabIndex={0}
                   >
-                    <span className={styles.joinedEmoji}>{club.emoji}</span>
                     {/* 탈퇴 버튼 */}
                     <span
                       className={styles.leaveOverlay}
-                      onClick={(e) => { e.stopPropagation(); leaveClub(club.id); decrementMemberCount(club.id); leaveClubApi(club.id).catch(() => {}); }}
+                      onClick={(e) => { e.stopPropagation(); setConfirmLeaveClub(club); }}
                       role="button"
                       tabIndex={0}
                       aria-label="클럽 나가기"
@@ -119,7 +124,6 @@ export function ActivityTab() {
                 </div>
                 <div className={styles.scheduleInfo}>
                   <p className={styles.scheduleName}>
-                    <span className={styles.scheduleEmoji}>{sch.clubEmoji}</span>
                     {sch.clubName}
                   </p>
                   <p className={styles.scheduleMeta}>{sch.time} · {sch.location}</p>
@@ -140,17 +144,19 @@ export function ActivityTab() {
           : (
             <div className={`${styles.bookmarkRow} hide-scrollbar`}>
               {bookmarkedClubs.map((club) => {
-                const colors = CLUB_EMOJIS[club.emoji] ?? ['#8EC6FF', '#0088FF'];
+                const colors = CATEGORY_COLORS[club.category] ?? ['#8EC6FF', '#0088FF'];
+                const coverImage = club.coverImage ?? club.posterImages?.[0];
                 return (
                   <div key={club.id} className={styles.bookmarkCard}>
                     <div
                       className={styles.bookmarkTile}
-                      style={{ background: `linear-gradient(135deg, ${colors[0]} 0%, ${colors[1]} 100%)` }}
+                      style={coverImage
+                        ? { backgroundImage: `url("${coverImage}")`, backgroundSize: 'cover', backgroundPosition: 'center' }
+                        : { background: `linear-gradient(135deg, ${colors[0]} 0%, ${colors[1]} 100%)` }}
                       onClick={() => router.push(`/clubs/${club.id}`)}
                       role="button"
                       tabIndex={0}
                     >
-                      <span className={styles.bookmarkEmoji}>{club.emoji}</span>
                       <span
                         className={styles.heartOverlay}
                         onClick={(e) => { e.stopPropagation(); toggleBookmarkWithApi(club.id); }}
@@ -192,6 +198,22 @@ export function ActivityTab() {
             ))
         }
       </section>
+      {confirmLeaveClub && (
+        <Modal
+          title="참여 취소"
+          message={`'${confirmLeaveClub.name}' 모임 참여를 취소할까요?`}
+          confirmLabel="참여 취소"
+          cancelLabel="돌아가기"
+          danger
+          onConfirm={() => {
+            leaveClub(confirmLeaveClub.id);
+            decrementMemberCount(confirmLeaveClub.id);
+            leaveClubApi(confirmLeaveClub.id).catch(() => {});
+            setConfirmLeaveClub(null);
+          }}
+          onCancel={() => setConfirmLeaveClub(null)}
+        />
+      )}
     </div>
   );
 }

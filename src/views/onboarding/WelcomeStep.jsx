@@ -16,7 +16,7 @@ export function WelcomeStep({ onNext, data }) {
   const login           = useAuthStore((s) => s.login);
   const registerWithApi = useAuthStore((s) => s.registerWithApi);
 
-  const { nickname = '링킷유저', emoji = '😊', bio, zionId, password } = data;
+  const { nickname = '링킷유저', bio, zionId, password } = data;
 
   const [loading, setLoading] = useState(false);
   const [error,   setError]   = useState('');
@@ -26,20 +26,20 @@ export function WelcomeStep({ onNext, data }) {
     setLoading(true);
 
     if (!zionId || !password) {
-      login({ ...defaultUser, nickname, emoji, bio });
+      login({ ...defaultUser, nickname, bio });
       onNext();
       return;
     }
 
     try {
-      await registerWithApi({ handle: zionId, nickname, emoji, bio, password });
+      await registerWithApi({ handle: zionId, nickname, bio, password });
       onNext();
     } catch (e) {
       const msg = e?.message ?? '';
       if (msg.includes('이미') || msg.includes('409')) {
         setError('이미 가입된 고유번호입니다. 로그인 화면으로 돌아가 로그인해 주세요.');
       } else if (e?.status === 0) {
-        login({ ...defaultUser, nickname, emoji, bio });
+        login({ ...defaultUser, nickname, bio });
         onNext();
       } else {
         setError('계정 생성에 실패했어요. 잠시 후 다시 시도해주세요.');
@@ -53,7 +53,7 @@ export function WelcomeStep({ onNext, data }) {
       {/* 환영 헤더 */}
       <div className={styles.welcomeCenter}>
         <div className={styles.welcomeAvatarWrap}>
-          <span className={styles.welcomeEmoji}>{emoji}</span>
+          <span className={styles.welcomeInitial}>{nickname?.[0]?.toUpperCase() ?? '?'}</span>
         </div>
         <h2 className={styles.welcomeTitle}>{nickname}님,<br />환영해요! 🎉</h2>
         <p className={styles.welcomeDesc}>

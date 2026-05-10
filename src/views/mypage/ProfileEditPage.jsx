@@ -8,8 +8,6 @@ import { Header } from '../../components/layout/Header';
 import { ImageUpload } from '../../components/ui/ImageUpload';
 import styles from './ProfileEditPage.module.css';
 
-const EMOJIS = ['😊', '😎', '🙌', '🔥', '🌟', '💪', '🎵', '📚', '⚽', '🍕', '📸', '🌿', '💃', '🎨', '🧗', '🏊'];
-
 export function ProfileEditPage() {
   const router = useRouter();
   const user = useAuthStore((s) => s.user);
@@ -17,10 +15,8 @@ export function ProfileEditPage() {
   const { showToast } = useToastContext();
 
   const [form, setForm] = useState({
-    emoji: user?.emoji ?? '😊',
     profileImage: user?.profileImage ?? null,
     nickname: user?.nickname ?? '',
-    handle: user?.handle ?? '',
     bio: user?.bio ?? '',
   });
   const [errors, setErrors] = useState({});
@@ -31,8 +27,6 @@ export function ProfileEditPage() {
     const e = {};
     if (!form.nickname.trim()) e.nickname = '닉네임을 입력하세요.';
     if (form.nickname.length > 10) e.nickname = '최대 10자까지 입력 가능해요.';
-    if (form.handle && !/^[a-zA-Z0-9_]+$/.test(form.handle)) e.handle = '영문, 숫자, 언더바(_)만 사용할 수 있어요.';
-    if (form.handle.length > 20) e.handle = '최대 20자까지 입력 가능해요.';
     if (form.bio.length > 50) e.bio = '최대 50자까지 입력 가능해요.';
     setErrors(e);
     return Object.keys(e).length === 0;
@@ -69,29 +63,11 @@ export function ProfileEditPage() {
               value={form.profileImage}
               onChange={(url) => set('profileImage', url)}
               shape="circle"
-              placeholder={form.emoji}
+              placeholder={form.nickname?.[0]?.toUpperCase() ?? '?'}
               className={styles.avatarUpload}
             />
           </div>
           <p className={styles.avatarName}>{form.nickname || '닉네임'}</p>
-          {form.handle ? <p className={styles.avatarHandle}>@{form.handle}</p> : null}
-        </div>
-
-        {/* 이모지 선택 (이미지 없을 때 사용) */}
-        <div className={styles.section}>
-          <p className={styles.label}>프로필 이모지 <span className={styles.optional}>(이미지 미설정 시)</span></p>
-          <div className={styles.emojiGrid}>
-            {EMOJIS.map((e) => (
-              <button
-                key={e}
-                type="button"
-                className={`${styles.emojiBtn} ${form.emoji === e ? styles.emojiSelected : ''}`}
-                onClick={() => set('emoji', e)}
-              >
-                {e}
-              </button>
-            ))}
-          </div>
         </div>
 
         {/* 닉네임 */}
@@ -106,22 +82,6 @@ export function ProfileEditPage() {
           />
           {errors.nickname && <p className={styles.errMsg}>{errors.nickname}</p>}
           <p className={styles.counter}>{form.nickname.length}/10</p>
-        </div>
-
-        {/* Handle */}
-        <div className={styles.section}>
-          <label className={styles.label}>@handle <span className={styles.optional}>(선택)</span></label>
-          <div className={styles.handleWrap}>
-            <span className={styles.handleAt}>@</span>
-            <input
-              className={`${styles.handleInput} ${errors.handle ? styles.inputErr : ''}`}
-              placeholder="영문·숫자·언더바"
-              maxLength={20}
-              value={form.handle}
-              onChange={(e) => set('handle', e.target.value)}
-            />
-          </div>
-          {errors.handle && <p className={styles.errMsg}>{errors.handle}</p>}
         </div>
 
         {/* 한 줄 소개 */}

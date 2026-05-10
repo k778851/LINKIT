@@ -23,7 +23,7 @@ function buildLocalStats(clubs, posts, user) {
       createdAt: p.createdAt,
     })),
     recentUsers: [
-      { id: user?.id ?? 'user-me', nickname: user?.nickname ?? '링킷유저', handle: user?.handle ?? 'linkit_user', emoji: user?.emoji ?? '😊', role: 'USER', joinedClubsCount: (user?.joinedClubs ?? []).length, createdAt: user?.createdAt },
+      { id: user?.id ?? 'user-me', nickname: user?.nickname ?? '링킷유저', handle: user?.handle ?? 'linkit_user', role: 'USER', joinedClubsCount: (user?.joinedClubs ?? []).length, createdAt: user?.createdAt },
     ],
   };
 }
@@ -102,7 +102,7 @@ export function AdminDashboard() {
                     <tbody>
                       {stats?.recentUsers?.map((u) => (
                         <tr key={u.id}>
-                          <td>{u.emoji} {u.nickname}</td>
+                          <td>{u.nickname}</td>
                           <td>
                             <span className={`${s.badge} ${u.role === 'ADMIN' ? s.badgeRed : s.badgeGray}`}>
                               {u.role === 'ADMIN' ? '관리자' : '일반'}

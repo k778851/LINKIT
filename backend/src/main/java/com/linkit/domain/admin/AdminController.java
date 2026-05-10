@@ -10,6 +10,7 @@ import com.linkit.domain.post.PostDto;
 import com.linkit.domain.post.PostRepository;
 import com.linkit.domain.user.User;
 import com.linkit.domain.user.UserRepository;
+import com.linkit.domain.user.UserRole;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.Builder;
 import lombok.Getter;
@@ -77,7 +78,7 @@ public class AdminController {
     public ApiResponse<Void> deleteUser(@PathVariable String userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new EntityNotFoundException("유저를 찾을 수 없습니다."));
-        if ("ADMIN".equals(user.getRole()))
+        if (user.getRole() == UserRole.ADMIN)
             throw new IllegalArgumentException("관리자 계정은 삭제할 수 없습니다.");
         userRepository.delete(user);
         return ApiResponse.ok("유저를 삭제했어요.");
@@ -146,15 +147,14 @@ public class AdminController {
 
     @Getter @Builder
     public static class UserSummary {
-        private String id, nickname, handle, emoji, role;
-        private int joinedClubsCount;
+        private String id, nickname, handle, role;
+        private String status;
         private LocalDateTime createdAt;
 
         static UserSummary from(User u) {
             return UserSummary.builder()
                     .id(u.getId()).nickname(u.getNickname()).handle(u.getHandle())
-                    .emoji(u.getEmoji()).role(u.getRole())
-                    .joinedClubsCount(u.getJoinedClubs().size())
+                    .role(u.getRole().name()).status(u.getStatus().name())
                     .createdAt(u.getCreatedAt()).build();
         }
     }

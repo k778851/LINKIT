@@ -5,11 +5,8 @@ import { ChevronRight } from 'lucide-react';
 import { Button } from '../../components/common/Button';
 import styles from './OnboardingStep.module.css';
 
-const EMOJIS = ['😊', '😎', '🙌', '🔥', '🌟', '💪', '🎵', '📚', '⚽', '🍕', '📸', '🌿'];
-
 export function ProfileStep({ onNext, onBack }) {
   const [nickname, setNickname] = useState('');
-  const [emoji,    setEmoji]    = useState('😊');
   const [bio,      setBio]      = useState('');
   const [error,    setError]    = useState('');
 
@@ -17,7 +14,7 @@ export function ProfileStep({ onNext, onBack }) {
     if (!nickname.trim())            { setError('닉네임을 입력해 주세요.'); return; }
     if (nickname.trim().length > 10) { setError('닉네임은 최대 10자까지 입력할 수 있어요.'); return; }
     setError('');
-    onNext({ nickname: nickname.trim(), emoji, bio: bio.trim() });
+    onNext({ nickname: nickname.trim(), bio: bio.trim() });
   };
 
   return (
@@ -30,26 +27,12 @@ export function ProfileStep({ onNext, onBack }) {
       <p className={styles.stepDesc}>LINKIT에서 사용할 닉네임과 이모지를 정해요.</p>
 
       <div className={styles.form}>
-        {/* 이모지 미리보기 */}
+        {/* 닉네임 미리보기 */}
         <div className={styles.emojiPreview}>
-          <div className={styles.emojiPreviewBubble}>{emoji}</div>
-          <p className={styles.emojiPreviewName}>{nickname || '닉네임'}</p>
-        </div>
-
-        {/* 이모지 선택 */}
-        <div>
-          <p className={styles.label} style={{ marginBottom: 10 }}>프로필 이모지</p>
-          <div className={styles.emojiGrid}>
-            {EMOJIS.map((e) => (
-              <button
-                key={e} type="button"
-                className={`${styles.emojiBtn} ${emoji === e ? styles.emojiSelected : ''}`}
-                onClick={() => setEmoji(e)}
-              >
-                {e}
-              </button>
-            ))}
+          <div className={styles.emojiPreviewBubble}>
+            {nickname?.[0]?.toUpperCase() ?? '?'}
           </div>
+          <p className={styles.emojiPreviewName}>{nickname || '닉네임'}</p>
         </div>
 
         {/* 닉네임 */}

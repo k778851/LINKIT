@@ -4,6 +4,10 @@ import { sampleClubs, sampleSchedules } from '../data/sampleData';
 import { clubApi } from '../api/clubApi';
 import { ApiError } from '../api/apiClient';
 
+/** 백엔드 미연결 or 미인증 — 로컬 fallback 허용 */
+const shouldFallback = (e) =>
+  e instanceof ApiError && (e.status === 0 || e.status === 401 || e.status === 403);
+
 export const useClubStore = create(
   persist(
     (set, get) => ({
@@ -22,12 +26,12 @@ export const useClubStore = create(
         const { selectedCategory, selectedSort } = get();
         try {
           const clubs = await clubApi.getAll(selectedCategory, selectedSort);
-          set({ clubs, loaded: true });
+          // 백엔드 DB가 비어 있으면 sampleData 유지
+          if (clubs && clubs.length > 0) set({ clubs, loaded: true });
+          else set({ loaded: true });
         } catch (e) {
-          if (e instanceof ApiError && e.status === 0) {
-            // 오프라인 → sampleData 유지
-            set({ loaded: true });
-          }
+          // 오프라인/미인증 → sampleData 유지
+          if (shouldFallback(e)) set({ loaded: true });
         }
       },
 
@@ -89,8 +93,13 @@ export const useClubStore = create(
           status: 'pending',
           createdAt: new Date().toISOString(),
           appliedAt: new Date().toISOString(),
+          members: [{ userId: club.createdBy, role: 'owner', joinedAt: new Date().toISOString() }],
         };
-        set((s) => ({ pendingClubs: [pending, ...s.pendingClubs] }));
+        // 승인 대기 목록 + 클럽 목록에 즉시 추가 (로컬 미리보기)
+        set((s) => ({
+          pendingClubs: [pending, ...s.pendingClubs],
+          clubs: [pending, ...s.clubs],
+        }));
         return pending;
       },
 
@@ -118,8 +127,7 @@ export const useClubStore = create(
           set((s) => ({ clubs: [created, ...s.clubs] }));
           return created;
         } catch (e) {
-          if (e instanceof ApiError && e.status === 0) {
-            // 오프라인 fallback
+          if (shouldFallback(e)) {
             const newClub = { id: club.id ?? `club-${Date.now()}`, ...club, createdAt: new Date().toISOString() };
             set((s) => ({ clubs: [newClub, ...s.clubs] }));
             return newClub;
@@ -134,7 +142,7 @@ export const useClubStore = create(
           const updated = await clubApi.update(clubId, patch);
           set((s) => ({ clubs: s.clubs.map((c) => c.id === clubId ? updated : c) }));
         } catch (e) {
-          if (e instanceof ApiError && e.status === 0) {
+          if (shouldFallback(e)) {
             set((s) => ({ clubs: s.clubs.map((c) => c.id === clubId ? { ...c, ...patch } : c) }));
           } else throw e;
         }
@@ -145,7 +153,7 @@ export const useClubStore = create(
         try {
           await clubApi.remove(clubId);
         } catch (e) {
-          if (!(e instanceof ApiError && e.status === 0)) throw e;
+          if (!shouldFallback(e)) throw e;
         }
         set((s) => ({ clubs: s.clubs.filter((c) => c.id !== clubId) }));
       },
@@ -168,14 +176,14 @@ export const useClubStore = create(
       /* ── API: join / leave ────────────────────────────── */
       joinClubApi: async (clubId) => {
         try { await clubApi.join(clubId); } catch (e) {
-          if (!(e instanceof ApiError && e.status === 0)) throw e;
+          if (!shouldFallback(e)) throw e;
         }
         get().incrementMemberCount(clubId);
       },
 
       leaveClubApi: async (clubId) => {
         try { await clubApi.leave(clubId); } catch (e) {
-          if (!(e instanceof ApiError && e.status === 0)) throw e;
+          if (!shouldFallback(e)) throw e;
         }
         get().decrementMemberCount(clubId);
       },
@@ -187,6 +195,20 @@ export const useClubStore = create(
           return club?.createdBy === userId;
         }),
     }),
-    { name: 'linkit-clubs' }
+    {
+      name: 'linkit-clubs',
+      merge: (persisted, initial) => ({
+        ...initial,
+        ...persisted,
+        // 클럽 목록: localStorage에 빈 배열이면 sampleData 유지
+        clubs: persisted.clubs?.length > 0 ? persisted.clubs : initial.clubs,
+        // 일정: sampleData를 항상 포함 (날짜 업데이트 반영)
+        schedules: (() => {
+          const sampleIds = new Set(initial.schedules.map((s) => s.id));
+          const userAdded = (persisted.schedules ?? []).filter((s) => !sampleIds.has(s.id));
+          return [...initial.schedules, ...userAdded];
+        })(),
+      }),
+    }
   )
 );

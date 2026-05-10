@@ -1,5 +1,6 @@
 package com.linkit.domain.notification;
 
+import com.linkit.domain.webpush.WebPushService;
 import com.linkit.sse.SseEmitterService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -14,9 +15,10 @@ public class NotificationService {
 
     private final NotificationRepository notificationRepository;
     private final SseEmitterService      sseEmitterService;
+    private final WebPushService         webPushService;
 
     /**
-     * 알림 저장 + 실시간 전송
+     * 알림 저장 + SSE 실시간 전송 + Web Push 전송 (앱 꺼져 있을 때)
      *
      * @param userId 수신자 ID
      * @param type   알림 유형 (comment / like / club / new_member / system)
@@ -38,6 +40,11 @@ public class NotificationService {
                 .build();
 
         notificationRepository.save(notification);
+
+        // 앱이 열려있을 때: SSE 실시간 전송
         sseEmitterService.sendToUser(userId, NotificationDto.Response.from(notification));
+
+        // 앱이 닫혀있을 때: Web Push 전송
+        webPushService.sendToUser(userId, title, body, icon, path);
     }
 }

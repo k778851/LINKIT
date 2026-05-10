@@ -4,7 +4,7 @@ import { defaultUser } from '../data/sampleData';
 import { useNotificationStore } from './notificationStore';
 import { authApi } from '../api/authApi';
 import { userApi } from '../api/userApi';
-import { tokenStorage, ApiError } from '../api/apiClient';
+import { tokenStorage, refreshTokenStorage, ApiError } from '../api/apiClient';
 
 export const useAuthStore = create(
   persist(
@@ -17,22 +17,20 @@ export const useAuthStore = create(
       loginWithApi: async (handle, password) => {
         const data = await authApi.login(handle, password);
         tokenStorage.set(data.token);
+        if (data.refreshToken) refreshTokenStorage.set(data.refreshToken);
         set({ user: data.user, token: data.token, isAuthenticated: true });
         return data.user;
-      },
-
-      /* ── API 회원가입 ───────────────────────────────────── */
-      registerWithApi: async (registerData) => {
-        await authApi.register(registerData);
-        // 가입 후 바로 로그인
-        return get().loginWithApi(registerData.handle, registerData.password);
       },
 
       /* ── 로컬 로그인 (개발/데모용 — 백엔드 미실행 시) ─── */
       login: (user) => set({ user, isAuthenticated: true }),
 
       logout: () => {
+        const refreshToken = refreshTokenStorage.get();
+        // 서버에 Refresh Token 폐기 요청 (실패해도 로컬 정리는 계속)
+        authApi.logout(refreshToken).catch(() => {});
         tokenStorage.remove();
+        refreshTokenStorage.remove();
         set({ user: null, token: null, isAuthenticated: false });
       },
 
@@ -100,7 +98,7 @@ export const useAuthStore = create(
 
           if (clubInfo) {
             useNotificationStore.getState().addNotification({
-              type: 'club', icon: clubInfo.emoji ?? '🏘️',
+              type: 'club', icon: '🏘️',
               title: `${clubInfo.name} 모임에 가입했어요!`,
               body: `${clubInfo.memberCount + 1}명이 함께하고 있어요`,
               path: `/clubs/${clubId}`,

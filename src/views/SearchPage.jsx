@@ -6,7 +6,7 @@ import { Search, X, Clock, TrendingUp } from 'lucide-react';
 import { useClubStore } from '../store/clubStore';
 import { useCommunityStore } from '../store/communityStore';
 import { searchApi } from '../api/searchApi';
-import { CLUB_EMOJIS, SAMPLE_CLUB_IMAGES } from '../data/sampleData';
+import { CATEGORY_COLORS, SAMPLE_CLUB_IMAGES } from '../data/sampleData';
 import { assetPath } from '../lib/assetPath';
 import styles from './SearchPage.module.css';
 
@@ -205,7 +205,7 @@ export function SearchPage() {
             <section className={styles.section}>
               {tab === 'all' && <p className={styles.sectionTitle}>클럽</p>}
               {matchedClubs.map((club) => {
-                const colors = CLUB_EMOJIS[club.emoji] ?? ['#8EC6FF', '#0088FF'];
+                const colors = CATEGORY_COLORS[club.category] ?? ['#8EC6FF', '#0088FF'];
                 const coverImage = club.coverImage ?? club.posterImages?.[0] ?? SAMPLE_CLUB_IMAGES[club.id];
                 const coverSrc = coverImage?.startsWith('/') ? assetPath(coverImage) : coverImage;
                 return (
@@ -220,9 +220,7 @@ export function SearchPage() {
                         ? { backgroundImage: `url("${coverSrc}")`, backgroundSize: 'cover', backgroundPosition: 'center' }
                         : { background: `linear-gradient(135deg,${colors[0]} 0%,${colors[1]} 100%)` }
                       }
-                    >
-                      {!coverSrc && club.emoji}
-                    </div>
+                    />
                     <div className={styles.clubInfo}>
                       <p className={styles.clubName}>
                         <Highlight text={club.name} query={q} />

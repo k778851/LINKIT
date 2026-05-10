@@ -2,6 +2,7 @@ package com.linkit.security;
 
 import com.linkit.domain.user.User;
 import com.linkit.domain.user.UserRepository;
+import com.linkit.domain.user.UserRole;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -23,11 +24,13 @@ public class CustomUserDetailsService implements UserDetailsService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new UsernameNotFoundException("유저를 찾을 수 없습니다: " + userId));
 
-        String role = "ADMIN".equals(user.getRole()) ? "ROLE_ADMIN" : "ROLE_USER";
+        // 시온 외부 API 인증 방식 — LINKIT 은 비밀번호를 저장하지 않습니다.
+        // JWT 검증 필터에서 토큰 유효성만 확인하므로 password 는 빈 값으로 설정합니다.
+        String roleName = user.getRole() == UserRole.ADMIN ? "ROLE_ADMIN" : "ROLE_USER";
         return org.springframework.security.core.userdetails.User.builder()
                 .username(user.getId())
-                .password(user.getPassword())
-                .authorities(List.of(new SimpleGrantedAuthority(role)))
+                .password("")
+                .authorities(List.of(new SimpleGrantedAuthority(roleName)))
                 .build();
     }
 }

@@ -6,6 +6,7 @@ import { ChevronLeft, UserPlus, UserCheck } from 'lucide-react';
 import { useAuthStore } from '../../store/authStore';
 import { useFollowStore } from '../../store/followStore';
 import { userApi } from '../../api/userApi';
+import { SAMPLE_USERS } from '../../data/sampleData';
 import styles from './UserProfilePage.module.css';
 
 export function UserProfilePage({ userId }) {
@@ -22,12 +23,24 @@ export function UserProfilePage({ userId }) {
 
   useEffect(() => {
     setLoading(true);
+    // 본인이면 스토어 user 바로 사용
+    if (userId === me?.id) {
+      setProfile(me);
+      setLoading(false);
+      return;
+    }
     userApi.getUser(userId)
       .then((data) => setProfile(data))
-      .catch(() => {})
+      .catch(() => {
+        // 오프라인/데모 — SAMPLE_USERS 혹은 간이 프로필로 fallback
+        const sample = SAMPLE_USERS[userId];
+        if (sample) {
+          setProfile({ id: userId, ...sample });
+        }
+      })
       .finally(() => setLoading(false));
     fetchStats(userId);
-  }, [userId]);
+  }, [userId]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleFollow = async () => {
     if (!me) return;
@@ -61,7 +74,7 @@ export function UserProfilePage({ userId }) {
     );
   }
 
-  const isFollowing  = followStats?.isFollowing  ?? profile.following ?? false;
+  const isFollowing    = followStats?.isFollowing    ?? profile.isFollowing    ?? false;
   const followerCount  = followStats?.followerCount  ?? profile.followerCount  ?? 0;
   const followingCount = followStats?.followingCount ?? profile.followingCount ?? 0;
 
@@ -80,12 +93,11 @@ export function UserProfilePage({ userId }) {
         <div className={styles.avatarWrap}>
           {profile.profileImage
             ? <img src={profile.profileImage} alt={profile.nickname} className={styles.avatarImg} />
-            : <span className={styles.avatar}>{profile.emoji ?? '😊'}</span>
+            : <span className={styles.avatar}>{profile.nickname?.[0]?.toUpperCase() ?? '?'}</span>
           }
         </div>
         <div className={styles.info}>
           <p className={styles.nickname}>{profile.nickname}</p>
-          <p className={styles.handle}>고유번호 {profile.handle}</p>
           {profile.bio && <p className={styles.bio}>{profile.bio}</p>}
         </div>
 

@@ -1,7 +1,9 @@
 'use client';
 
+import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Header } from '../components/layout/Header';
+import { Modal } from '../components/common/Modal';
 import { useNotificationStore } from '../store/notificationStore';
 import styles from './NotificationPage.module.css';
 
@@ -20,6 +22,7 @@ export function NotificationPage() {
   const markRead     = useNotificationStore((s) => s.markRead);
   const markAllRead  = useNotificationStore((s) => s.markAllRead);
   const deleteNotif  = useNotificationStore((s) => s.deleteNotif);
+  const [pendingDelete, setPendingDelete] = useState(null);
 
   const unreadCount = notifications.filter((n) => !n.read).length;
 
@@ -77,7 +80,7 @@ export function NotificationPage() {
               </div>
               <button
                 className={styles.delBtn}
-                onClick={(e) => { e.stopPropagation(); deleteNotif(notif.id); }}
+                onClick={(e) => { e.stopPropagation(); setPendingDelete(notif); }}
                 aria-label="알림 삭제"
               >
                 ×
@@ -85,6 +88,18 @@ export function NotificationPage() {
             </button>
           ))}
         </div>
+      )}
+
+      {pendingDelete && (
+        <Modal
+          title="알림 삭제"
+          message="이 알림을 삭제할까요?"
+          confirmLabel="삭제"
+          cancelLabel="취소"
+          danger
+          onConfirm={() => { deleteNotif(pendingDelete.id); setPendingDelete(null); }}
+          onCancel={() => setPendingDelete(null)}
+        />
       )}
     </div>
   );

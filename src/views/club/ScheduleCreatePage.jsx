@@ -12,10 +12,9 @@ import styles from './ScheduleCreatePage.module.css';
 
 export function ScheduleCreatePage({ clubId }) {
   const router = useRouter();
-  const getClubById = useClubStore((s) => s.getClubById);
+  const club = useClubStore((s) => s.clubs.find((c) => c.id === clubId));
   const user = useAuthStore((s) => s.user);
   const { showToast } = useToastContext();
-  const club = getClubById(clubId);
 
   const [form, setForm] = useState({
     title: '',
@@ -50,7 +49,6 @@ export function ScheduleCreatePage({ clubId }) {
         id: `sch-${Date.now()}`,
         clubId,
         clubName: club.name,
-        clubEmoji: club.emoji,
         title: form.title,
         location: form.location,
         time: form.time || '00:00',
@@ -73,7 +71,6 @@ export function ScheduleCreatePage({ clubId }) {
       <div className={styles.body}>
         {/* 클럽 표시 */}
         <div className={styles.clubBadge}>
-          <span className={styles.clubEmoji}>{club.emoji}</span>
           <span className={styles.clubName}>{club.name}</span>
         </div>
 

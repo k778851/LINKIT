@@ -14,7 +14,7 @@ import s from './admin.module.css';
 const LOCAL_USERS = [
   { id: 'user-me', ...defaultUser, role: 'USER', joinedClubsCount: 2 },
   ...Object.entries(SAMPLE_USERS).map(([id, u]) => ({
-    id, nickname: u.nickname, handle: id, emoji: u.emoji, role: 'USER', joinedClubsCount: 1, createdAt: null,
+    id, nickname: u.nickname, handle: id, role: 'USER', joinedClubsCount: 1, createdAt: null,
   })),
 ];
 
@@ -110,7 +110,7 @@ export function AdminUsersPage() {
                   const isSelf = u.id === currentUser?.id;
                   return (
                     <tr key={u.id}>
-                      <td><span style={{ fontSize: 18, marginRight: 6 }}>{u.emoji}</span>{u.nickname}</td>
+                      <td>{u.nickname}</td>
                       <td style={{ color: '#888', fontSize: 13 }}>@{u.handle}</td>
                       <td>
                         <span className={`${s.badge} ${u.role === 'ADMIN' ? s.badgeRed : s.badgeGray}`}>

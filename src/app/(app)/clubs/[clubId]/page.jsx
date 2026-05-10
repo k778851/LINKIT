@@ -1,7 +1,9 @@
+import { use } from 'react';
 import { ClubDetailPage } from '../../../../views/club/ClubDetailPage';
 
 export default function Page({ params }) {
-  return <ClubDetailPage clubId={params.clubId} />;
+  const { clubId } = use(params);
+  return <ClubDetailPage clubId={clubId} />;
 }
 
 export function generateStaticParams() {

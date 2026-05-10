@@ -40,10 +40,11 @@ public class Club {
     private int memberCount = 0;
 
     @Builder.Default
-    private int newCount = 0;
-
-    @Builder.Default
     private boolean isPrivate = false;
+
+    /** 가입 시 질문 (비공개 클럽 전용) */
+    @Column(length = 500)
+    private String joinQuestion;
 
     /** 정기 모임 일정 텍스트 (예: "매주 금요일 20:00") */
     @Column(length = 100)
@@ -51,6 +52,12 @@ public class Club {
 
     @Column(length = 100)
     private String location;
+
+    /** DRAFT | PENDING | ACTIVE | CLOSED */
+    @Enumerated(EnumType.STRING)
+    @Builder.Default
+    @Column(nullable = false, length = 10)
+    private ClubStatus status = ClubStatus.PENDING;
 
     @Column(nullable = false, length = 50)
     private String createdBy;

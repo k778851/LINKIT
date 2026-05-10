@@ -2,18 +2,18 @@
    LINKIT Sample Data — design bundle v2
    ============================================================ */
 
-export const CLUB_EMOJIS = {
-  '🏃': ['#FF8FA9', '#FF668A'],
-  '🍕': ['#FFB876', '#FF8A3D'],
-  '📸': ['#8EC6FF', '#0088FF'],
-  '🎵': ['#B8A7FF', '#7B61FF'],
-  '📚': ['#8EE3EB', '#00C3D0'],
-  '⚽': ['#9CE5A3', '#4AC258'],
-  '🎨': ['#FFC2A8', '#FF6B35'],
-  '🍜': ['#FFD980', '#FFA500'],
-  '🎸': ['#C4B8FF', '#8B5CF6'],
-  '🧘': ['#A8D8B9', '#34A85A'],
+/** 카테고리별 그라디언트 색상 — 이모지 대신 카테고리로 색상 결정 */
+export const CATEGORY_COLORS = {
+  '운동': ['#FF8FA9', '#FF668A'],
+  '음식': ['#FFB876', '#FF8A3D'],
+  '아트': ['#FFC2A8', '#FF6B35'],
+  '스터디': ['#8EE3EB', '#00C3D0'],
+  '음악': ['#B8A7FF', '#7B61FF'],
+  '기타': ['#8EC6FF', '#0088FF'],
 };
+
+/** @deprecated 이모지 제거됨 — CATEGORY_COLORS 사용 */
+export const CLUB_EMOJIS = CATEGORY_COLORS;
 
 export const SAMPLE_CLUB_IMAGES = {
   'club-1': 'https://images.unsplash.com/photo-1571902943202-507ec2618e8f?w=400&h=400&q=80&auto=format&fit=crop',
@@ -409,51 +409,210 @@ export const sampleBanners = [
 ];
 
 export const sampleSchedules = [
+  /* ── club-1 러닝 크루 ── */
   {
     id: 'sch-1',
     clubId: 'club-1',
     clubName: '러닝 크루',
     clubEmoji: '🏃',
+    title: '금요일 저녁 러닝',
     time: '20:00',
-    startAt: '2026-05-02T11:00:00.000Z',
+    startAt: '2026-05-16T11:00:00.000Z',   // 5/16 20:00 KST
     location: '여의도 한강공원',
+    description: '5km 라이트 런 (초보 환영)',
   },
+  {
+    id: 'sch-1b',
+    clubId: 'club-1',
+    clubName: '러닝 크루',
+    clubEmoji: '🏃',
+    title: '금요일 저녁 러닝',
+    time: '20:00',
+    startAt: '2026-05-23T11:00:00.000Z',   // 5/23 20:00 KST
+    location: '여의도 한강공원',
+    description: '10km 인터벌 트레이닝',
+  },
+  /* ── club-6 풋살 크루 ── */
   {
     id: 'sch-2',
     clubId: 'club-6',
     clubName: '풋살 크루',
     clubEmoji: '⚽',
+    title: '주말 정기 풋살',
     time: '15:00',
-    startAt: '2026-05-04T06:00:00.000Z',
+    startAt: '2026-05-17T06:00:00.000Z',   // 5/17 15:00 KST
     location: '오치동 풋살장',
+    description: '5vs5 친선 경기',
   },
+  {
+    id: 'sch-2b',
+    clubId: 'club-6',
+    clubName: '풋살 크루',
+    clubEmoji: '⚽',
+    title: '주말 정기 풋살',
+    time: '15:00',
+    startAt: '2026-05-24T06:00:00.000Z',   // 5/24 15:00 KST
+    location: '오치동 풋살장',
+    description: '6vs6 정기전',
+  },
+  /* ── club-3 감성 사진 모임 ── */
   {
     id: 'sch-3',
     clubId: 'club-3',
     clubName: '감성 사진 모임',
     clubEmoji: '📸',
+    title: '성수동 봄 출사',
     time: '10:00',
-    startAt: '2026-05-11T01:00:00.000Z',
+    startAt: '2026-05-11T01:00:00.000Z',   // 5/11 10:00 KST
     location: '성수동 카페거리',
+    description: '봄빛 필름 감성 촬영',
+  },
+  {
+    id: 'sch-3b',
+    clubId: 'club-3',
+    clubName: '감성 사진 모임',
+    clubEmoji: '📸',
+    title: '홍대 스트리트 출사',
+    time: '14:00',
+    startAt: '2026-06-14T05:00:00.000Z',   // 6/14 14:00 KST
+    location: '홍대 거리',
+    description: '도심 스트리트 포토',
+  },
+  /* ── club-2 맛집 탐방대 ── */
+  {
+    id: 'sch-4',
+    clubId: 'club-2',
+    clubName: '맛집 탐방대',
+    clubEmoji: '🍕',
+    title: '이태원 신상 탐방',
+    time: '12:00',
+    startAt: '2026-05-17T03:00:00.000Z',   // 5/17 12:00 KST
+    location: '이태원',
+    description: '봄 시즌 신상 레스토랑 오픈런',
+  },
+  {
+    id: 'sch-4b',
+    clubId: 'club-2',
+    clubName: '맛집 탐방대',
+    clubEmoji: '🍕',
+    title: '망원동 브런치 탐방',
+    time: '11:00',
+    startAt: '2026-05-31T02:00:00.000Z',   // 5/31 11:00 KST
+    location: '망원동',
+    description: '숨은 브런치 카페 투어',
+  },
+  /* ── club-4 밴드 클럽 ── */
+  {
+    id: 'sch-5',
+    clubId: 'club-4',
+    clubName: '밴드 클럽',
+    clubEmoji: '🎵',
+    title: '정기 합주 세션',
+    time: '19:00',
+    startAt: '2026-05-21T10:00:00.000Z',   // 5/21 19:00 KST
+    location: '홍대 합주실',
+    description: '6월 공연 준비 합주',
+  },
+  {
+    id: 'sch-5b',
+    clubId: 'club-4',
+    clubName: '밴드 클럽',
+    clubEmoji: '🎵',
+    title: '정기 합주 세션',
+    time: '19:00',
+    startAt: '2026-05-28T10:00:00.000Z',   // 5/28 19:00 KST
+    location: '홍대 합주실',
+    description: '무대 리허설 집중 합주',
+  },
+  /* ── club-5 책 읽는 모임 ── */
+  {
+    id: 'sch-6',
+    clubId: 'club-5',
+    clubName: '책 읽는 모임',
+    clubEmoji: '📚',
+    title: '5월 독서 토론',
+    time: '14:00',
+    startAt: '2026-05-31T05:00:00.000Z',   // 5/31 14:00 KST
+    location: '강남 북카페',
+    description: '「달러구트 꿈 백화점」 토론',
   },
 ];
 
-/* 클럽 개설자 샘플 유저 정보 */
+/* 샘플 유저 정보 (클럽 멤버 표시 + 오프라인 프로필 fallback) */
 export const SAMPLE_USERS = {
-  'user-1': { emoji: '🏃', nickname: '러닝장' },
-  'user-2': { emoji: '🍕', nickname: '피자러버' },
-  'user-3': { emoji: '📷', nickname: '필름감성' },
-  'user-4': { emoji: '🎵', nickname: '밴드마스터' },
-  'user-5': { emoji: '📚', nickname: '독서왕' },
-  'user-6': { emoji: '⚽', nickname: '풋살왕' },
-  'user-me': { emoji: '😊', nickname: '링킷유저' },
+  'user-1': {
+    id: 'user-1',
+    nickname: '러닝장',
+    bio: '매일 달리는 삶 🏃 여의도 러닝 크루 방장',
+    joinedClubs: ['club-1'],
+    followerCount: 24,
+    followingCount: 12,
+    createdAt: '2026-01-15T00:00:00.000Z',
+  },
+  'user-2': {
+    id: 'user-2',
+    nickname: '피자러버',
+    bio: '서울 맛집 다 가봤어요 🍕',
+    joinedClubs: ['club-2'],
+    followerCount: 18,
+    followingCount: 31,
+    createdAt: '2026-01-20T00:00:00.000Z',
+  },
+  'user-3': {
+    id: 'user-3',
+    nickname: '필름감성',
+    bio: '필름 카메라로 일상을 담습니다 📷',
+    joinedClubs: ['club-3'],
+    followerCount: 67,
+    followingCount: 45,
+    createdAt: '2026-02-01T00:00:00.000Z',
+  },
+  'user-4': {
+    id: 'user-4',
+    nickname: '밴드마스터',
+    bio: '기타, 베이스, 드럼 다 해요 🎸',
+    joinedClubs: ['club-4'],
+    followerCount: 42,
+    followingCount: 38,
+    createdAt: '2026-02-10T00:00:00.000Z',
+  },
+  'user-5': {
+    id: 'user-5',
+    nickname: '독서왕',
+    bio: '한 달에 책 3권 읽기 도전 중 📚',
+    joinedClubs: ['club-5'],
+    followerCount: 15,
+    followingCount: 22,
+    createdAt: '2026-02-15T00:00:00.000Z',
+  },
+  'user-6': {
+    id: 'user-6',
+    nickname: '풋살왕',
+    bio: '오치동 풋살장 터줏대감 ⚽',
+    joinedClubs: ['club-6'],
+    followerCount: 89,
+    followingCount: 54,
+    createdAt: '2026-03-01T00:00:00.000Z',
+  },
+  'user-me': {
+    id: 'user-me',
+    nickname: '링킷유저',
+    bio: '소모임을 사랑하는 사람 🙌',
+    joinedClubs: ['club-1', 'club-6'],
+    followerCount: 7,
+    followingCount: 5,
+    createdAt: '2026-01-01T00:00:00.000Z',
+  },
+  'user-7':  { id: 'user-7',  nickname: '청년부원',  bio: '', joinedClubs: [], followerCount: 3,  followingCount: 8  },
+  'user-8':  { id: 'user-8',  nickname: '봄바람',    bio: '', joinedClubs: [], followerCount: 11, followingCount: 14 },
+  'user-9':  { id: 'user-9',  nickname: '베이킹러버', bio: '', joinedClubs: [], followerCount: 5,  followingCount: 9  },
+  'user-10': { id: 'user-10', nickname: '총무',      bio: '', joinedClubs: [], followerCount: 2,  followingCount: 6  },
 };
 
 export const defaultUser = {
   id: 'user-me',
   nickname: '링킷유저',
   handle: 'linkit_user',
-  emoji: '😊',
   bio: '소모임을 사랑하는 사람 🙌',
   joinedClubs: ['club-1', 'club-6'],
   bookmarkedClubs: ['club-4', 'club-5', 'club-3'],

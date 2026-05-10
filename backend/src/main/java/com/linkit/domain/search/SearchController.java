@@ -1,13 +1,10 @@
 package com.linkit.domain.search;
 
 import com.linkit.common.ApiResponse;
-import com.linkit.domain.club.Club;
 import com.linkit.domain.club.ClubDto;
 import com.linkit.domain.club.ClubRepository;
-import com.linkit.domain.post.Post;
 import com.linkit.domain.post.PostDto;
-import com.linkit.domain.post.PostRepository;
-import com.linkit.domain.post.PostLikeRepository;
+import com.linkit.domain.post.PostService;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -25,9 +22,8 @@ import java.util.List;
 @RequiredArgsConstructor
 public class SearchController {
 
-    private final ClubRepository    clubRepository;
-    private final PostRepository    postRepository;
-    private final PostLikeRepository likeRepository;
+    private final ClubRepository clubRepository;
+    private final PostService    postService;
 
     @GetMapping
     public ApiResponse<SearchResult> search(
@@ -51,15 +47,13 @@ public class SearchController {
                 .map(ClubDto.Response::from)
                 .toList();
 
-        // 게시글 검색 — 제목·내용·카테고리
-        List<PostDto.Response> posts = postRepository.findAllByOrderByCreatedAtDesc().stream()
+        // 게시글 검색 — 제목·내용·카테고리 (PostService 통해 좋아요 여부 포함)
+        List<PostDto.Response> posts = postService.getPosts(null, userId).stream()
                 .filter(p ->
                     p.getTitle().toLowerCase().contains(keyword) ||
                     p.getContent().toLowerCase().contains(keyword) ||
                     (p.getCategory() != null && p.getCategory().toLowerCase().contains(keyword))
                 )
-                .map(p -> PostDto.Response.from(p,
-                        userId != null && likeRepository.existsByPostIdAndUserId(p.getId(), userId)))
                 .toList();
 
         return ApiResponse.ok(SearchResult.of(clubs, posts));

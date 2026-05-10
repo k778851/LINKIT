@@ -3,10 +3,9 @@ package com.linkit.domain.user;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
-import java.util.HashSet;
-import java.util.Set;
 
 @Entity
 @Table(name = "users")
@@ -20,46 +19,59 @@ public class User {
     @Column(length = 50)
     private String id;
 
-    @Column(nullable = false, length = 50)
-    private String nickname;
-
-    @Column(nullable = false, unique = true, length = 50)
+    // ── 외부 인증 (시온) ─────────────────────────────────
+    /** 시온 고유번호 (00000000-00000) */
+    @Column(nullable = false, unique = true, length = 20)
     private String handle;
 
-    @Column(length = 10)
-    private String emoji;
+    /** 외부 인증 제공자 식별자 */
+    @Builder.Default
+    @Column(nullable = false, length = 20)
+    private String provider = "ZION";
 
-    @Column(length = 200)
+    /** 시온 API 수신 실명 — 암호화 사본: user_pii.real_name_enc */
+    @Column(length = 20)
+    private String realName;
+
+    /** 시온 API 수신 전화번호 — 암호화 사본: user_pii.phone_enc */
+    @Column(length = 20)
+    private String phoneNumber;
+
+    // ── LINKIT 프로필 (온보딩 완료 후 설정) ──────────────
+    /** 닉네임 — 온보딩 전 NULL 허용 */
+    @Column(length = 20)
+    private String nickname;
+
+    @Column(length = 100)
     private String bio;
 
     @Column(length = 500)
     private String profileImage;
 
-    @Column(nullable = false)
-    private String password;
-
-    /** USER | ADMIN */
+    // ── 계정 권한 / 상태 ─────────────────────────────────
+    @Enumerated(EnumType.STRING)
     @Builder.Default
     @Column(nullable = false, length = 10)
-    private String role = "USER";
+    private UserRole role = UserRole.USER;
 
-    /** 가입한 클럽 ID 목록 */
-    @ElementCollection(fetch = FetchType.LAZY)
-    @CollectionTable(name = "club_members",
-            joinColumns = @JoinColumn(name = "user_id"))
-    @Column(name = "club_id")
+    /** ONBOARDING → ACTIVE → SUSPENDED */
+    @Enumerated(EnumType.STRING)
     @Builder.Default
-    private Set<String> joinedClubs = new HashSet<>();
+    @Column(nullable = false, length = 15)
+    private UserStatus status = UserStatus.ONBOARDING;
 
-    /** 찜한 클럽 ID 목록 */
-    @ElementCollection(fetch = FetchType.LAZY)
-    @CollectionTable(name = "club_bookmarks",
-            joinColumns = @JoinColumn(name = "user_id"))
-    @Column(name = "club_id")
+    /** 마케팅 수신 동의 여부 */
     @Builder.Default
-    private Set<String> bookmarkedClubs = new HashSet<>();
+    @Column(nullable = false)
+    private Boolean marketingOptedIn = false;
+
+    /** 마지막 로그인 시각 */
+    private LocalDateTime lastLoginAt;
 
     @CreationTimestamp
     @Column(updatable = false)
     private LocalDateTime createdAt;
+
+    @UpdateTimestamp
+    private LocalDateTime updatedAt;
 }

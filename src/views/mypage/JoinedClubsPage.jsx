@@ -1,10 +1,12 @@
 'use client';
 
+import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuthStore } from '../../store/authStore';
 import { useClubStore } from '../../store/clubStore';
 import { Header } from '../../components/layout/Header';
-import { CLUB_EMOJIS, SAMPLE_CLUB_IMAGES } from '../../data/sampleData';
+import { Modal } from '../../components/common/Modal';
+import { CATEGORY_COLORS, SAMPLE_CLUB_IMAGES } from '../../data/sampleData';
 import { assetPath } from '../../lib/assetPath';
 import { useToastContext } from '../../context/ToastContext';
 import styles from './JoinedClubsPage.module.css';
@@ -18,14 +20,16 @@ export function JoinedClubsPage() {
   const leaveClubApi = useClubStore((s) => s.leaveClubApi);
   const decrementMemberCount = useClubStore((s) => s.decrementMemberCount);
 
+  const [confirmClub, setConfirmClub] = useState(null); // 탈퇴 확인 대상 클럽
+
   const joinedClubs = clubs.filter((c) => user?.joinedClubs?.includes(c.id));
 
-  async function handleLeave(club) {
-    // 낙관적 업데이트
+  async function handleLeaveConfirm() {
+    const club = confirmClub;
+    setConfirmClub(null);
     leaveClub(club.id);
     decrementMemberCount(club.id);
-    showToast(`${club.name}에서 나왔어요`, 'success');
-    // API 호출 (실패해도 UX는 유지)
+    showToast(`${club.name} 참여를 취소했어요`, 'success');
     leaveClubApi(club.id).catch(() => {});
   }
 
@@ -45,7 +49,7 @@ export function JoinedClubsPage() {
       ) : (
         <div className={styles.grid}>
           {joinedClubs.map((club) => {
-            const colors = CLUB_EMOJIS[club.emoji] ?? ['#8EC6FF', '#0088FF'];
+            const colors = CATEGORY_COLORS[club.category] ?? ['#8EC6FF', '#0088FF'];
             const coverImage = club.coverImage ?? club.posterImages?.[0] ?? SAMPLE_CLUB_IMAGES[club.id];
             const coverSrc = coverImage?.startsWith('/') ? assetPath(coverImage) : coverImage;
             return (
@@ -61,11 +65,10 @@ export function JoinedClubsPage() {
                   role="button"
                   tabIndex={0}
                 >
-                  {!coverSrc && <span className={styles.emoji}>{club.emoji}</span>}
                   {/* 탈퇴 버튼 */}
                   <span
                     className={styles.leaveBtn}
-                    onClick={(e) => { e.stopPropagation(); handleLeave(club); }}
+                    onClick={(e) => { e.stopPropagation(); setConfirmClub(club); }}
                     role="button"
                     tabIndex={0}
                     aria-label="클럽 나가기"
@@ -81,6 +84,18 @@ export function JoinedClubsPage() {
             );
           })}
         </div>
+      )}
+
+      {confirmClub && (
+        <Modal
+          title="참여 취소"
+          message={`'${confirmClub.name}' 모임 참여를 취소할까요?`}
+          confirmLabel="참여 취소"
+          cancelLabel="돌아가기"
+          danger
+          onConfirm={handleLeaveConfirm}
+          onCancel={() => setConfirmClub(null)}
+        />
       )}
     </div>
   );

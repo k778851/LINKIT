@@ -1,7 +1,7 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useEffect } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuthStore } from '../../store/authStore';
 import { useClubStore } from '../../store/clubStore';
 import { useCommunityStore } from '../../store/communityStore';
@@ -12,9 +12,13 @@ import styles from './MyPage.module.css';
 
 export function MyPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const user = useAuthStore((s) => s.user);
   const posts = useCommunityStore((s) => s.posts);
-  const [tab, setTab] = useState('activity');
+
+  // 탭 상태를 URL 쿼리로 관리 → 뒤로가기 시 탭 복원
+  const tab = searchParams.get('tab') === 'settings' ? 'settings' : 'activity';
+  const setTab = (t) => router.replace(`/mypage${t === 'settings' ? '?tab=settings' : ''}`);
 
   const fetchStats   = useFollowStore((s) => s.fetchStats);
   const followStats  = useFollowStore((s) => user ? s.stats[user.id] : null);
@@ -43,12 +47,11 @@ export function MyPage() {
         <div className={styles.avatarWrap}>
           {user.profileImage
             ? <img src={user.profileImage} alt={user.nickname} className={styles.avatarImg} />
-            : <span className={styles.avatar}>{user.emoji}</span>
+            : <span className={styles.avatar}>{user.nickname?.[0]?.toUpperCase() ?? '?'}</span>
           }
         </div>
         <div className={styles.profileInfo}>
           <p className={styles.nickname}>{user.nickname}</p>
-          <p className={styles.handle}>고유번호 {user.handle}</p>
           {user.bio && <p className={styles.bio}>{user.bio}</p>}
         </div>
         <button className={styles.editBtn} onClick={() => router.push('/mypage/edit')}>

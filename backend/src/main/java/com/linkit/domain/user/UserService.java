@@ -2,16 +2,15 @@ package com.linkit.domain.user;
 
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.access.AccessDeniedException;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.linkit.domain.follow.FollowRepository;
 import com.linkit.security.JwtTokenProvider;
 
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Service
@@ -20,82 +19,151 @@ import java.util.UUID;
 public class UserService {
 
     private final UserRepository userRepository;
-    private final PasswordEncoder passwordEncoder;
     private final JwtTokenProvider tokenProvider;
-    private final AuthenticationManager authenticationManager;
+    private final RefreshTokenRepository refreshTokenRepository;
+    private final FollowRepository followRepository;
 
+    @Value("${jwt.refresh-expiration:2592000000}")
+    private long refreshExpiration;
+
+    /* ── 로그인 / 최초 가입 ──────────────────────────────── */
+
+    /**
+     * 시온 외부 API 인증 후 LINKIT 로그인.
+     *
+     * <p>처리 흐름:
+     * <ol>
+     *   <li>시온 API 호출 → handle + password 검증 (TODO: ZionApiClient 구현)</li>
+     *   <li>DB에 해당 handle 없음 → 신규 유저 생성 (ONBOARDING 상태)</li>
+     *   <li>DB에 있음 → lastLoginAt 갱신</li>
+     *   <li>Access Token 발급 후 반환. status == ONBOARDING 이면 isNewUser = true</li>
+     * </ol>
+     * </p>
+     */
     @Transactional
-    public UserDto.ProfileResponse register(UserDto.RegisterRequest req) {
-        if (userRepository.existsByHandle(req.getHandle())) {
-            throw new IllegalArgumentException("이미 사용 중인 아이디입니다.");
-        }
-        User user = User.builder()
-                .id("user-" + UUID.randomUUID().toString().substring(0, 8))
-                .handle(req.getHandle())
-                .nickname(req.getNickname())
-                .password(passwordEncoder.encode(req.getPassword()))
-                .emoji(req.getEmoji() != null ? req.getEmoji() : "😊")
-                .bio(req.getBio())
+    public UserDto.LoginResponse login(UserDto.LoginRequest req) {
+        // ── 1. 시온 API 검증 ─────────────────────────────────
+        // TODO: ZionApiClient.validate(req.getHandle(), req.getPassword())
+        //       인증 실패 시 BadCredentialsException 던지도록 구현
+
+        // ── 2. 유저 조회 or 생성 ──────────────────────────────
+        User user = userRepository.findByHandle(req.getHandle())
+                .orElseGet(() -> userRepository.save(
+                        User.builder()
+                                .id("user-" + UUID.randomUUID().toString().replace("-", "").substring(0, 8))
+                                .handle(req.getHandle())
+                                .provider("ZION")
+                                .build()
+                ));
+
+        // ── 3. 마지막 로그인 시각 갱신 ───────────────────────
+        user.setLastLoginAt(LocalDateTime.now());
+
+        // ── 4. JWT (Access + Refresh) 발급 ──────────────────
+        String accessToken  = tokenProvider.generateToken(user.getId());
+        String rawRefresh   = UUID.randomUUID().toString();
+        String refreshHash  = JwtTokenProvider.sha256(rawRefresh);
+        boolean isNewUser   = user.getStatus() == UserStatus.ONBOARDING;
+
+        // ── 5. Refresh Token DB 저장 ─────────────────────────
+        refreshTokenRepository.save(RefreshToken.builder()
+                .userId(user.getId())
+                .tokenHash(refreshHash)
+                .issuedAt(LocalDateTime.now())
+                .expiresAt(LocalDateTime.now().plusSeconds(refreshExpiration / 1000))
+                .build());
+
+        return UserDto.LoginResponse.builder()
+                .token(accessToken)
+                .refreshToken(rawRefresh)
+                .user(UserDto.ProfileResponse.from(user))
+                .isNewUser(isNewUser)
                 .build();
-        return UserDto.ProfileResponse.from(userRepository.save(user));
     }
 
-    public UserDto.LoginResponse login(UserDto.LoginRequest req) {
-        Authentication auth = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(
-                        userRepository.findByHandle(req.getHandle())
-                                .orElseThrow(() -> new IllegalArgumentException("아이디 또는 비밀번호가 올바르지 않습니다."))
-                                .getId(),
-                        req.getPassword()
-                )
-        );
-        String userId = auth.getName();
-        User user = getUser(userId);
-        String token = tokenProvider.generateToken(userId);
-        return UserDto.LoginResponse.builder()
-                .token(token)
-                .user(UserDto.ProfileResponse.from(user))
-                .build();
+    /* ── 토큰 갱신 ───────────────────────────────────────────── */
+
+    /**
+     * Refresh Token 검증 후 새 Access Token 발급.
+     * Refresh Token은 그대로 유지합니다 (단일 디바이스 세션 갱신).
+     */
+    @Transactional
+    public UserDto.RefreshResponse refresh(String rawRefreshToken) {
+        String hash = JwtTokenProvider.sha256(rawRefreshToken);
+        RefreshToken rt = refreshTokenRepository.findByTokenHash(hash)
+                .orElseThrow(() -> new IllegalArgumentException("유효하지 않은 Refresh Token 입니다."));
+        if (!rt.isValid()) {
+            throw new IllegalArgumentException("만료되었거나 폐기된 Refresh Token 입니다.");
+        }
+        String newAccessToken = tokenProvider.generateToken(rt.getUserId());
+        return UserDto.RefreshResponse.builder().token(newAccessToken).build();
     }
+
+    /* ── 로그아웃 ────────────────────────────────────────────── */
+
+    /**
+     * Refresh Token 단건 폐기 (현재 기기 로그아웃).
+     * rawRefreshToken 이 null/blank 이면 해당 유저의 모든 토큰 폐기.
+     */
+    @Transactional
+    public void logout(String userId, String rawRefreshToken) {
+        if (rawRefreshToken != null && !rawRefreshToken.isBlank()) {
+            String hash = JwtTokenProvider.sha256(rawRefreshToken);
+            refreshTokenRepository.findByTokenHash(hash).ifPresent(rt -> {
+                rt.setRevokedAt(LocalDateTime.now());
+            });
+        } else {
+            // Refresh Token 없이 로그아웃 → 해당 유저 전체 토큰 폐기
+            refreshTokenRepository.revokeAllByUserId(userId, LocalDateTime.now());
+        }
+    }
+
+    /* ── 온보딩 완료 ──────────────────────────────────────── */
+
+    /**
+     * 최초 로그인 후 닉네임·자기소개·마케팅 동의 설정.
+     * 완료 시 status 를 ONBOARDING → ACTIVE 로 변경합니다.
+     */
+    @Transactional
+    public UserDto.ProfileResponse completeOnboarding(String userId, UserDto.OnboardingRequest req) {
+        User user = getUser(userId);
+        if (user.getStatus() != UserStatus.ONBOARDING) {
+            throw new IllegalStateException("이미 온보딩이 완료된 계정입니다.");
+        }
+        user.setNickname(req.getNickname());
+        user.setBio(req.getBio());
+        if (req.getMarketingOptedIn() != null) {
+            user.setMarketingOptedIn(req.getMarketingOptedIn());
+        }
+        user.setStatus(UserStatus.ACTIVE);
+        return UserDto.ProfileResponse.from(user);
+    }
+
+    /* ── 프로필 조회 ──────────────────────────────────────── */
 
     public UserDto.ProfileResponse getProfile(String userId) {
-        return UserDto.ProfileResponse.from(getUser(userId));
+        return getProfile(userId, null);
     }
+
+    public UserDto.ProfileResponse getProfile(String userId, String requesterId) {
+        User user = getUser(userId);
+        long followers  = followRepository.countByFollowingId(userId);
+        long following  = followRepository.countByFollowerId(userId);
+        boolean isFollowing = requesterId != null &&
+                followRepository.existsByFollowerIdAndFollowingId(requesterId, userId);
+        return UserDto.ProfileResponse.from(user, followers, following, isFollowing);
+    }
+
+    /* ── 프로필 수정 ──────────────────────────────────────── */
 
     @Transactional
     public UserDto.ProfileResponse updateProfile(String userId, String requesterId, UserDto.UpdateRequest req) {
         if (!userId.equals(requesterId)) throw new AccessDeniedException("권한이 없습니다.");
         User user = getUser(userId);
         if (req.getNickname()     != null) user.setNickname(req.getNickname());
-        if (req.getEmoji()        != null) user.setEmoji(req.getEmoji());
         if (req.getBio()          != null) user.setBio(req.getBio());
         if (req.getProfileImage() != null) user.setProfileImage(req.getProfileImage());
         return UserDto.ProfileResponse.from(user);
-    }
-
-    /* ── 클럽 멤버십 ──────────────────────────────────── */
-
-    @Transactional
-    public void joinClub(String userId, String clubId) {
-        getUser(userId).getJoinedClubs().add(clubId);
-    }
-
-    @Transactional
-    public void leaveClub(String userId, String clubId) {
-        getUser(userId).getJoinedClubs().remove(clubId);
-    }
-
-    @Transactional
-    public boolean toggleBookmark(String userId, String clubId) {
-        User user = getUser(userId);
-        Set<String> bookmarks = user.getBookmarkedClubs();
-        if (bookmarks.contains(clubId)) {
-            bookmarks.remove(clubId);
-            return false;
-        } else {
-            bookmarks.add(clubId);
-            return true;
-        }
     }
 
     /* ── 내부 헬퍼 ───────────────────────────────────── */

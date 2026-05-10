@@ -85,7 +85,6 @@ public class FollowService {
                             .id(u.getId())
                             .nickname(u.getNickname())
                             .handle(u.getHandle())
-                            .emoji(u.getEmoji())
                             .profileImage(u.getProfileImage())
                             .following(myFollowingIds.contains(u.getId()))
                             .build();
@@ -110,7 +109,6 @@ public class FollowService {
                             .id(u.getId())
                             .nickname(u.getNickname())
                             .handle(u.getHandle())
-                            .emoji(u.getEmoji())
                             .profileImage(u.getProfileImage())
                             .following(myFollowingIds.contains(u.getId()))
                             .build();

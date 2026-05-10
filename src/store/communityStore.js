@@ -6,6 +6,10 @@ import { postApi } from '../api/postApi';
 import { clubApi } from '../api/clubApi';
 import { ApiError } from '../api/apiClient';
 
+/** 백엔드 미연결 or 미인증 상태 — 로컬 fallback 허용 */
+const shouldFallback = (e) =>
+  e instanceof ApiError && (e.status === 0 || e.status === 401 || e.status === 403);
+
 export const useCommunityStore = create(
   persist(
     (set, get) => ({
@@ -23,10 +27,11 @@ export const useCommunityStore = create(
         const cat = category ?? get().selectedCategory;
         try {
           const posts = await postApi.getAll(cat);
-          set({ posts });
+          // 백엔드 DB가 비어 있으면 sampleData 유지
+          if (posts && posts.length > 0) set({ posts });
         } catch (e) {
-          if (!(e instanceof ApiError && e.status === 0)) throw e;
-          // 오프라인 → sampleData 유지
+          if (!shouldFallback(e)) throw e;
+          // 오프라인/미인증 → sampleData 유지
         }
       },
 
@@ -47,7 +52,7 @@ export const useCommunityStore = create(
           set((s) => ({ posts: [created, ...s.posts] }));
           return created;
         } catch (e) {
-          if (e instanceof ApiError && e.status === 0) {
+          if (shouldFallback(e)) {
             const localPost = {
               ...post,
               id: `post-${Date.now()}`,
@@ -136,7 +141,7 @@ export const useCommunityStore = create(
           const updated = await postApi.update(postId, patch);
           set((s) => ({ posts: s.posts.map((p) => p.id === postId ? updated : p) }));
         } catch (e) {
-          if (e instanceof ApiError && e.status === 0) {
+          if (shouldFallback(e)) {
             set((s) => ({ posts: s.posts.map((p) => p.id === postId ? { ...p, ...patch } : p) }));
           } else throw e;
         }
@@ -147,7 +152,7 @@ export const useCommunityStore = create(
         try {
           await postApi.remove(postId);
         } catch (e) {
-          if (!(e instanceof ApiError && e.status === 0)) throw e;
+          if (!shouldFallback(e)) throw e;
         }
         set((s) => ({
           posts:     s.posts.filter((p) => p.id !== postId),
@@ -172,7 +177,7 @@ export const useCommunityStore = create(
             ],
           }));
         } catch (e) {
-          if (!(e instanceof ApiError && e.status === 0)) throw e;
+          if (!shouldFallback(e)) throw e;
         }
       },
 
@@ -182,7 +187,7 @@ export const useCommunityStore = create(
           set((s) => ({ clubPosts: [created, ...s.clubPosts] }));
           return created;
         } catch (e) {
-          if (e instanceof ApiError && e.status === 0) {
+          if (shouldFallback(e)) {
             const local = {
               ...post,
               id: `cp-${Date.now()}`,
@@ -220,6 +225,19 @@ export const useCommunityStore = create(
           ),
         })),
     }),
-    { name: 'linkit-posts' }
+    {
+      name: 'linkit-posts',
+      merge: (persisted, initial) => ({
+        ...initial,
+        ...persisted,
+        // 사용자 작성 게시글 유지 + samplePosts 항상 포함
+        posts: (() => {
+          const sampleIds = new Set(initial.posts.map((p) => p.id));
+          const userPosts = (persisted.posts ?? []).filter((p) => !sampleIds.has(p.id));
+          return [...initial.posts, ...userPosts];
+        })(),
+        comments: persisted.comments?.length > 0 ? persisted.comments : initial.comments,
+      }),
+    }
   )
 );

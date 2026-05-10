@@ -1,5 +1,6 @@
 package com.linkit.domain.comment;
 
+import com.linkit.domain.notification.NotificationService;
 import com.linkit.domain.post.Post;
 import com.linkit.domain.post.PostRepository;
 import jakarta.persistence.EntityNotFoundException;
@@ -15,8 +16,9 @@ import java.util.UUID;
 @Transactional(readOnly = true)
 public class CommentService {
 
-    private final CommentRepository commentRepository;
-    private final PostRepository    postRepository;
+    private final CommentRepository   commentRepository;
+    private final PostRepository      postRepository;
+    private final NotificationService notificationService;
 
     public List<CommentDto.Response> getComments(String postId) {
         return commentRepository.findByPostIdOrderByCreatedAtAsc(postId)
@@ -38,7 +40,23 @@ public class CommentService {
                 .build();
 
         post.setCommentCount(post.getCommentCount() + 1);
-        return CommentDto.Response.from(commentRepository.save(comment));
+        CommentDto.Response saved = CommentDto.Response.from(commentRepository.save(comment));
+
+        // 게시글 작성자에게 댓글 알림 전송 (본인 댓글 제외)
+        if (!post.getAuthorId().equals(userId)) {
+            notificationService.send(
+                    post.getAuthorId(),
+                    "comment",
+                    "💬",
+                    "내 게시글에 댓글이 달렸어요",
+                    req.getContent().length() > 50
+                            ? req.getContent().substring(0, 50) + "…"
+                            : req.getContent(),
+                    "/community/" + postId
+            );
+        }
+
+        return saved;
     }
 
     @Transactional

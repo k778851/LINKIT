@@ -48,7 +48,7 @@ export function ClubBoardTab({ clubId }) {
   const handleCommentSubmit = (postId) => {
     const text = (commentTexts[postId] ?? '').trim();
     if (!text) return;
-    addClubComment({ postId, content: text, authorId: user?.id, authorNickname: user?.nickname, authorEmoji: user?.emoji });
+    addClubComment({ postId, content: text, authorId: user?.id, authorNickname: user?.nickname });
     setCommentTexts((prev) => ({ ...prev, [postId]: '' }));
     showToast('댓글을 등록했어요', 'success');
   };
@@ -68,7 +68,6 @@ export function ClubBoardTab({ clubId }) {
       ...writeForm,
       authorId: user?.id,
       authorNickname: user?.nickname ?? '익명',
-      authorEmoji: user?.emoji ?? '😊',
     });
     showToast('게시글을 등록했어요 🎉', 'success');
     setWriteForm({ category: '자유', title: '', content: '' });
@@ -123,7 +122,7 @@ export function ClubBoardTab({ clubId }) {
                 <p className={styles.cardContent}>{post.content}</p>
                 <div className={styles.cardMeta}>
                   <span className={styles.metaAuthor}>
-                    {post.authorEmoji} {post.authorNickname}
+                    {post.authorNickname}
                   </span>
                   <span className={styles.metaTime}>
                     {formatRelativeTime(post.createdAt)}
@@ -164,7 +163,7 @@ export function ClubBoardTab({ clubId }) {
                     ) : (
                       getPostComments(post.id).map((c) => (
                         <div key={c.id} className={styles.comment}>
-                          <span className={styles.commentEmoji}>{c.authorEmoji}</span>
+                          <span className={styles.commentEmoji}>{c.authorNickname?.[0]?.toUpperCase() ?? '?'}</span>
                           <div className={styles.commentBody}>
                             <span className={styles.commentName}>{c.authorNickname}</span>
                             <span className={styles.commentTime}>{formatRelativeTime(c.createdAt)}</span>

@@ -1,7 +1,7 @@
 package com.linkit.domain.club;
 
 import com.linkit.common.ApiResponse;
-import com.linkit.domain.user.UserService;
+import com.linkit.domain.notification.NotificationService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -16,8 +16,8 @@ import java.util.List;
 @RequiredArgsConstructor
 public class ClubController {
 
-    private final ClubService clubService;
-    private final UserService userService;
+    private final ClubService         clubService;
+    private final NotificationService notificationService;
 
     @GetMapping
     public ApiResponse<List<ClubDto.Response>> list(
@@ -37,8 +37,8 @@ public class ClubController {
             @AuthenticationPrincipal UserDetails principal,
             @RequestBody @Valid ClubDto.CreateRequest req) {
         ClubDto.Response club = clubService.createClub(req, principal.getUsername());
-        // 생성자 자동 가입
-        userService.joinClub(principal.getUsername(), club.getId());
+        // 생성자 자동 가입 (ClubService.joinClub 내부에서 memberCount +1 처리)
+        clubService.joinClub(principal.getUsername(), club.getId());
         return ApiResponse.ok("클럽을 개설했어요 🎉", club);
     }
 
@@ -64,8 +64,22 @@ public class ClubController {
     public ApiResponse<Void> join(
             @AuthenticationPrincipal UserDetails principal,
             @PathVariable String clubId) {
-        userService.joinClub(principal.getUsername(), clubId);
-        clubService.incrementMember(clubId);
+        // joinClub 내부에서 ClubMember 저장 + memberCount +1 처리
+        clubService.joinClub(principal.getUsername(), clubId);
+
+        // 클럽장에게 새 멤버 알림 전송 (본인이 만든 클럽에 본인이 가입하는 경우 제외)
+        ClubDto.Response club = clubService.getClub(clubId);
+        if (!club.getCreatedBy().equals(principal.getUsername())) {
+            notificationService.send(
+                    club.getCreatedBy(),
+                    "new_member",
+                    "👋",
+                    club.getName() + "에 새 멤버가 가입했어요!",
+                    "현재 " + club.getMemberCount() + "명이 함께하고 있어요",
+                    "/clubs/" + clubId
+            );
+        }
+
         return ApiResponse.ok("모임에 신청했어요 🎉");
     }
 
@@ -73,8 +87,8 @@ public class ClubController {
     public ApiResponse<Void> leave(
             @AuthenticationPrincipal UserDetails principal,
             @PathVariable String clubId) {
-        userService.leaveClub(principal.getUsername(), clubId);
-        clubService.decrementMember(clubId);
+        // leaveClub 내부에서 ClubMember 삭제 + memberCount -1 처리
+        clubService.leaveClub(principal.getUsername(), clubId);
         return ApiResponse.ok("참여를 취소했어요.");
     }
 
@@ -82,7 +96,7 @@ public class ClubController {
     public ApiResponse<Void> bookmark(
             @AuthenticationPrincipal UserDetails principal,
             @PathVariable String clubId) {
-        boolean added = userService.toggleBookmark(principal.getUsername(), clubId);
+        boolean added = clubService.toggleBookmark(principal.getUsername(), clubId);
         return ApiResponse.ok(added ? "찜 목록에 추가했어요 💖" : "찜 목록에서 제거했어요");
     }
 }

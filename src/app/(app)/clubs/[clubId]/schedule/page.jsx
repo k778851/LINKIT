@@ -1,7 +1,9 @@
+import { use } from 'react';
 import { ScheduleCreatePage } from '../../../../../views/club/ScheduleCreatePage';
 
 export default function Page({ params }) {
-  return <ScheduleCreatePage clubId={params.clubId} />;
+  const { clubId } = use(params);
+  return <ScheduleCreatePage clubId={clubId} />;
 }
 
 export function generateStaticParams() {

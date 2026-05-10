@@ -27,6 +27,10 @@ public class Post {
     @Column(nullable = false, columnDefinition = "TEXT")
     private String content;
 
+    /** 첨부 이미지 URL */
+    @Column(length = 500)
+    private String image;
+
     @Column(length = 100)
     private String location;
 

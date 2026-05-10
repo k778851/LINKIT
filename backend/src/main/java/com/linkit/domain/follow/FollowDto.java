@@ -12,7 +12,6 @@ public class FollowDto {
         private String id;
         private String nickname;
         private String handle;
-        private String emoji;
         private String profileImage;
         private boolean following;   // 현재 요청자가 이 사람을 팔로우 중인지
     }

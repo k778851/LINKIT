@@ -4,7 +4,8 @@ import '../styles/global.css';
 export const metadata = {
   title: 'LINKIT — 우리 동네 소모임',
   description: '동네 주민들이 소모임을 자유롭게 생성하고 참여할 수 있는 모바일 커뮤니티',
-  manifest: '/LINKIT/manifest.json',
+  // 로컬 dev: /manifest.json, 프로덕션(GitHub Pages): /LINKIT/manifest.json
+  manifest: process.env.NODE_ENV === 'production' ? '/LINKIT/manifest.json' : '/manifest.json',
   appleWebApp: {
     capable: true,
     statusBarStyle: 'default',
@@ -14,7 +15,6 @@ export const metadata = {
     icon: '/LINKIT/favicon.svg',
     apple: '/LINKIT/icons/icon-192.png',
   },
-  themeColor: '#1677FF',
 };
 
 export const viewport = {

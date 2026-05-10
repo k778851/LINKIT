@@ -1,7 +1,9 @@
+import { use } from 'react';
 import { PostEditPage } from '../../../../../views/community/PostEditPage';
 
 export default function Page({ params }) {
-  return <PostEditPage postId={params.postId} />;
+  const { postId } = use(params);
+  return <PostEditPage postId={postId} />;
 }
 
 export function generateStaticParams() {

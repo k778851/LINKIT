@@ -2,6 +2,7 @@ package com.linkit.domain.schedule;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
 
@@ -20,13 +21,26 @@ public class Schedule {
     @Column(nullable = false, length = 50)
     private String clubId;
 
-    /** 모임 시각 텍스트 (예: "20:00") */
-    @Column(length = 20)
-    private String time;
+    /** 일정 제목 */
+    @Column(nullable = false, length = 100)
+    private String title;
 
-    /** 실제 시작 일시 */
-    private LocalDateTime startAt;
+    /** 일정 상세 설명 */
+    @Column(columnDefinition = "TEXT")
+    private String description;
 
-    @Column(length = 100)
+    /** 모임 시작 일시 */
+    @Column(nullable = false)
+    private LocalDateTime scheduledAt;
+
+    @Column(length = 200)
     private String location;
+
+    /** 일정을 생성한 유저 ID */
+    @Column(nullable = false, length = 50)
+    private String createdBy;
+
+    @CreationTimestamp
+    @Column(updatable = false)
+    private LocalDateTime createdAt;
 }

@@ -3,70 +3,61 @@ spring:
     active: dev
 
 ---
-# ── 개발 환경 (H2 인메모리) ──────────────────────────────
+# ── 개발 환경 (SQLite - 로컬 파일) ──────────────────────────
 spring:
   config:
     activate:
       on-profile: dev
 
   datasource:
-    url: jdbc:h2:mem:linkitdb;DB_CLOSE_DELAY=-1;MODE=MySQL;NON_KEYWORDS=VALUE
-    driver-class-name: org.h2.Driver
-    username: sa
-    password:
-
-  h2:
-    console:
-      enabled: true
-      path: /h2-console
+    url: jdbc:sqlite:${DB_PATH:./linkit-dev.db}
+    driver-class-name: org.sqlite.JDBC
 
   jpa:
     hibernate:
-      ddl-auto: create-drop
+      ddl-auto: update
     show-sql: true
     properties:
       hibernate:
         format_sql: true
-        dialect: org.hibernate.dialect.H2Dialect
-    defer-datasource-initialization: true
-
-  sql:
-    init:
-      mode: always
-      encoding: UTF-8
-      data-locations: classpath:data.sql
-
-server:
-  port: 8080
-
-jwt:
-  secret: linkit-secret-key-must-be-at-least-256-bits-long-for-hs256-algorithm
-  expiration: 86400000   # 24시간 (ms)
+        dialect: org.hibernate.community.dialect.SQLiteDialect
+        # SQLite는 외래키 비활성화가 기본 — 트리거 활성화
+        javax.persistence.schema-generation.scripts.action: none
+    open-in-view: false
 
   servlet:
     multipart:
       max-file-size: 5MB
       max-request-size: 10MB
 
+server:
+  port: 8080
+
+jwt:
+  secret: linkit-secret-key-must-be-at-least-256-bits-long-for-hs256-algorithm
+  expiration: 3600000      # Access Token: 1시간 (ms)
+  refresh-expiration: 604800000  # Refresh Token: 7일 (ms)
+
 app:
   cors:
-    # 개발: 로컬 Next.js + GitHub Pages 미리보기
     allowed-origins: "http://localhost:3000,https://k7788.github.io"
   upload:
     dir: uploads
+  vapid:
+    public-key: "BF-zTDqdwfXgGs1uaCCOpo-C4gnUgNLRtK9Lq8S0Zm2-7NpBYkJRy2uvySn_rdPceBtsDgyqVte9qsmq1riOdd8"
+    private-key: "YUd8DLz06UukPgPQKUSkGQZ2WdQ6he0-7mj4eLmi2Vo"
+    subject: "mailto:k778851@gmail.com"
 
 ---
-# ── 운영 환경 (MySQL) ────────────────────────────────────
+# ── 운영 환경 (SQLite - 운영 파일) ──────────────────────────
 spring:
   config:
     activate:
       on-profile: prod
 
   datasource:
-    url: jdbc:mysql://${DB_HOST:localhost}:3306/${DB_NAME:linkitdb}?useSSL=false&characterEncoding=utf8&serverTimezone=Asia/Seoul
-    driver-class-name: com.mysql.cj.jdbc.Driver
-    username: ${DB_USER:linkit}
-    password: ${DB_PASSWORD:}
+    url: jdbc:sqlite:${DB_PATH:/data/linkit.db}
+    driver-class-name: org.sqlite.JDBC
 
   jpa:
     hibernate:
@@ -74,22 +65,65 @@ spring:
     show-sql: false
     properties:
       hibernate:
-        dialect: org.hibernate.dialect.MySQLDialect
-
-server:
-  port: ${PORT:8080}
-
-jwt:
-  secret: ${JWT_SECRET}
-  expiration: 86400000
+        dialect: org.hibernate.community.dialect.SQLiteDialect
+    open-in-view: false
 
   servlet:
     multipart:
       max-file-size: 5MB
       max-request-size: 10MB
 
+server:
+  port: ${PORT:8080}
+
+jwt:
+  secret: ${JWT_SECRET}
+  expiration: 3600000
+  refresh-expiration: 604800000
+
 app:
   cors:
     allowed-origins: ${CORS_ORIGINS:http://localhost:3000}
   upload:
     dir: ${UPLOAD_DIR:uploads}
+  vapid:
+    public-key: ${VAPID_PUBLIC_KEY}
+    private-key: ${VAPID_PRIVATE_KEY}
+    subject: "mailto:k778851@gmail.com"
+
+---
+# ── 테스트 환경 (H2 인메모리) ────────────────────────────────
+spring:
+  config:
+    activate:
+      on-profile: test
+
+  datasource:
+    url: jdbc:h2:mem:linkittest;DB_CLOSE_DELAY=-1;MODE=MySQL
+    driver-class-name: org.h2.Driver
+    username: sa
+    password:
+
+  h2:
+    console:
+      enabled: false
+
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    show-sql: false
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.H2Dialect
+    open-in-view: false
+
+jwt:
+  secret: test-secret-key-must-be-at-least-256-bits-long-for-testing
+  expiration: 3600000
+  refresh-expiration: 604800000
+
+app:
+  cors:
+    allowed-origins: "http://localhost:3000"
+  upload:
+    dir: /tmp/linkit-test-uploads

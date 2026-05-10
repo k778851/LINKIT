@@ -76,8 +76,26 @@ export function LoginStep({ onNext }) {
         <p className={styles.tagline}>우리 동네 소모임 커뮤니티</p>
       </div>
 
-      {/* 시온로그인 폼 */}
       <div className={styles.formSection}>
+        {/* ── 데모 모드 (최상단 CTA) ── */}
+        <button
+          className={styles.demoBtnPrimary}
+          onClick={() => { loginLocal(defaultUser); onNext({ skipToHome: true }); }}
+        >
+          <span className={styles.demoBtnIcon}>🎨</span>
+          <span className={styles.demoBtnText}>
+            <span className={styles.demoBtnTitle}>로그인 없이 둘러보기</span>
+            <span className={styles.demoBtnSub}>샘플 데이터로 모든 기능 체험</span>
+          </span>
+          <span className={styles.demoBtnArrow}>›</span>
+        </button>
+
+        {/* 구분선 */}
+        <div className={styles.divider}>
+          <span className={styles.dividerText}>시온 계정으로 로그인</span>
+        </div>
+
+        {/* 시온로그인 폼 */}
         <div className={styles.fieldGroup}>
           <div className={styles.field}>
             <label className={styles.fieldLabel}>고유번호</label>
@@ -125,18 +143,6 @@ export function LoginStep({ onNext }) {
             프로필 설정하기
           </button>
         </p>
-
-        {/* 데모 모드 */}
-        <div className={styles.divider}>
-          <span className={styles.dividerText}>또는</span>
-        </div>
-
-        <button
-          className={styles.demoBtn}
-          onClick={() => { loginLocal(defaultUser); onNext({ skipToHome: true }); }}
-        >
-          🎨 로그인 없이 UI 둘러보기
-        </button>
 
         {/* 테스트 계정 힌트 */}
         <div className={styles.testHint}>

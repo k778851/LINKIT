@@ -14,11 +14,9 @@ const CATEGORIES = ['일상', '질문', '모임', '나눔', '생활정보'];
 export function PostEditPage({ postId }) {
   const router = useRouter();
   const { showToast } = useToastContext();
-  const getPostById = useCommunityStore((s) => s.getPostById);
+  const post = useCommunityStore((s) => s.posts.find((p) => p.id === postId));
   const updatePost  = useCommunityStore((s) => s.updatePost);
   const user = useAuthStore((s) => s.user);
-
-  const post = getPostById(postId);
 
   const [form, setForm] = useState({ category: '', title: '', content: '' });
   const [errors, setErrors] = useState({});

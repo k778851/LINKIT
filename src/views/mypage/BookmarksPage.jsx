@@ -6,7 +6,7 @@ import { useAuthStore } from '../../store/authStore';
 import { useClubStore } from '../../store/clubStore';
 import { Header } from '../../components/layout/Header';
 import { useToastContext } from '../../context/ToastContext';
-import { CLUB_EMOJIS, SAMPLE_CLUB_IMAGES } from '../../data/sampleData';
+import { CATEGORY_COLORS, SAMPLE_CLUB_IMAGES } from '../../data/sampleData';
 import { assetPath } from '../../lib/assetPath';
 import styles from './BookmarksPage.module.css';
 
@@ -42,7 +42,7 @@ export function BookmarksPage() {
       ) : (
         <div className={styles.grid}>
           {bookmarked.map((club) => {
-            const colors = CLUB_EMOJIS[club.emoji] ?? ['#8EC6FF', '#0088FF'];
+            const colors = CATEGORY_COLORS[club.category] ?? ['#8EC6FF', '#0088FF'];
             const coverImage = club.coverImage ?? club.posterImages?.[0] ?? SAMPLE_CLUB_IMAGES[club.id];
             const coverSrc = coverImage?.startsWith('/') ? assetPath(coverImage) : coverImage;
             return (
@@ -58,7 +58,6 @@ export function BookmarksPage() {
                   role="button"
                   tabIndex={0}
                 >
-                  {!coverSrc && <span className={styles.emoji}>{club.emoji}</span>}
                   {/* 찜 해제 버튼 */}
                   <button
                     className={styles.heartBtn}

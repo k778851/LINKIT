@@ -21,7 +21,7 @@ class PostLike {
 
 /* ── 레포지토리 ─────────────────────────────────────────── */
 
-interface PostLikeRepository extends JpaRepository<PostLike, PostLikeRepository.PostLikeId> {
+public interface PostLikeRepository extends JpaRepository<PostLike, PostLikeRepository.PostLikeId> {
     boolean existsByPostIdAndUserId(String postId, String userId);
     void deleteByPostIdAndUserId(String postId, String userId);
 

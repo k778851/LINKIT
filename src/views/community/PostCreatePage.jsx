@@ -15,7 +15,7 @@ export function PostCreatePage() {
   const router = useRouter();
   const addPost = useCommunityStore((s) => s.addPost);
   const user = useAuthStore((s) => s.user);
-  const [form, setForm] = useState({ category: '', title: '', content: '', location: '', image: null });
+  const [form, setForm] = useState({ category: '', title: '', content: '', image: null });
   const [errors, setErrors] = useState({});
   const { showToast } = useToastContext();
 
@@ -39,8 +39,6 @@ export function PostCreatePage() {
       ...form,
       authorId: user?.id,
       authorNickname: user?.nickname ?? '익명',
-      authorEmoji: user?.emoji ?? '😊',
-      location: form.location.trim() || undefined,
     });
     showToast('게시글을 등록했어요 🎉', 'success');
     router.replace('/community');
@@ -104,16 +102,6 @@ export function PostCreatePage() {
             shape="rect"
             placeholder="📷"
           />
-        </div>
-
-        {/* 위치 */}
-        <div className={styles.section}>
-          <label className={styles.label}>
-            위치 <span className={styles.optional}>(선택{form.category === '생활정보' ? ' · 권장' : ''})</span>
-          </label>
-          <input className={styles.input}
-            placeholder="동네, 장소명 등 (최대 20자)" maxLength={20}
-            value={form.location} onChange={(e) => set('location', e.target.value)} />
         </div>
 
         <button

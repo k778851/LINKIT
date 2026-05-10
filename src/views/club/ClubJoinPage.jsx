@@ -6,25 +6,24 @@ import { useClubStore } from '../../store/clubStore';
 import { useAuthStore } from '../../store/authStore';
 import { useToastContext } from '../../context/ToastContext';
 import { Header } from '../../components/layout/Header';
-import { CLUB_EMOJIS } from '../../data/sampleData';
+import { CATEGORY_COLORS } from '../../data/sampleData';
 import styles from './ClubJoinPage.module.css';
 
 export function ClubJoinPage({ clubId }) {
   const router = useRouter();
-  const getClubById = useClubStore((s) => s.getClubById);
+  const club = useClubStore((s) => s.clubs.find((c) => c.id === clubId));
   const joinClubStore  = useAuthStore((s) => s.joinClub);
   const joinClubApi    = useClubStore((s) => s.joinClubApi);
   const incrementMemberCount = useClubStore((s) => s.incrementMemberCount);
   const user = useAuthStore((s) => s.user);
   const { showToast } = useToastContext();
-  const club = getClubById(clubId);
 
   const [answer, setAnswer] = useState('');
   const [submitting, setSubmitting] = useState(false);
 
   if (!club) return null;
 
-  const colors = CLUB_EMOJIS[club.emoji] ?? ['#8EC6FF', '#0088FF'];
+  const colors = CATEGORY_COLORS[club.category] ?? ['#8EC6FF', '#0088FF'];
   const hasQuestion = !!club.joinQuestion;
   const canSubmit = !submitting && (!hasQuestion || answer.trim().length > 0);
 
@@ -34,7 +33,7 @@ export function ClubJoinPage({ clubId }) {
     try {
       // 가입 처리 (승인제가 아닌 경우 즉시 가입)
       if (!club.isPrivate) {
-        joinClubStore(clubId, { name: club.name, emoji: club.emoji, memberCount: club.memberCount });
+        joinClubStore(clubId, { name: club.name, memberCount: club.memberCount });
         incrementMemberCount(clubId);
         joinClubApi(clubId).catch(() => {});
         showToast(`${club.name}에 신청했어요 🎉`, 'success');
@@ -56,10 +55,10 @@ export function ClubJoinPage({ clubId }) {
         <div className={styles.clubCard}>
           <div
             className={styles.clubPoster}
-            style={{ background: `linear-gradient(135deg, ${colors[0]} 0%, ${colors[1]} 100%)` }}
-          >
-            <span className={styles.clubEmoji}>{club.emoji}</span>
-          </div>
+            style={club.coverImage
+              ? { backgroundImage: `url("${club.coverImage}")`, backgroundSize: 'cover', backgroundPosition: 'center' }
+              : { background: `linear-gradient(135deg, ${colors[0]} 0%, ${colors[1]} 100%)` }}
+          />
           <div className={styles.clubInfo}>
             <span className={styles.clubCategory}>{club.category}</span>
             <p className={styles.clubName}>{club.name}</p>

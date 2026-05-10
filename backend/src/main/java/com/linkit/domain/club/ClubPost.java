@@ -30,6 +30,10 @@ public class ClubPost {
     @Column(nullable = false, columnDefinition = "TEXT")
     private String content;
 
+    /** 첨부 이미지 URL */
+    @Column(length = 500)
+    private String image;
+
     @Column(nullable = false, length = 50)
     private String authorId;
 

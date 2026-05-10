@@ -14,8 +14,9 @@ public class ScheduleDto {
     @Getter
     public static class CreateRequest {
         @NotBlank private String clubId;
-        private String time;
-        @NotNull  private LocalDateTime startAt;
+        @NotBlank private String title;
+        private String description;
+        @NotNull  private LocalDateTime scheduledAt;
         private String location;
     }
 
@@ -25,24 +26,28 @@ public class ScheduleDto {
         private String clubId;
         private String clubName;
         private String clubEmoji;
-        private String time;
-        private LocalDateTime startAt;
+        private String title;
+        private String description;
+        private LocalDateTime scheduledAt;
         private String location;
-        private long dday;          // 양수 = 미래, 0 = 오늘, 음수 = 과거
+        private LocalDateTime createdAt;
+        private long dday;   // 양수 = 미래, 0 = 오늘, 음수 = 과거
 
         public static Response from(Schedule s, String clubName, String clubEmoji) {
             long dday = ChronoUnit.DAYS.between(
                     LocalDateTime.now(ZoneId.of("Asia/Seoul")).toLocalDate(),
-                    s.getStartAt().toLocalDate()
+                    s.getScheduledAt().toLocalDate()
             );
             return Response.builder()
                     .id(s.getId())
                     .clubId(s.getClubId())
                     .clubName(clubName)
                     .clubEmoji(clubEmoji)
-                    .time(s.getTime())
-                    .startAt(s.getStartAt())
+                    .title(s.getTitle())
+                    .description(s.getDescription())
+                    .scheduledAt(s.getScheduledAt())
                     .location(s.getLocation())
+                    .createdAt(s.getCreatedAt())
                     .dday(dday)
                     .build();
         }

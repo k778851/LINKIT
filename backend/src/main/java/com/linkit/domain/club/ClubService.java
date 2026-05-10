@@ -15,7 +15,9 @@ import java.util.UUID;
 @Transactional(readOnly = true)
 public class ClubService {
 
-    private final ClubRepository clubRepository;
+    private final ClubRepository       clubRepository;
+    private final ClubMemberRepository clubMemberRepository;
+    private final ClubBookmarkRepository clubBookmarkRepository;
 
     public List<ClubDto.Response> getClubs(String category, String sort) {
         List<Club> clubs = "전체".equals(category)
@@ -24,7 +26,6 @@ public class ClubService {
 
         Comparator<Club> comparator = switch (sort != null ? sort : "최신순") {
             case "인기순" -> Comparator.comparingInt(Club::getMemberCount).reversed();
-            case "신규순" -> Comparator.comparingInt(Club::getNewCount).reversed();
             default      -> Comparator.comparing(Club::getCreatedAt).reversed();
         };
 
@@ -80,6 +81,43 @@ public class ClubService {
         Club club = findById(clubId);
         if (!club.getCreatedBy().equals(userId)) throw new AccessDeniedException("클럽 삭제 권한이 없습니다.");
         clubRepository.delete(club);
+    }
+
+    /* ── 멤버십 ──────────────────────────────────────────── */
+
+    @Transactional
+    public void joinClub(String userId, String clubId) {
+        if (clubMemberRepository.existsByClubIdAndUserId(clubId, userId)) {
+            throw new IllegalStateException("이미 가입된 클럽입니다.");
+        }
+        clubMemberRepository.save(ClubMember.builder()
+                .clubId(clubId)
+                .userId(userId)
+                .role(ClubMemberRole.MEMBER)
+                .build());
+        incrementMember(clubId);
+    }
+
+    @Transactional
+    public void leaveClub(String userId, String clubId) {
+        clubMemberRepository.deleteByClubIdAndUserId(clubId, userId);
+        decrementMember(clubId);
+    }
+
+    /* ── 북마크 ──────────────────────────────────────────── */
+
+    /** 북마크 토글. 추가 시 true, 제거 시 false 반환 */
+    @Transactional
+    public boolean toggleBookmark(String userId, String clubId) {
+        if (clubBookmarkRepository.existsByUserIdAndClubId(userId, clubId)) {
+            clubBookmarkRepository.deleteByUserIdAndClubId(userId, clubId);
+            return false;
+        }
+        clubBookmarkRepository.save(ClubBookmark.builder()
+                .userId(userId)
+                .clubId(clubId)
+                .build());
+        return true;
     }
 
     @Transactional

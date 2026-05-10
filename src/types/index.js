@@ -7,7 +7,6 @@
  * @property {string} id
  * @property {string} nickname
  * @property {string} handle
- * @property {string} emoji
  * @property {string} bio
  * @property {string[]} joinedClubs
  * @property {string[]} bookmarkedClubs
@@ -36,7 +35,6 @@
  * @property {string} [location]
  * @property {string} authorId
  * @property {string} authorNickname
- * @property {string} authorEmoji
  * @property {number} likeCount
  * @property {number} commentCount
  * @property {number} viewCount
@@ -48,7 +46,6 @@
  * @property {string} content
  * @property {string} authorId
  * @property {string} authorNickname
- * @property {string} authorEmoji
  * @property {number} likeCount
  * @property {string} createdAt
  */

@@ -8,21 +8,21 @@ import { useAuthStore } from '../../store/authStore';
 import { calcDdayNum, getDdayLabel, formatShortDate } from '../../utils/formatDate';
 import { useToastContext } from '../../context/ToastContext';
 import { EmptyState } from '../../components/common/EmptyState';
+import { Modal } from '../../components/common/Modal';
 import { ClubBoardTab } from './tabs/ClubBoardTab';
-import { CLUB_EMOJIS, SAMPLE_CLUB_IMAGES, SAMPLE_USERS } from '../../data/sampleData';
+import { CATEGORY_COLORS, SAMPLE_CLUB_IMAGES, SAMPLE_USERS } from '../../data/sampleData';
 import { assetPath } from '../../lib/assetPath';
 import styles from './ClubDetailPage.module.css';
 
 export function ClubDetailPage({ clubId }) {
   const router = useRouter();
-  const getClubById = useClubStore((s) => s.getClubById);
+  const club = useClubStore((s) => s.clubs.find((c) => c.id === clubId));
   const incrementMemberCount = useClubStore((s) => s.incrementMemberCount);
   const decrementMemberCount = useClubStore((s) => s.decrementMemberCount);
   const getClubMembers = useClubStore((s) => s.getClubMembers);
   const setMemberRole = useClubStore((s) => s.setMemberRole);
   const removeMember = useClubStore((s) => s.removeMember);
   const schedules = useClubStore((s) => s.schedules);
-  const club = getClubById(clubId);
   const user = useAuthStore((s) => s.user);
   const [openMenuUserId, setOpenMenuUserId] = useState(null);
   const toggleBookmarkWithApi = useAuthStore((s) => s.toggleBookmarkWithApi);
@@ -32,13 +32,14 @@ export function ClubDetailPage({ clubId }) {
   const leaveClubApi   = useClubStore((s) => s.leaveClubApi);
   const { showToast } = useToastContext();
   const [tab, setTab] = useState('intro');
+  const [showLeaveConfirm, setShowLeaveConfirm] = useState(false);
 
   if (!club) return <EmptyState emoji="😢" title="클럽을 찾을 수 없어요" />;
   const isBookmarked = user?.bookmarkedClubs?.includes(clubId);
   const isJoined     = user?.joinedClubs?.includes(clubId);
   const isCreator    = club.createdBy === user?.id;
-  const colors = CLUB_EMOJIS[club.emoji] ?? ['#8EC6FF', '#0088FF'];
-  const creator = SAMPLE_USERS[club.createdBy] ?? { emoji: club.emoji, nickname: '클럽장' };
+  const colors = CATEGORY_COLORS[club.category] ?? ['#8EC6FF', '#0088FF'];
+  const creator = SAMPLE_USERS[club.createdBy] ?? { nickname: '클럽장' };
   const gradient = `linear-gradient(135deg, ${colors[0]} 0%, ${colors[1]} 100%)`;
   const coverImage = club.coverImage ?? club.posterImages?.[0] ?? SAMPLE_CLUB_IMAGES[club.id];
   const coverSrc = coverImage?.startsWith('/') ? assetPath(coverImage) : coverImage;
@@ -50,7 +51,6 @@ export function ClubDetailPage({ clubId }) {
     <div className={styles.page}>
       {/* 히어로 */}
       <div className={`${styles.hero} ${coverSrc ? styles.heroWithImage : ''}`} style={heroStyle}>
-        {!coverSrc && <span className={styles.heroEmoji}>{club.emoji}</span>}
         {/* 헤더 버튼 */}
         <div className={styles.heroNav}>
           <button className={styles.navBtn} onClick={() => router.back()} aria-label="뒤로">
@@ -178,7 +178,7 @@ export function ClubDetailPage({ clubId }) {
                             className={styles.scheduleApplyBtn}
                             onClick={() => {
                               if (!isJoined) {
-                                joinClubStore(clubId, { name: club.name, emoji: club.emoji, memberCount: club.memberCount });
+                                joinClubStore(clubId, { name: club.name, memberCount: club.memberCount });
                                 incrementMemberCount(clubId);
                                 joinClubApi(clubId).catch(() => {});
                               }
@@ -212,7 +212,7 @@ export function ClubDetailPage({ clubId }) {
           const isAdminUser = members.some(m => m.userId === user?.id && m.role === 'admin');
 
           const renderMember = (m) => {
-            const info = SAMPLE_USERS[m.userId] ?? { emoji: '👤', nickname: '알 수 없음' };
+            const info = SAMPLE_USERS[m.userId] ?? { nickname: '알 수 없음' };
             const isSelf = m.userId === user?.id;
             const showMenu = !isSelf && isOwner;
             const menuOpen = openMenuUserId === m.userId;
@@ -227,7 +227,7 @@ export function ClubDetailPage({ clubId }) {
             return (
               <div key={m.userId}>
                 <div className={styles.memberRow}>
-                  <span className={styles.memberEmoji}>{info.emoji}</span>
+                  <span className={styles.memberEmoji}>{info.nickname?.[0]?.toUpperCase() ?? '?'}</span>
                   <span className={styles.memberName}>{info.nickname}</span>
                   <div className={styles.memberRowRight}>
                     <span className={badgeClass}>{badgeText}</span>
@@ -303,6 +303,24 @@ export function ClubDetailPage({ clubId }) {
         <div style={{ height: 100 }} />
       </div>
 
+      {showLeaveConfirm && (
+        <Modal
+          title="참여 취소"
+          message={`'${club.name}' 모임 참여를 취소할까요?`}
+          confirmLabel="참여 취소"
+          cancelLabel="돌아가기"
+          danger
+          onConfirm={() => {
+            leaveClubStore(clubId);
+            decrementMemberCount(clubId);
+            leaveClubApi(clubId).catch(() => {});
+            showToast('모임 참여를 취소했어요', 'info');
+            setShowLeaveConfirm(false);
+          }}
+          onCancel={() => setShowLeaveConfirm(false)}
+        />
+      )}
+
       {/* 하단 CTA 바 */}
       <div className={styles.ctaBar}>
         <button
@@ -319,10 +337,7 @@ export function ClubDetailPage({ clubId }) {
           className={`${styles.joinBtn} ${isJoined ? styles.joinedBtn : ''}`}
           onClick={() => {
             if (isJoined) {
-              leaveClubStore(clubId);
-              decrementMemberCount(clubId);
-              leaveClubApi(clubId).catch(() => {});
-              showToast('모임 참여를 취소했어요', 'info');
+              setShowLeaveConfirm(true);
             } else {
               router.push(`/clubs/${clubId}/join`);
             }
