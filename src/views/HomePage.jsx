@@ -104,6 +104,12 @@ export function HomePage() {
     .sort((a, b) => a.dday - b.dday)[0] ?? null;
 
   const popularClubs = clubs.slice(0, 4);
+  const homeClubCategories = ['전체', ...Array.from(new Set(clubs.map((club) => club.category)))];
+  const [homeClubTab, setHomeClubTab] = useState('전체');
+  const homeClubList = (homeClubTab === '전체'
+    ? clubs
+    : clubs.filter((club) => club.category === homeClubTab)
+  ).slice(0, 6);
 
   return (
     <div className={styles.page}>
@@ -215,6 +221,27 @@ export function HomePage() {
         <div className={styles.sectionHeader}>
           <h2 className={styles.sectionTitle}>인기 모임</h2>
           <button className={styles.moreBtn} onClick={() => router.push('/clubs')}>전체 보기</button>
+        </div>
+        <div className={styles.clubTabsBlock}>
+          <div className={`${styles.clubTabs} hide-scrollbar`}>
+            {homeClubCategories.map((category) => (
+              <button
+                key={category}
+                className={`${styles.clubTab} ${homeClubTab === category ? styles.clubTabActive : ''}`}
+                onClick={() => setHomeClubTab(category)}
+              >
+                {category}
+              </button>
+            ))}
+          </div>
+          <div className={styles.clubTabList}>
+            {homeClubList.map((club) => (
+              <button key={club.id} className={styles.clubTabItem} onClick={() => router.push(`/clubs/${club.id}`)}>
+                <span className={styles.clubTabName}>{club.name}</span>
+                <span className={styles.clubTabMeta}>{club.category} · {club.memberCount.toLocaleString()}명</span>
+              </button>
+            ))}
+          </div>
         </div>
         <div className={styles.popularList}>
           {popularClubs.map((club, idx) => (

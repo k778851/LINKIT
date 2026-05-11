@@ -239,6 +239,73 @@
   font-weight: 500;
 }
 
+.clubTabsBlock {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.clubTabs {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding-bottom: 2px;
+}
+
+.clubTab {
+  flex-shrink: 0;
+  height: 32px;
+  padding: 0 13px;
+  border-radius: 999px;
+  border: 1.5px solid var(--base-border);
+  background: var(--base-white);
+  color: var(--ink-3);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.clubTabActive {
+  border-color: var(--blue);
+  background: var(--blue-soft);
+  color: var(--blue);
+}
+
+.clubTabList {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.clubTabItem {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+  padding: 10px 12px;
+  border: 1px solid var(--base-border);
+  border-radius: 12px;
+  background: var(--base-white);
+  text-align: left;
+}
+
+.clubTabName {
+  color: var(--ink);
+  font-size: 13px;
+  font-weight: 700;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.clubTabMeta {
+  color: var(--ink-3);
+  font-size: 11px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
 /* ── Horizontal scroll (HomeClubCard) ── */
 .hScroll {
   display: flex;

@@ -24,7 +24,7 @@ export function ClubJoinPage({ clubId }) {
   if (!club) return null;
 
   const colors = CATEGORY_COLORS[club.category] ?? ['#8EC6FF', '#0088FF'];
-  const hasQuestion = !!club.joinQuestion;
+  const hasQuestion = !!club.isPrivate && !!club.joinQuestion;
   const canSubmit = !submitting && (!hasQuestion || answer.trim().length > 0);
 
   const handleSubmit = async () => {

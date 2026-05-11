@@ -47,6 +47,13 @@ export function ActivityTab() {
 
   const bookmarkedClubs = clubs.filter((c) => user?.bookmarkedClubs?.includes(c.id));
   const joinedClubs    = clubs.filter((c) => user?.joinedClubs?.includes(c.id));
+  const managedClubs = clubs.filter((club) =>
+    club.createdBy === user?.id ||
+    user?.ownedClubs?.includes(club.id) ||
+    club.members?.some((member) =>
+      member.userId === user?.id && ['owner', 'admin'].includes(member.role)
+    )
+  );
 
   return (
     <div className={styles.tab}>
@@ -101,6 +108,49 @@ export function ActivityTab() {
                   </div>
                   <p className={`${styles.joinedName} truncate-1`}>{club.name}</p>
                   <p className={styles.joinedMeta}>{club.memberCount.toLocaleString()}명</p>
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </section>
+
+      <section className={styles.section}>
+        <div className={styles.sectionHeader}>
+          <h2 className={styles.sectionTitle}>
+            운영 중인 클럽
+            {managedClubs.length > 0 && (
+              <span className={styles.countPill}>{managedClubs.length}</span>
+            )}
+          </h2>
+        </div>
+        {managedClubs.length === 0 ? (
+          <div className={styles.emptyBox}>
+            <p className={styles.empty}>운영 중인 클럽이 없어요</p>
+            <button className={styles.exploreBtn} onClick={() => router.push('/clubs/new')}>클럽 개설하기</button>
+          </div>
+        ) : (
+          <div className={styles.manageList}>
+            {managedClubs.slice(0, 3).map((club) => {
+              const pendingCount = club.pendingJoinCount ?? (club.isPrivate ? (club.newCount ?? 0) : 0);
+              return (
+                <div key={club.id} className={styles.manageCard}>
+                  <div className={styles.manageTop}>
+                    <div>
+                      <p className={styles.manageName}>{club.name}</p>
+                      <p className={styles.manageMeta}>{club.status === 'pending' ? '승인 대기' : '운영 중'} · {club.memberCount.toLocaleString()}명</p>
+                    </div>
+                    <span className={styles.manageBadge}>{pendingCount}건 대기</span>
+                  </div>
+                  <div className={styles.manageStats}>
+                    <span>신규 {club.newCount ?? 0}</span>
+                    <span>게시판 {club.postCount ?? 0}</span>
+                    <span>{club.isPrivate ? '승인제' : '전체공개'}</span>
+                  </div>
+                  <div className={styles.manageActions}>
+                    <button onClick={() => router.push(`/clubs/${club.id}`)}>상태 보기</button>
+                    <button onClick={() => router.push(`/clubs/${club.id}/edit`)}>관리하기</button>
+                  </div>
                 </div>
               );
             })}

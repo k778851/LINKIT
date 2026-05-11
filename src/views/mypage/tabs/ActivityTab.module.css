@@ -148,6 +148,80 @@
   padding: 6px 16px; border-radius: 999px;
 }
 
+.manageList {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.manageCard {
+  border: 1px solid var(--base-border);
+  border-radius: 14px;
+  background: var(--base);
+  padding: 12px;
+}
+
+.manageTop {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.manageName {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--ink);
+}
+
+.manageMeta {
+  margin-top: 3px;
+  font-size: 12px;
+  color: var(--ink-3);
+}
+
+.manageBadge {
+  flex-shrink: 0;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--pink);
+  background: var(--pink-soft);
+  padding: 4px 8px;
+  border-radius: 999px;
+}
+
+.manageStats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 10px;
+}
+
+.manageStats span {
+  font-size: 11px;
+  color: var(--ink-3);
+  background: var(--base-white);
+  border: 1px solid var(--base-border);
+  border-radius: 999px;
+  padding: 4px 8px;
+}
+
+.manageActions {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.manageActions button {
+  height: 34px;
+  border-radius: 10px;
+  font-size: 12px;
+  font-weight: 700;
+  background: var(--blue-soft);
+  color: var(--blue);
+}
+
 /* ── My posts ── */
 .postRow {
   display: flex; flex-direction: column; gap: 4px; width: 100%;

@@ -18,11 +18,14 @@ export function ClubCreatePage() {
   const user = useAuthStore((s) => s.user);
   const { showToast } = useToastContext();
   const [form, setForm] = useState({
-    name: '', category: '',
+    name: '',
+    category: '',
     coverImage: null,
-    description: '', schedule: '', isPrivate: false,
-    tags: '',          // 해시태그 (쉼표 구분, 최대 3개)
-    joinQuestion: '',  // 가입질문
+    description: '',
+    schedule: '',
+    isPrivate: false,
+    tags: '',
+    joinQuestion: '',
   });
   const [errors, setErrors] = useState({});
   const [submitting, setSubmitting] = useState(false);
@@ -31,11 +34,11 @@ export function ClubCreatePage() {
 
   const validate = () => {
     const e = {};
-    if (!form.name.trim()) e.name = '클럽 이름을 입력하세요.';
-    if (form.name.length > 15) e.name = '최대 15자까지 입력 가능해요.';
-    if (!form.category) e.category = '카테고리를 선택하세요.';
-    if (!form.description.trim()) e.description = '소개를 입력하세요.';
-    if (form.description.length > 100) e.description = '최대 100자까지 입력 가능해요.';
+    if (!form.name.trim()) e.name = '클럽 이름을 입력해주세요';
+    if (form.name.length > 15) e.name = '최대 15자까지 입력할 수 있어요';
+    if (!form.category) e.category = '카테고리를 선택해주세요';
+    if (!form.description.trim()) e.description = '소개를 입력해주세요';
+    if (form.description.length > 100) e.description = '최대 100자까지 입력할 수 있어요';
     setErrors(e);
     return Object.keys(e).length === 0;
   };
@@ -45,14 +48,21 @@ export function ClubCreatePage() {
     setSubmitting(true);
     try {
       const parsedTags = form.tags
-        .split(',').map((t) => t.trim()).filter(Boolean).slice(0, 3);
+        .split(',')
+        .map((t) => t.trim())
+        .filter(Boolean)
+        .slice(0, 3);
       submitClubForApproval({
-        id: `club-${Date.now()}`, ...form,
+        id: `club-${Date.now()}`,
+        ...form,
+        joinQuestion: form.isPrivate ? form.joinQuestion.trim() : '',
         tags: parsedTags,
-        memberCount: 1, posterImages: [],
+        memberCount: 1,
+        postCount: 0,
+        posterImages: [],
         createdBy: user?.id,
       });
-      showToast('클럽신청이 완료되었습니다. 관리자 승인 후 개설돼요 😊', 'success');
+      showToast('클럽 개설 신청이 완료됐습니다. 승인 후 개설돼요.', 'success');
       router.replace('/clubs');
     } catch {
       showToast('클럽 생성에 실패했어요. 다시 시도해주세요.', 'error');
@@ -61,7 +71,6 @@ export function ClubCreatePage() {
     }
   };
 
-  // 미리보기용 그라디언트 (카테고리 기반)
   const colors = CATEGORY_COLORS[form.category] ?? ['#8EC6FF', '#0088FF'];
   const previewGrad = `linear-gradient(135deg, ${colors[0]} 0%, ${colors[1]} 100%)`;
   const isValid = form.name.trim() && form.category && form.description.trim();
@@ -82,18 +91,15 @@ export function ClubCreatePage() {
       />
 
       <div className={styles.body}>
-        {/* 커버 이미지 업로드 */}
         <div className={styles.section}>
           <p className={styles.label}>커버 이미지 <span className={styles.optional}>(선택)</span></p>
           <ImageUpload
             value={form.coverImage}
             onChange={(url) => set('coverImage', url)}
             shape="square"
-            placeholder={form.emoji}
           />
         </div>
 
-        {/* 미리보기 카드 */}
         <div className={styles.previewCard}>
           <div
             className={styles.previewPoster}
@@ -104,28 +110,33 @@ export function ClubCreatePage() {
           <div className={styles.previewInfo}>
             {form.category && <span className={styles.previewCategory}>{form.category}</span>}
             <p className={styles.previewName}>{form.name || '클럽 이름'}</p>
-            <p className={styles.previewDesc}>{form.description || '클럽 소개가 여기 표시돼요'}</p>
+            <p className={styles.previewDesc}>{form.description || '클럽 소개가 여기에 표시돼요'}</p>
           </div>
         </div>
 
-        {/* 클럽 이름 */}
         <div className={styles.section}>
           <label className={styles.label}>클럽 이름 <span className={styles.req}>*</span></label>
-          <input className={`${styles.input} ${errors.name ? styles.inputErr : ''}`}
-            placeholder="한글·영어·숫자 최대 15자" maxLength={15} value={form.name}
-            onChange={(e) => set('name', e.target.value)} />
+          <input
+            className={`${styles.input} ${errors.name ? styles.inputErr : ''}`}
+            placeholder="한글, 영어, 숫자 최대 15자"
+            maxLength={15}
+            value={form.name}
+            onChange={(e) => set('name', e.target.value)}
+          />
           {errors.name && <p className={styles.errMsg}>{errors.name}</p>}
           <p className={styles.counter}>{form.name.length}/15</p>
         </div>
 
-        {/* 카테고리 */}
         <div className={styles.section}>
           <p className={styles.label}>카테고리 <span className={styles.req}>*</span></p>
           <div className={styles.chipRow}>
             {CATEGORIES.map((cat) => (
-              <button key={cat} type="button"
+              <button
+                key={cat}
+                type="button"
                 className={`${styles.chip} ${form.category === cat ? styles.chipActive : ''}`}
-                onClick={() => set('category', cat)}>
+                onClick={() => set('category', cat)}
+              >
                 {cat}
               </button>
             ))}
@@ -133,32 +144,40 @@ export function ClubCreatePage() {
           {errors.category && <p className={styles.errMsg}>{errors.category}</p>}
         </div>
 
-        {/* 소개 */}
         <div className={styles.section}>
           <label className={styles.label}>소개 <span className={styles.req}>*</span></label>
-          <textarea className={`${styles.textarea} ${errors.description ? styles.inputErr : ''}`}
-            placeholder="클럽을 소개해 주세요. (최대 100자)" maxLength={100} rows={3}
-            value={form.description} onChange={(e) => set('description', e.target.value)} />
+          <textarea
+            className={`${styles.textarea} ${errors.description ? styles.inputErr : ''}`}
+            placeholder="클럽을 소개해주세요. (최대 100자)"
+            maxLength={100}
+            rows={3}
+            value={form.description}
+            onChange={(e) => set('description', e.target.value)}
+          />
           {errors.description && <p className={styles.errMsg}>{errors.description}</p>}
           <p className={styles.counter}>{form.description.length}/100</p>
         </div>
 
-        {/* 정기 일정 */}
         <div className={styles.section}>
           <label className={styles.label}>정기 일정 <span className={styles.optional}>(선택)</span></label>
-          <input className={styles.input} placeholder="예: 매주 금요일 20:00"
-            value={form.schedule} onChange={(e) => set('schedule', e.target.value)} />
+          <input
+            className={styles.input}
+            placeholder="예: 매주 금요일 20:00"
+            value={form.schedule}
+            onChange={(e) => set('schedule', e.target.value)}
+          />
         </div>
 
-        {/* 해시태그 */}
         <div className={styles.section}>
           <label className={styles.label}>
             해시태그 <span className={styles.optional}>(선택 · 최대 3개)</span>
           </label>
-          <input className={styles.input}
-            placeholder="예: 러닝, 아웃도어, 여의도"
+          <input
+            className={styles.input}
+            placeholder="예: 러닝, 주말, 여의도"
             value={form.tags}
-            onChange={(e) => set('tags', e.target.value)} />
+            onChange={(e) => set('tags', e.target.value)}
+          />
           {form.tags && (
             <div className={styles.tagPreview}>
               {form.tags.split(',').map((t) => t.trim()).filter(Boolean).slice(0, 3).map((t, i) => (
@@ -168,30 +187,40 @@ export function ClubCreatePage() {
           )}
         </div>
 
-        {/* 가입질문 */}
-        <div className={styles.section}>
-          <label className={styles.label}>
-            가입 질문 <span className={styles.optional}>(선택)</span>
-          </label>
-          <input className={styles.input}
-            placeholder="신청자에게 물어볼 질문 (예: 운동 경력이 어떻게 되시나요?)"
-            maxLength={100}
-            value={form.joinQuestion}
-            onChange={(e) => set('joinQuestion', e.target.value)} />
-        </div>
-
-        {/* 공개 범위 */}
         <div className={styles.section}>
           <p className={styles.label}>공개 범위</p>
           <div className={styles.toggleRow}>
-            <button type="button"
+            <button
+              type="button"
               className={`${styles.toggleBtn} ${!form.isPrivate ? styles.toggleActive : ''}`}
-              onClick={() => set('isPrivate', false)}>전체 공개</button>
-            <button type="button"
+              onClick={() => setForm((f) => ({ ...f, isPrivate: false, joinQuestion: '' }))}
+            >
+              전체 공개
+            </button>
+            <button
+              type="button"
               className={`${styles.toggleBtn} ${form.isPrivate ? styles.toggleActive : ''}`}
-              onClick={() => set('isPrivate', true)}>승인제</button>
+              onClick={() => set('isPrivate', true)}
+            >
+              승인제
+            </button>
           </div>
         </div>
+
+        {form.isPrivate && (
+          <div className={styles.section}>
+            <label className={styles.label}>
+              가입 질문 <span className={styles.optional}>(선택)</span>
+            </label>
+            <input
+              className={styles.input}
+              placeholder="신청자에게 물어볼 질문을 입력하세요"
+              maxLength={100}
+              value={form.joinQuestion}
+              onChange={(e) => set('joinQuestion', e.target.value)}
+            />
+          </div>
+        )}
 
         <button
           className={`${styles.submitBtn} ${isValid && !submitting ? styles.submitBtnActive : styles.submitBtnDisabled}`}

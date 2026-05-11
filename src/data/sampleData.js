@@ -615,6 +615,7 @@ export const defaultUser = {
   handle: 'linkit_user',
   bio: '소모임을 사랑하는 사람 🙌',
   joinedClubs: ['club-1', 'club-6'],
+  ownedClubs: ['club-6'],
   bookmarkedClubs: ['club-4', 'club-5', 'club-3'],
   settings: {
     theme: 'light',
