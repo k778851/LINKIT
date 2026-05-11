@@ -205,7 +205,11 @@ export const useClubStore = create(
         ...initial,
         ...persisted,
         // 클럽 목록: localStorage에 빈 배열이면 sampleData 유지
-        clubs: persisted.clubs?.length > 0 ? persisted.clubs : initial.clubs,
+        clubs: (() => {
+          const sampleIds = new Set(initial.clubs.map((club) => club.id));
+          const userAdded = (persisted.clubs ?? []).filter((club) => !sampleIds.has(club.id));
+          return [...initial.clubs, ...userAdded];
+        })(),
         // 일정: sampleData를 항상 포함 (날짜 업데이트 반영)
         schedules: (() => {
           const sampleIds = new Set(initial.schedules.map((s) => s.id));

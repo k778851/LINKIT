@@ -222,6 +222,92 @@
   color: var(--blue);
 }
 
+.requestList {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid var(--base-border);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.requestTitle {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--ink-2);
+}
+
+.requestItem {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 10px;
+  border-radius: 12px;
+  background: var(--base-white);
+}
+
+.requestInfo {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  min-width: 0;
+}
+
+.requestAvatar {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: var(--blue-soft);
+  color: var(--blue);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 800;
+  flex-shrink: 0;
+}
+
+.requestName {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--ink);
+}
+
+.requestAnswer {
+  margin-top: 2px;
+  font-size: 11px;
+  color: var(--ink-3);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 160px;
+}
+
+.requestActions {
+  display: flex;
+  gap: 5px;
+  flex-shrink: 0;
+}
+
+.requestActions button {
+  height: 28px;
+  padding: 0 9px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.approveBtn {
+  background: var(--blue);
+  color: #fff;
+}
+
+.rejectBtn {
+  background: var(--base-border);
+  color: var(--ink-3);
+}
+
 /* ── My posts ── */
 .postRow {
   display: flex; flex-direction: column; gap: 4px; width: 100%;

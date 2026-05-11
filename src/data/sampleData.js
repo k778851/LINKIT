@@ -1,4 +1,4 @@
-/* ============================================================
+﻿/* ============================================================
    LINKIT Sample Data — design bundle v2
    ============================================================ */
 
@@ -149,12 +149,12 @@ export const sampleClubs = [
     posterImages: [SAMPLE_CLUB_IMAGES['club-6']],
     schedule: '매주 일요일 15:00',
     location: '오치동',
-    createdBy: 'user-6',
+    createdBy: 'user-me',
     createdAt: '2026-03-20T00:00:00.000Z',
     members: [
-      { userId: 'user-6', role: 'owner', joinedAt: '2026-03-20T00:00:00.000Z' },
+      { userId: 'user-me', role: 'owner', joinedAt: '2026-03-20T00:00:00.000Z' },
       { userId: 'user-1', role: 'admin', joinedAt: '2026-03-21T00:00:00.000Z' },
-      { userId: 'user-me', role: 'member', joinedAt: '2026-03-22T00:00:00.000Z' },
+      { userId: 'user-6', role: 'member', joinedAt: '2026-03-22T00:00:00.000Z' },
     ],
   },
 ];
@@ -442,7 +442,7 @@ export const sampleSchedules = [
     time: '15:00',
     startAt: '2026-05-17T06:00:00.000Z',   // 5/17 15:00 KST
     location: '오치동 풋살장',
-    description: '5vs5 친선 경기',
+    description: '주말 정기전 진행',
   },
   {
     id: 'sch-2b',
@@ -453,88 +453,7 @@ export const sampleSchedules = [
     time: '15:00',
     startAt: '2026-05-24T06:00:00.000Z',   // 5/24 15:00 KST
     location: '오치동 풋살장',
-    description: '6vs6 정기전',
-  },
-  /* ── club-3 감성 사진 모임 ── */
-  {
-    id: 'sch-3',
-    clubId: 'club-3',
-    clubName: '감성 사진 모임',
-    clubEmoji: '📸',
-    title: '성수동 봄 출사',
-    time: '10:00',
-    startAt: '2026-05-11T01:00:00.000Z',   // 5/11 10:00 KST
-    location: '성수동 카페거리',
-    description: '봄빛 필름 감성 촬영',
-  },
-  {
-    id: 'sch-3b',
-    clubId: 'club-3',
-    clubName: '감성 사진 모임',
-    clubEmoji: '📸',
-    title: '홍대 스트리트 출사',
-    time: '14:00',
-    startAt: '2026-06-14T05:00:00.000Z',   // 6/14 14:00 KST
-    location: '홍대 거리',
-    description: '도심 스트리트 포토',
-  },
-  /* ── club-2 맛집 탐방대 ── */
-  {
-    id: 'sch-4',
-    clubId: 'club-2',
-    clubName: '맛집 탐방대',
-    clubEmoji: '🍕',
-    title: '이태원 신상 탐방',
-    time: '12:00',
-    startAt: '2026-05-17T03:00:00.000Z',   // 5/17 12:00 KST
-    location: '이태원',
-    description: '봄 시즌 신상 레스토랑 오픈런',
-  },
-  {
-    id: 'sch-4b',
-    clubId: 'club-2',
-    clubName: '맛집 탐방대',
-    clubEmoji: '🍕',
-    title: '망원동 브런치 탐방',
-    time: '11:00',
-    startAt: '2026-05-31T02:00:00.000Z',   // 5/31 11:00 KST
-    location: '망원동',
-    description: '숨은 브런치 카페 투어',
-  },
-  /* ── club-4 밴드 클럽 ── */
-  {
-    id: 'sch-5',
-    clubId: 'club-4',
-    clubName: '밴드 클럽',
-    clubEmoji: '🎵',
-    title: '정기 합주 세션',
-    time: '19:00',
-    startAt: '2026-05-21T10:00:00.000Z',   // 5/21 19:00 KST
-    location: '홍대 합주실',
-    description: '6월 공연 준비 합주',
-  },
-  {
-    id: 'sch-5b',
-    clubId: 'club-4',
-    clubName: '밴드 클럽',
-    clubEmoji: '🎵',
-    title: '정기 합주 세션',
-    time: '19:00',
-    startAt: '2026-05-28T10:00:00.000Z',   // 5/28 19:00 KST
-    location: '홍대 합주실',
-    description: '무대 리허설 집중 합주',
-  },
-  /* ── club-5 책 읽는 모임 ── */
-  {
-    id: 'sch-6',
-    clubId: 'club-5',
-    clubName: '책 읽는 모임',
-    clubEmoji: '📚',
-    title: '5월 독서 토론',
-    time: '14:00',
-    startAt: '2026-05-31T05:00:00.000Z',   // 5/31 14:00 KST
-    location: '강남 북카페',
-    description: '「달러구트 꿈 백화점」 토론',
+    description: '주말 정기전 진행',
   },
 ];
 
