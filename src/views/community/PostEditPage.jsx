@@ -1,9 +1,10 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useCommunityStore } from '../../store/communityStore';
 import { useAuthStore } from '../../store/authStore';
+import { getPostDetailPath, getPostLookupId } from '../../lib/communityRoutes';
 import { useToastContext } from '../../context/ToastContext';
 import { Header } from '../../components/layout/Header';
 import { EmptyState } from '../../components/common/EmptyState';
@@ -13,8 +14,10 @@ const CATEGORIES = ['일상', '질문', '모임', '나눔', '생활정보'];
 
 export function PostEditPage({ postId }) {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const lookupPostId = getPostLookupId(postId, searchParams.get('postId'));
   const { showToast } = useToastContext();
-  const post = useCommunityStore((s) => s.posts.find((p) => p.id === postId));
+  const post = useCommunityStore((s) => s.posts.find((p) => p.id === lookupPostId));
   const updatePost  = useCommunityStore((s) => s.updatePost);
   const user = useAuthStore((s) => s.user);
 
@@ -26,7 +29,7 @@ export function PostEditPage({ postId }) {
     if (post) {
       setForm({ category: post.category, title: post.title, content: post.content });
     }
-  }, [postId]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [lookupPostId]); // eslint-disable-line react-hooks/exhaustive-deps
 
   if (!post) return <EmptyState emoji="😢" title="게시글을 찾을 수 없어요" />;
   if (post.authorId !== user?.id) return <EmptyState emoji="🔒" title="수정 권한이 없어요" />;
@@ -46,9 +49,9 @@ export function PostEditPage({ postId }) {
     if (!validate() || submitting) return;
     setSubmitting(true);
     try {
-      await updatePost(postId, { category: form.category, title: form.title, content: form.content });
+      await updatePost(lookupPostId, { category: form.category, title: form.title, content: form.content });
       showToast('게시글을 수정했어요 ✏️', 'success');
-      router.replace(`/community/${postId}`);
+      router.replace(getPostDetailPath(lookupPostId));
     } catch {
       showToast('수정에 실패했어요. 다시 시도해주세요.', 'error');
     } finally {

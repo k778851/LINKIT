@@ -44,6 +44,13 @@
   border: 1.5px solid var(--base-white);
 }
 
+.firstFold {
+  min-height: calc(100dvh - 52px);
+  display: flex;
+  flex-direction: column;
+  padding-bottom: 12px;
+}
+
 /* ── Banner ── */
 .bannerWrap {
   margin: 16px 16px 0;
@@ -190,6 +197,8 @@
   align-items: center;
   justify-content: space-between;
   padding: 16px 16px 8px;
+  margin-top: auto;
+  gap: 12px;
 }
 
 .statText {

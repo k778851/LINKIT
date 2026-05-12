@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { Plus } from 'lucide-react';
 import { useCommunityStore } from '../../store/communityStore';
 import { tokenStorage } from '../../api/apiClient';
+import { getPostDetailPath } from '../../lib/communityRoutes';
 import { Chip } from '../../components/common/Chip';
 import { PostCard } from '../../components/community/PostCard';
 import { FAB } from '../../components/common/FAB';
@@ -73,7 +74,7 @@ export function CommunityListPage() {
                   className="card-animate"
                   style={{ animationDelay: `${Math.min(idx * 40, 280)}ms` }}
                 >
-                  <PostCard post={post} onClick={() => router.push(`/community/${post.id}`)} />
+                  <PostCard post={post} onClick={() => router.push(getPostDetailPath(post.id))} />
                 </div>
               ))
         }

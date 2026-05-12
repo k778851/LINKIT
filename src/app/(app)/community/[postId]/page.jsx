@@ -1,5 +1,6 @@
 import { use } from 'react';
 import { PostDetailPage } from '../../../../views/community/PostDetailPage';
+import { STATIC_POST_IDS, LOCAL_POST_ROUTE_ID } from '../../../../lib/communityRoutes';
 
 export default function Page({ params }) {
   const { postId } = use(params);
@@ -7,6 +8,5 @@ export default function Page({ params }) {
 }
 
 export function generateStaticParams() {
-  return ['post-1','post-2','post-3','post-4','post-5','post-6','post-7','post-8']
-    .map((postId) => ({ postId }));
+  return [...STATIC_POST_IDS, LOCAL_POST_ROUTE_ID].map((postId) => ({ postId }));
 }

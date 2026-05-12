@@ -9,6 +9,7 @@ import { searchApi } from '../api/searchApi';
 import { tokenStorage } from '../api/apiClient';
 import { CATEGORY_COLORS, SAMPLE_CLUB_IMAGES } from '../data/sampleData';
 import { assetPath } from '../lib/assetPath';
+import { getPostDetailPath } from '../lib/communityRoutes';
 import styles from './SearchPage.module.css';
 
 const TRENDING = ['러닝', '독서모임', '풋살', '맛집탐방', '사진', '밴드'];
@@ -244,7 +245,7 @@ export function SearchPage() {
                 <button
                   key={post.id}
                   className={styles.postRow}
-                  onClick={() => { saveRecent(q); router.push(`/community/${post.id}`); }}
+                  onClick={() => { saveRecent(q); router.push(getPostDetailPath(post.id)); }}
                 >
                   <div className={styles.postTop}>
                     <span className={styles.postBadge}>{post.category}</span>

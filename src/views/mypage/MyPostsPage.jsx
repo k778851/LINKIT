@@ -9,6 +9,7 @@ import { Header } from '../../components/layout/Header';
 import { Modal } from '../../components/common/Modal';
 import { useToastContext } from '../../context/ToastContext';
 import { formatRelativeTime } from '../../utils/formatDate';
+import { getPostDetailPath } from '../../lib/communityRoutes';
 import styles from './MyPostsPage.module.css';
 
 const BADGE_COLORS = {
@@ -85,7 +86,7 @@ export function MyPostsPage() {
             const badgeStyle = BADGE_COLORS[post.category] ?? { color: 'var(--ink-3)', bg: 'var(--base-border)' };
             return (
               <div key={post.id} className={styles.card}>
-                <div className={styles.cardTop} onClick={() => router.push(`/community/${post.id}`)}>
+                <div className={styles.cardTop} onClick={() => router.push(getPostDetailPath(post.id))}>
                   <span
                     className={styles.badge}
                     style={{ color: badgeStyle.color, background: badgeStyle.bg }}
@@ -102,7 +103,7 @@ export function MyPostsPage() {
                   </button>
                 </div>
 
-                <button className={styles.cardBody} onClick={() => router.push(`/community/${post.id}`)}>
+                <button className={styles.cardBody} onClick={() => router.push(getPostDetailPath(post.id))}>
                   <p className={styles.title}>{post.title}</p>
                   <p className={styles.preview}>{post.content}</p>
                   <div className={styles.stats}>

@@ -10,6 +10,7 @@ import { scheduleApi } from '../../../api/scheduleApi';
 import { ApiError } from '../../../api/apiClient';
 import { formatRelativeTime, calcDdayNum, getDdayLabel, formatShortDate } from '../../../utils/formatDate';
 import { CATEGORY_COLORS } from '../../../data/sampleData';
+import { getPostDetailPath } from '../../../lib/communityRoutes';
 import styles from './ActivityTab.module.css';
 
 export function ActivityTab() {
@@ -217,7 +218,7 @@ export function ActivityTab() {
           <p className={styles.empty}>작성한 게시글이 없어요</p>
         ) : (
           myPosts.slice(0, 3).map((post) => (
-            <button key={post.id} className={styles.postRow} onClick={() => router.push(`/community/${post.id}`)}>
+            <button key={post.id} className={styles.postRow} onClick={() => router.push(getPostDetailPath(post.id))}>
               <span className={styles.postBadge}>{post.category}</span>
               <p className={`${styles.postTitle} truncate-1`}>{post.title}</p>
               <div className={styles.postMeta}>

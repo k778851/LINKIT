@@ -1,10 +1,11 @@
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { Heart, Share2, Eye, MessageCircle, Send, Trash2, Pencil } from 'lucide-react';
 import { useCommunityStore } from '../../store/communityStore';
 import { useAuthStore } from '../../store/authStore';
+import { getPostEditPath, getPostLookupId } from '../../lib/communityRoutes';
 import { Header } from '../../components/layout/Header';
 import { EmptyState } from '../../components/common/EmptyState';
 import { Modal } from '../../components/common/Modal';
@@ -24,35 +25,37 @@ function badgeClass(cat) {
 
 export function PostDetailPage({ postId }) {
   const router = useRouter();
-  const post = useCommunityStore((s) => s.posts.find((p) => p.id === postId));
+  const searchParams = useSearchParams();
+  const lookupPostId = getPostLookupId(postId, searchParams.get('postId'));
+  const post = useCommunityStore((s) => s.posts.find((p) => p.id === lookupPostId));
   const allComments = useCommunityStore((s) => s.comments);
   const comments = useMemo(
-    () => allComments.filter((c) => c.postId === postId),
-    [allComments, postId]
+    () => allComments.filter((c) => c.postId === lookupPostId),
+    [allComments, lookupPostId]
   );
   const { toggleLike, likedPosts, incrementView, addComment, deletePost } = useCommunityStore();
   const user = useAuthStore((s) => s.user);
   const [commentText, setCommentText] = useState('');
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const { showToast } = useToastContext();
-  const isLiked = likedPosts.includes(postId);
+  const isLiked = likedPosts.includes(lookupPostId);
   const canSend = commentText.trim().length > 0;
   const isAuthor = post?.authorId === user?.id;
 
-  useEffect(() => { if (post) incrementView(postId); }, [postId]); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => { if (post) incrementView(lookupPostId); }, [lookupPostId]); // eslint-disable-line react-hooks/exhaustive-deps
 
   if (!post) return <EmptyState emoji="😢" title="게시글을 찾을 수 없어요" />;
 
   const handleComment = () => {
     if (!canSend) return;
-    addComment({ postId, content: commentText.trim(), authorId: user?.id, authorNickname: user?.nickname });
+    addComment({ postId: lookupPostId, content: commentText.trim(), authorId: user?.id, authorNickname: user?.nickname });
     setCommentText('');
     showToast('댓글을 등록했어요', 'success');
   };
 
   const handleDelete = async () => {
     try {
-      await deletePost(postId);
+      await deletePost(lookupPostId);
       showToast('게시글을 삭제했어요', 'success');
       router.back();
     } catch {
@@ -68,7 +71,7 @@ export function PostDetailPage({ postId }) {
         right={
           isAuthor && (
             <div className={styles.headerBtns}>
-              <button className={styles.headerIconBtn} onClick={() => router.push(`/community/${postId}/edit`)} aria-label="게시글 수정">
+              <button className={styles.headerIconBtn} onClick={() => router.push(getPostEditPath(lookupPostId))} aria-label="게시글 수정">
                 <Pencil size={17} color="var(--ink-3)" />
               </button>
               <button className={styles.headerIconBtn} onClick={() => setShowDeleteModal(true)} aria-label="게시글 삭제">
@@ -115,7 +118,7 @@ export function PostDetailPage({ postId }) {
 
         {/* 액션 */}
         <div className={styles.actions}>
-          <button className={`${styles.actionBtn} ${isLiked ? styles.liked : ''}`} onClick={() => { toggleLike(postId); showToast(isLiked ? '좋아요를 취소했어요' : '좋아요를 눌렀어요 ❤️', 'success'); }}>
+          <button className={`${styles.actionBtn} ${isLiked ? styles.liked : ''}`} onClick={() => { toggleLike(lookupPostId); showToast(isLiked ? '좋아요를 취소했어요' : '좋아요를 눌렀어요 ❤️', 'success'); }}>
             <Heart size={18} fill={isLiked ? 'var(--pink)' : 'none'} />
             <span>{post.likeCount}</span>
           </button>

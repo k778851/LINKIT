@@ -5,6 +5,7 @@ import { useNotificationStore } from './notificationStore';
 import { postApi } from '../api/postApi';
 import { clubApi } from '../api/clubApi';
 import { ApiError } from '../api/apiClient';
+import { getPostDetailPath } from '../lib/communityRoutes';
 
 /** 백엔드 미연결 or 미인증 상태 — 로컬 fallback 허용 */
 const shouldFallback = (e) =>
@@ -79,7 +80,7 @@ export const useCommunityStore = create(
                 type: 'like', icon: '❤️',
                 title: '내 게시글에 좋아요가 달렸어요',
                 body: `"${post.title}"`,
-                path: `/community/${postId}`,
+                path: getPostDetailPath(postId),
               });
             }
           }
@@ -113,7 +114,7 @@ export const useCommunityStore = create(
               type: 'comment', icon: '💬',
               title: '내 게시글에 댓글이 달렸어요',
               body: `${comment.authorNickname}: ${comment.content.slice(0, 30)}`,
-              path: `/community/${comment.postId}`,
+              path: getPostDetailPath(comment.postId),
             });
           }
 
