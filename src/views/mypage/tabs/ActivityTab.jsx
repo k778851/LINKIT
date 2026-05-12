@@ -16,7 +16,6 @@ import styles from './ActivityTab.module.css';
 export function ActivityTab() {
   const router = useRouter();
   const user = useAuthStore((s) => s.user);
-  const toggleBookmarkWithApi = useAuthStore((s) => s.toggleBookmarkWithApi);
   const allSchedules = useClubStore((s) => s.schedules);
   const clubs = useClubStore((s) => s.clubs);
   const allPosts = useCommunityStore((s) => s.posts);
@@ -47,7 +46,6 @@ export function ActivityTab() {
     .map((schedule) => ({ ...schedule, dday: calcDdayNum(schedule.startAt) }))
     .sort((a, b) => a.dday - b.dday);
 
-  const bookmarkedClubs = clubs.filter((club) => user?.bookmarkedClubs?.includes(club.id));
   const joinedClubs = clubs.filter((club) => user?.joinedClubs?.includes(club.id));
   const managedClubs = clubs.filter((club) =>
     club.createdBy === user?.id ||
@@ -189,28 +187,6 @@ export function ActivityTab() {
 
       <section className={styles.section}>
         <div className={styles.sectionHeader}>
-          <h2 className={styles.sectionTitle}>찜한 클럽</h2>
-          <button className={styles.moreBtn} onClick={() => router.push('/mypage/bookmarks')}>전체 보기</button>
-        </div>
-        {bookmarkedClubs.length === 0 ? (
-          <p className={styles.empty}>찜한 클럽이 없어요</p>
-        ) : (
-          <div className={`${styles.bookmarkRow} hide-scrollbar`}>
-            {bookmarkedClubs.map((club) => (
-              <ClubThumb
-                key={club.id}
-                club={club}
-                onClick={() => router.push(`/clubs/${club.id}`)}
-                onAction={() => toggleBookmarkWithApi(club.id)}
-                type="bookmark"
-              />
-            ))}
-          </div>
-        )}
-      </section>
-
-      <section className={styles.section}>
-        <div className={styles.sectionHeader}>
           <h2 className={styles.sectionTitle}>작성한 게시글</h2>
           <button className={styles.moreBtn} onClick={() => router.push('/mypage/posts')}>전체 보기</button>
         </div>
@@ -234,42 +210,23 @@ export function ActivityTab() {
   );
 }
 
-function ClubThumb({ club, onClick, onAction, type }) {
+function ClubThumb({ club, onClick }) {
   const colors = CATEGORY_COLORS[club.category] ?? ['#8EC6FF', '#0088FF'];
   const coverImage = club.coverImage ?? club.posterImages?.[0];
-  const cardClass = type === 'bookmark' ? styles.bookmarkCard : styles.joinedCard;
-  const tileClass = type === 'bookmark' ? styles.bookmarkTile : styles.joinedTile;
-  const nameClass = type === 'bookmark' ? styles.bookmarkName : styles.joinedName;
-  const metaClass = type === 'bookmark' ? styles.bookmarkMeta : styles.joinedMeta;
 
   return (
-    <div className={cardClass}>
+    <div className={styles.joinedCard}>
       <div
-        className={tileClass}
+        className={styles.joinedTile}
         style={coverImage
           ? { backgroundImage: `url("${coverImage}")`, backgroundSize: 'cover', backgroundPosition: 'center' }
           : { background: `linear-gradient(135deg, ${colors[0]} 0%, ${colors[1]} 100%)` }}
         onClick={onClick}
         role="button"
         tabIndex={0}
-      >
-        {type === 'bookmark' && (
-          <span
-            className={styles.heartOverlay}
-            onClick={(event) => {
-              event.stopPropagation();
-              onAction?.();
-            }}
-            role="button"
-            tabIndex={0}
-            aria-label="찜 해제"
-          >
-            ♥
-          </span>
-        )}
-      </div>
-      <p className={`${nameClass} truncate-1`}>{club.name}</p>
-      <p className={metaClass}>{club.memberCount.toLocaleString()}명</p>
+      />
+      <p className={`${styles.joinedName} truncate-1`}>{club.name}</p>
+      <p className={styles.joinedMeta}>{club.memberCount.toLocaleString()}명</p>
     </div>
   );
 }
