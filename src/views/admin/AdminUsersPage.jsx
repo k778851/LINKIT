@@ -1,151 +1,106 @@
 'use client';
 
-import { useEffect, useState, useCallback } from 'react';
-import { Search, Trash2 } from 'lucide-react';
-import { adminApi } from '../../api/adminApi';
-import { tokenStorage } from '../../api/apiClient';
-import { useAuthStore } from '../../store/authStore';
-import { Modal } from '../../components/common/Modal';
-import { useToastContext } from '../../context/ToastContext';
-import { formatRelativeTime } from '../../utils/formatDate';
-import { defaultUser, SAMPLE_USERS } from '../../data/sampleData';
+import { Search, ShieldAlert, UserRoundCheck } from 'lucide-react';
+import { useMemo, useState } from 'react';
+import { adminUsers } from './adminDemoData';
 import s from './admin.module.css';
 
-/* 로컬 fallback 유저 목록 */
-const LOCAL_USERS = [
-  { id: 'user-me', ...defaultUser, role: 'USER', joinedClubsCount: 2 },
-  ...Object.entries(SAMPLE_USERS).map(([id, u]) => ({
-    id, nickname: u.nickname, handle: id, role: 'USER', joinedClubsCount: 1, createdAt: null,
-  })),
-];
+const filters = ['전체', '정상', '경고', '정지'];
 
 export function AdminUsersPage() {
-  const { showToast } = useToastContext();
-  const currentUser   = useAuthStore((s) => s.user);
+  const [query, setQuery] = useState('');
+  const [filter, setFilter] = useState('전체');
 
-  const [users,   setUsers]   = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [query,   setQuery]   = useState('');
-  const [pendingDelete, setPendingDelete] = useState(null);
-  const [deleting, setDeleting] = useState(false);
-
-  const load = useCallback(async (q = '') => {
-    setLoading(true);
-    if (!tokenStorage.get()) {
-      const q2 = q.toLowerCase();
-      setUsers(LOCAL_USERS.filter((u) =>
-        !q2 || u.nickname.toLowerCase().includes(q2) || u.handle.toLowerCase().includes(q2)
-      ));
-      setLoading(false);
-      return;
-    }
-    try {
-      const data = await adminApi.getUsers(q);
-      setUsers(data);
-    } catch {
-      const q2 = q.toLowerCase();
-      setUsers(LOCAL_USERS.filter((u) =>
-        !q2 || u.nickname.toLowerCase().includes(q2) || u.handle.toLowerCase().includes(q2)
-      ));
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
-  useEffect(() => { load(); }, [load]);
-
-  /* 디바운스 검색 */
-  useEffect(() => {
-    const t = setTimeout(() => load(query), 350);
-    return () => clearTimeout(t);
-  }, [query, load]);
-
-  const handleDelete = async () => {
-    if (!pendingDelete || deleting) return;
-    setDeleting(true);
-    try {
-      await adminApi.deleteUser(pendingDelete.id);
-      setUsers((prev) => prev.filter((u) => u.id !== pendingDelete.id));
-      showToast(`${pendingDelete.nickname} 유저를 삭제했어요.`, 'success');
-    } catch (e) {
-      showToast(e?.message ?? '삭제에 실패했어요.', 'error');
-    } finally {
-      setDeleting(false);
-      setPendingDelete(null);
-    }
-  };
+  const users = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    return adminUsers.filter((user) => {
+      const matched = !q || user.name.toLowerCase().includes(q) || user.id.toLowerCase().includes(q) || user.handle.includes(q);
+      const statusMatched = filter === '전체' || user.status === filter;
+      return matched && statusMatched;
+    });
+  }, [query, filter]);
 
   return (
     <div>
-      {pendingDelete && (
-        <Modal
-          title="유저 삭제"
-          message={`"${pendingDelete.nickname}" 유저를 삭제할까요? 되돌릴 수 없어요.`}
-          confirmLabel="삭제" cancelLabel="취소" danger
-          onConfirm={handleDelete}
-          onCancel={() => setPendingDelete(null)}
-        />
-      )}
-
       <div className={s.pageHeader}>
-        <p className={s.pageTitle}>유저 관리</p>
-        <p className={s.pageDesc}>전체 {users.length}명</p>
+        <div>
+          <p className={s.eyebrow}>USER MANAGEMENT</p>
+          <h1 className={s.pageTitle}>회원 관리</h1>
+          <p className={s.pageDesc}>회원 검색, 상세 열람, 상태 변경, 제재 및 내부 메모를 관리합니다.</p>
+        </div>
+        <div className={s.headerActions}>
+          <button className={s.ghostBtn}><ShieldAlert size={16} /> 일괄 경고</button>
+          <button className={s.primaryBtn}><UserRoundCheck size={16} /> 정지 해제</button>
+        </div>
       </div>
 
-      <div className={s.card}>
-        {/* 검색 */}
+      <section className={s.card}>
         <div className={s.searchBar}>
           <div className={s.searchWrap}>
             <Search size={16} className={s.searchIcon} />
-            <input className={s.searchInput} placeholder="닉네임·아이디 검색..."
-              value={query} onChange={(e) => setQuery(e.target.value)} />
+            <input
+              className={s.searchInput}
+              placeholder="회원 ID, 이름, 연락처 검색"
+              value={query}
+              onChange={(event) => setQuery(event.target.value)}
+            />
           </div>
         </div>
+        <div className={s.filterRow}>
+          {filters.map((item) => (
+            <button
+              key={item}
+              className={`${s.filterBtn} ${filter === item ? s.filterActive : ''}`}
+              onClick={() => setFilter(item)}
+            >
+              {item}
+            </button>
+          ))}
+        </div>
 
-        {loading ? <p className={s.loading}>불러오는 중...</p> : (
-          <div className={s.tableWrap}>
-            <table className={s.table}>
-              <thead>
-                <tr>
-                  <th>유저</th><th>아이디</th><th>역할</th>
-                  <th>참여 클럽</th><th>가입일</th><th></th>
+        <div className={s.tableWrap}>
+          <table className={s.table}>
+            <thead>
+              <tr>
+                <th>회원ID</th>
+                <th>이름</th>
+                <th>상태</th>
+                <th>가입일</th>
+                <th>신고</th>
+                <th>클럽수</th>
+                <th>마지막 로그인</th>
+                <th>액션</th>
+              </tr>
+            </thead>
+            <tbody>
+              {users.map((user) => (
+                <tr key={user.id}>
+                  <td>{user.id}</td>
+                  <td><strong>{user.name}</strong><p className={s.itemMeta}>@{user.handle}</p></td>
+                  <td><span className={`${s.badge} ${statusClass(user.status)}`}>{user.status}</span></td>
+                  <td>{user.joinedAt}</td>
+                  <td>{user.reports}</td>
+                  <td>{user.joined}</td>
+                  <td>{user.lastLogin}</td>
+                  <td>
+                    <div className={s.actionGroup}>
+                      <button className={s.smallBtn}>상세</button>
+                      <button className={s.rejectBtn}>제재</button>
+                    </div>
+                  </td>
                 </tr>
-              </thead>
-              <tbody>
-                {users.length === 0 && (
-                  <tr><td colSpan={6}><p className={s.empty}>검색 결과가 없어요</p></td></tr>
-                )}
-                {users.map((u) => {
-                  const isSelf = u.id === currentUser?.id;
-                  return (
-                    <tr key={u.id}>
-                      <td>{u.nickname}</td>
-                      <td style={{ color: '#888', fontSize: 13 }}>@{u.handle}</td>
-                      <td>
-                        <span className={`${s.badge} ${u.role === 'ADMIN' ? s.badgeRed : s.badgeGray}`}>
-                          {u.role === 'ADMIN' ? '관리자' : '일반'}
-                        </span>
-                      </td>
-                      <td>{u.joinedClubsCount ?? 0}개</td>
-                      <td style={{ color: '#aaa', fontSize: 12 }}>
-                        {u.createdAt ? formatRelativeTime(u.createdAt) : '-'}
-                      </td>
-                      <td>
-                        {!isSelf && u.role !== 'ADMIN' && (
-                          <button className={s.deleteBtn}
-                            onClick={() => setPendingDelete(u)}>
-                            <Trash2 size={13} /> 삭제
-                          </button>
-                        )}
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
-        )}
-      </div>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </section>
     </div>
   );
+}
+
+function statusClass(status) {
+  if (status === '정상') return s.badgeGreen;
+  if (status === '경고') return s.badgeOrange;
+  if (status === '정지') return s.badgeRed;
+  return s.badgeGray;
 }
