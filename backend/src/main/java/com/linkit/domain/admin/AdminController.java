@@ -4,6 +4,7 @@ import com.linkit.common.ApiResponse;
 import com.linkit.domain.club.Club;
 import com.linkit.domain.club.ClubDto;
 import com.linkit.domain.club.ClubRepository;
+import com.linkit.domain.club.ClubStatus;
 import com.linkit.domain.comment.CommentRepository;
 import com.linkit.domain.post.Post;
 import com.linkit.domain.post.PostDto;
@@ -11,6 +12,7 @@ import com.linkit.domain.post.PostRepository;
 import com.linkit.domain.user.User;
 import com.linkit.domain.user.UserRepository;
 import com.linkit.domain.user.UserRole;
+import com.linkit.domain.user.UserStatus;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.Builder;
 import lombok.Getter;
@@ -73,6 +75,20 @@ public class AdminController {
         );
     }
 
+    @PatchMapping("/users/{userId}/status")
+    @Transactional
+    public ApiResponse<UserSummary> updateUserStatus(
+            @PathVariable String userId,
+            @RequestBody StatusRequest req) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new EntityNotFoundException("회원을 찾을 수 없습니다."));
+        if (user.getRole() == UserRole.ADMIN) {
+            throw new IllegalArgumentException("관리자 계정 상태는 변경할 수 없습니다.");
+        }
+        user.setStatus(UserStatus.valueOf(req.status()));
+        return ApiResponse.ok(UserSummary.from(user));
+    }
+
     @DeleteMapping("/users/{userId}")
     @Transactional
     public ApiResponse<Void> deleteUser(@PathVariable String userId) {
@@ -87,6 +103,7 @@ public class AdminController {
     /* ── 클럽 관리 ─────────────────────────────────────── */
 
     @GetMapping("/clubs")
+    @Transactional(readOnly = true)
     public ApiResponse<List<ClubDto.Response>> clubs(
             @RequestParam(defaultValue = "") String q) {
         String keyword = q.trim().toLowerCase();
@@ -99,6 +116,17 @@ public class AdminController {
                         .map(ClubDto.Response::from)
                         .toList()
         );
+    }
+
+    @PatchMapping("/clubs/{clubId}/status")
+    @Transactional
+    public ApiResponse<ClubDto.Response> updateClubStatus(
+            @PathVariable String clubId,
+            @RequestBody StatusRequest req) {
+        Club club = clubRepository.findById(clubId)
+                .orElseThrow(() -> new EntityNotFoundException("클럽을 찾을 수 없습니다."));
+        club.setStatus(ClubStatus.valueOf(req.status()));
+        return ApiResponse.ok(ClubDto.Response.from(club));
     }
 
     @DeleteMapping("/clubs/{clubId}")
@@ -124,6 +152,17 @@ public class AdminController {
                         .map(PostSummary::from)
                         .toList()
         );
+    }
+
+    @PatchMapping("/posts/{postId}/status")
+    @Transactional
+    public ApiResponse<PostSummary> updatePostStatus(
+            @PathVariable String postId,
+            @RequestBody StatusRequest req) {
+        Post post = postRepository.findById(postId)
+                .orElseThrow(() -> new EntityNotFoundException("게시글을 찾을 수 없습니다."));
+        post.setStatus(req.status());
+        return ApiResponse.ok(PostSummary.from(post));
     }
 
     @DeleteMapping("/posts/{postId}")
@@ -161,16 +200,18 @@ public class AdminController {
 
     @Getter @Builder
     public static class PostSummary {
-        private String id, category, title, authorId;
+        private String id, category, title, authorId, status;
         private int likeCount, commentCount, viewCount;
         private LocalDateTime createdAt;
 
         static PostSummary from(Post p) {
             return PostSummary.builder()
                     .id(p.getId()).category(p.getCategory()).title(p.getTitle())
-                    .authorId(p.getAuthorId()).likeCount(p.getLikeCount())
+                    .authorId(p.getAuthorId()).status(p.getStatus()).likeCount(p.getLikeCount())
                     .commentCount(p.getCommentCount()).viewCount(p.getViewCount())
                     .createdAt(p.getCreatedAt()).build();
         }
     }
+
+    public record StatusRequest(String status) {}
 }

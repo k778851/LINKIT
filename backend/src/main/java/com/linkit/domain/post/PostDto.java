@@ -53,6 +53,7 @@ public class PostDto {
         private int likeCount;
         private int commentCount;
         private int viewCount;
+        private String status;
         private boolean liked;           // 현재 유저 좋아요 여부
         private LocalDateTime createdAt;
 
@@ -67,6 +68,7 @@ public class PostDto {
                     .likeCount(p.getLikeCount())
                     .commentCount(p.getCommentCount())
                     .viewCount(p.getViewCount())
+                    .status(p.getStatus())
                     .liked(liked)
                     .createdAt(p.getCreatedAt())
                     .build();

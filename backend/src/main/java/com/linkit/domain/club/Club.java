@@ -40,6 +40,10 @@ public class Club {
     private int memberCount = 0;
 
     @Builder.Default
+    @Column(name = "new_count", nullable = false)
+    private int newCount = 0;
+
+    @Builder.Default
     private boolean isPrivate = false;
 
     /** 가입 시 질문 (비공개 클럽 전용) */

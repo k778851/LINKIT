@@ -10,6 +10,7 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -26,6 +27,7 @@ public class SearchController {
     private final PostService    postService;
 
     @GetMapping
+    @Transactional(readOnly = true)
     public ApiResponse<SearchResult> search(
             @RequestParam String q,
             @AuthenticationPrincipal UserDetails principal) {

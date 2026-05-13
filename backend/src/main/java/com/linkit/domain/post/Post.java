@@ -41,6 +41,10 @@ public class Post {
     @Builder.Default private int commentCount = 0;
     @Builder.Default private int viewCount    = 0;
 
+    @Builder.Default
+    @Column(length = 20)
+    private String status = "VISIBLE";
+
     @CreationTimestamp
     @Column(updatable = false)
     private LocalDateTime createdAt;

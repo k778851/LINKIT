@@ -62,6 +62,7 @@ public class ClubDto {
         private String category;
         private String description;
         private int memberCount;
+        private int newCount;
         private boolean isPrivate;
         private String schedule;
         private String location;
@@ -78,11 +79,12 @@ public class ClubDto {
                     .category(c.getCategory())
                     .description(c.getDescription())
                     .memberCount(c.getMemberCount())
+                    .newCount(c.getNewCount())
                     .isPrivate(c.isPrivate())
                     .schedule(c.getSchedule())
                     .location(c.getLocation())
                     .createdBy(c.getCreatedBy())
-                    .tags(c.getTags())
+                    .tags(List.copyOf(c.getTags()))
                     .createdAt(c.getCreatedAt())
                     .build();
         }
