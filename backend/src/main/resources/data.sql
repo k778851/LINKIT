@@ -1,18 +1,18 @@
 -- ============================================================
--- LINKIT 샘플 데이터 (H2 개발용)
+-- LINKIT 샘플 데이터 (SQLite 개발용)
 -- ============================================================
 
 -- 유저 (비밀번호는 DataInitializer 에서 실제 BCrypt 해시로 교체됨)
 -- 고유번호 포맷: YYYYMMDD-NNNNN
 INSERT INTO users (id, nickname, handle, emoji, bio, password, role, created_at) VALUES
-  ('admin',   '관리자',    '00000000-00000', '🛡️', 'LINKIT 관리자',            '$2a$10$dummyhash_admin', 'ADMIN', NOW()),
-  ('user-1',  '러닝장',    '20240001-00001', '🏃', '매주 달리는 러닝 크루장',  '$2a$10$dummyhash1',     'USER',  NOW()),
-  ('user-2',  '피자러버',  '20240001-00002', '🍕', '맛집 탐방 전문가',          '$2a$10$dummyhash2',     'USER',  NOW()),
-  ('user-3',  '필름감성',  '20240001-00003', '📷', '필름 사진 모임장',          '$2a$10$dummyhash3',     'USER',  NOW()),
-  ('user-4',  '밴드마스터','20240001-00004', '🎵', '홍대 밴드 클럽장',          '$2a$10$dummyhash4',     'USER',  NOW()),
-  ('user-5',  '독서왕',    '20240001-00005', '📚', '한 달에 한 권 독서모임',    '$2a$10$dummyhash5',     'USER',  NOW()),
-  ('user-6',  '풋살왕',    '20240001-00006', '⚽', '주말 풋살 크루장',          '$2a$10$dummyhash6',     'USER',  NOW()),
-  ('user-me', '링킷유저',  '20240001-00099', '😊', '소모임을 사랑하는 사람 🙌', '$2a$10$dummyhash0',     'USER',  NOW());
+  ('admin',   '관리자',    '00000000-00000', '🛡️', 'LINKIT 관리자',            '$2a$10$dummyhash_admin', 'ADMIN', CURRENT_TIMESTAMP),
+  ('user-1',  '러닝장',    '20240001-00001', '🏃', '매주 달리는 러닝 크루장',  '$2a$10$dummyhash1',     'USER',  CURRENT_TIMESTAMP),
+  ('user-2',  '피자러버',  '20240001-00002', '🍕', '맛집 탐방 전문가',          '$2a$10$dummyhash2',     'USER',  CURRENT_TIMESTAMP),
+  ('user-3',  '필름감성',  '20240001-00003', '📷', '필름 사진 모임장',          '$2a$10$dummyhash3',     'USER',  CURRENT_TIMESTAMP),
+  ('user-4',  '밴드마스터','20240001-00004', '🎵', '홍대 밴드 클럽장',          '$2a$10$dummyhash4',     'USER',  CURRENT_TIMESTAMP),
+  ('user-5',  '독서왕',    '20240001-00005', '📚', '한 달에 한 권 독서모임',    '$2a$10$dummyhash5',     'USER',  CURRENT_TIMESTAMP),
+  ('user-6',  '풋살왕',    '20240001-00006', '⚽', '주말 풋살 크루장',          '$2a$10$dummyhash6',     'USER',  CURRENT_TIMESTAMP),
+  ('user-me', '링킷유저',  '20240001-00099', '😊', '소모임을 사랑하는 사람 🙌', '$2a$10$dummyhash0',     'USER',  CURRENT_TIMESTAMP);
 
 -- 클럽
 INSERT INTO clubs (id, name, emoji, category, description, member_count, new_count, is_private, schedule, location, created_by, created_at) VALUES
@@ -50,27 +50,27 @@ INSERT INTO schedules (id, club_id, time, start_at, location) VALUES
 
 -- 커뮤니티 게시글
 INSERT INTO posts (id, category, title, content, location, author_id, like_count, comment_count, view_count, created_at) VALUES
-  ('post-1','일상',    '같이 꽃 보러 가실분!!!',          '이번 주말 여의도 벚꽃 축제 같이 가실 분 계신가요? 토요일 오후 2시에 모여서 산책하면 좋을 것 같아요 :)',       '여의도', 'user-me', 3,  4, 42,  DATEADD('HOUR',-3,NOW())),
-  ('post-2','모임',    '이번 주 풋살 같이 하실 분!',       '이번 일요일 오후 3시 오치동 풋살장에서 진행합니다. 자리 2~3명 남았어요!',                                     '오치동', 'user-6',  8,  6, 89,  DATEADD('HOUR',-5,NOW())),
-  ('post-3','질문',    '교회 근처 맛집 추천해주세요',      '이번 주 수요일 청년부 모임 후에 다같이 저녁 먹으려고 하는데 근처 맛집 아시는 분 추천 부탁드려요!',            NULL,     'user-7',  5,  9, 67,  DATEADD('HOUR',-8,NOW())),
-  ('post-4','일상',    '오늘 날씨 너무 좋다 ☀️',           '점심 먹고 공원 산책했는데 완전 최고였어요. 이런 날씨에 모임 하기 딱이죠?',                                     NULL,     'user-me', 12, 3, 55,  DATEADD('HOUR',-10,NOW())),
-  ('post-5','나눔',    '베이킹 해봤는데 나눠드려요',       '쿠키랑 마들렌을 너무 많이 구웠어요 ㅎㅎ 내일 청년부 오시는 분들 오실 때 가져갈게요!',                          NULL,     'user-9',  21, 8, 134, DATEADD('DAY',-1,NOW())),
-  ('post-6','생활정보','이번 주 청년부 일정 공유',          '수요일 저녁 7시 예배 후 친교 모임, 토요일 오전 봉사활동, 주일 청년부 예배 1부 9시 / 2부 11시입니다.',        NULL,     'user-10', 15, 2, 210, DATEADD('DAY',-2,NOW())),
-  ('post-7','모임',    '감성 사진 같이 찍을 분?',          '다음 주 성수동 나들이 계획 중인데요, 필름 카메라 가져오실 분 같이 사진 찍어요!',                               '성수동', 'user-3',  7,  5, 78,  DATEADD('DAY',-3,NOW())),
-  ('post-8','생활정보','용봉동 24시 약국 위치 공유해요 💊', '용봉동 GS25 편의점 옆 건물 1층에 24시간 운영하는 약국이 있어요. 늦은 밤에도 이용 가능합니다!',               '용봉동', 'user-me', 12, 2, 98,  DATEADD('DAY',-1,NOW()));
+  ('post-1','일상',    '같이 꽃 보러 가실분!!!',          '이번 주말 여의도 벚꽃 축제 같이 가실 분 계신가요? 토요일 오후 2시에 모여서 산책하면 좋을 것 같아요 :)',       '여의도', 'user-me', 3,  4, 42,  datetime('now','-3 hours')),
+  ('post-2','모임',    '이번 주 풋살 같이 하실 분!',       '이번 일요일 오후 3시 오치동 풋살장에서 진행합니다. 자리 2~3명 남았어요!',                                     '오치동', 'user-6',  8,  6, 89,  datetime('now','-5 hours')),
+  ('post-3','질문',    '교회 근처 맛집 추천해주세요',      '이번 주 수요일 청년부 모임 후에 다같이 저녁 먹으려고 하는데 근처 맛집 아시는 분 추천 부탁드려요!',            NULL,     'user-7',  5,  9, 67,  datetime('now','-8 hours')),
+  ('post-4','일상',    '오늘 날씨 너무 좋다 ☀️',           '점심 먹고 공원 산책했는데 완전 최고였어요. 이런 날씨에 모임 하기 딱이죠?',                                     NULL,     'user-me', 12, 3, 55,  datetime('now','-10 hours')),
+  ('post-5','나눔',    '베이킹 해봤는데 나눠드려요',       '쿠키랑 마들렌을 너무 많이 구웠어요 ㅎㅎ 내일 청년부 오시는 분들 오실 때 가져갈게요!',                          NULL,     'user-9',  21, 8, 134, datetime('now','-1 days')),
+  ('post-6','생활정보','이번 주 청년부 일정 공유',          '수요일 저녁 7시 예배 후 친교 모임, 토요일 오전 봉사활동, 주일 청년부 예배 1부 9시 / 2부 11시입니다.',        NULL,     'user-10', 15, 2, 210, datetime('now','-2 days')),
+  ('post-7','모임',    '감성 사진 같이 찍을 분?',          '다음 주 성수동 나들이 계획 중인데요, 필름 카메라 가져오실 분 같이 사진 찍어요!',                               '성수동', 'user-3',  7,  5, 78,  datetime('now','-3 days')),
+  ('post-8','생활정보','용봉동 24시 약국 위치 공유해요 💊', '용봉동 GS25 편의점 옆 건물 1층에 24시간 운영하는 약국이 있어요. 늦은 밤에도 이용 가능합니다!',               '용봉동', 'user-me', 12, 2, 98,  datetime('now','-1 days'));
 
 -- 댓글
 INSERT INTO comments (id, post_id, content, author_id, like_count, created_at) VALUES
-  ('c-1','post-1','저도 가고 싶어요!!',           'user-8',  1, DATEADD('HOUR',-2,NOW())),
-  ('c-2','post-1','몇 명이나 모였나요?',           'user-9',  0, DATEADD('HOUR',-1,NOW())),
-  ('c-3','post-1','저 갈게요 ☺️',                 'user-7',  2, DATEADD('MINUTE',-30,NOW())),
-  ('c-4','post-1','토요일 오후 2시 맞죠?',         'user-10', 0, DATEADD('MINUTE',-10,NOW())),
-  ('c-5','post-3','근처 돈까스 집 추천! 맛있어요.','user-8',  3, DATEADD('HOUR',-7,NOW()));
+  ('c-1','post-1','저도 가고 싶어요!!',           'user-8',  1, datetime('now','-2 hours')),
+  ('c-2','post-1','몇 명이나 모였나요?',           'user-9',  0, datetime('now','-1 hours')),
+  ('c-3','post-1','저 갈게요 ☺️',                 'user-7',  2, datetime('now','-30 minutes')),
+  ('c-4','post-1','토요일 오후 2시 맞죠?',         'user-10', 0, datetime('now','-10 minutes')),
+  ('c-5','post-3','근처 돈까스 집 추천! 맛있어요.','user-8',  3, datetime('now','-7 hours'));
 
 -- 클럽 게시글
 INSERT INTO club_posts (id, club_id, category, title, content, author_id, like_count, comment_count, view_count, created_at) VALUES
-  ('cp-1','club-1','공지','이번 주 금요일 러닝 코스 변경 안내',  '4/26(금) 여의도 벚꽃 인파로 인해 한강 반포 코스로 변경됩니다. 집결 장소: 반포한강공원 3번 게이트. 시간 동일 20:00!','user-1', 14,5, 88,  DATEADD('HOUR',-1,NOW())),
-  ('cp-2','club-1','자유','오늘 러닝 후기 😤 완전 힘들었다',     '10km 뛰었는데 마지막 2km가 진짜 지옥이었어요 ㅋㅋ 그래도 완주! 다음엔 더 잘할 수 있을 것 같아요.','user-2', 9, 3, 54,  DATEADD('HOUR',-6,NOW())),
-  ('cp-3','club-1','질문','러닝화 추천 부탁드려요!',              '이제 막 시작한 초보인데 신발을 뭘 신어야 할지 모르겠어요. 쿠셔닝 좋은 거 위주로 추천해주시면 감사하겠습니다 🙏','user-me',4, 7, 41,  DATEADD('DAY',-2,NOW())),
-  ('cp-4','club-3','공지','5월 출사 일정 — 성수동 카페거리',      '05/11(일) 오전 10시 성수동 카페거리에서 진행합니다. 필름카메라·디지털 모두 환영! 점심도 같이 먹어요 🍽️','user-3', 18,6, 120, DATEADD('DAY',-3,NOW())),
-  ('cp-5','club-3','자유','지난 출사 사진 몇 장 공유해요',        '지난달 망원 출사에서 찍은 사진들이에요. 역시 골든아워에 필름감이 최고네요 📸 다들 사진 올려주세요!','user-4', 31,12,203, DATEADD('DAY',-5,NOW()));
+  ('cp-1','club-1','공지','이번 주 금요일 러닝 코스 변경 안내',  '4/26(금) 여의도 벚꽃 인파로 인해 한강 반포 코스로 변경됩니다. 집결 장소: 반포한강공원 3번 게이트. 시간 동일 20:00!','user-1', 14,5, 88,  datetime('now','-1 hours')),
+  ('cp-2','club-1','자유','오늘 러닝 후기 😤 완전 힘들었다',     '10km 뛰었는데 마지막 2km가 진짜 지옥이었어요 ㅋㅋ 그래도 완주! 다음엔 더 잘할 수 있을 것 같아요.','user-2', 9, 3, 54,  datetime('now','-6 hours')),
+  ('cp-3','club-1','질문','러닝화 추천 부탁드려요!',              '이제 막 시작한 초보인데 신발을 뭘 신어야 할지 모르겠어요. 쿠셔닝 좋은 거 위주로 추천해주시면 감사하겠습니다 🙏','user-me',4, 7, 41,  datetime('now','-2 days')),
+  ('cp-4','club-3','공지','5월 출사 일정 — 성수동 카페거리',      '05/11(일) 오전 10시 성수동 카페거리에서 진행합니다. 필름카메라·디지털 모두 환영! 점심도 같이 먹어요 🍽️','user-3', 18,6, 120, datetime('now','-3 days')),
+  ('cp-5','club-3','자유','지난 출사 사진 몇 장 공유해요',        '지난달 망원 출사에서 찍은 사진들이에요. 역시 골든아워에 필름감이 최고네요 📸 다들 사진 올려주세요!','user-4', 31,12,203, datetime('now','-5 days'));

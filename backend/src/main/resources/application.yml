@@ -92,21 +92,15 @@ app:
     subject: "mailto:k778851@gmail.com"
 
 ---
-# ── 테스트 환경 (H2 인메모리) ────────────────────────────────
+# ── 테스트 환경 (SQLite - 테스트 파일) ─────────────────────────
 spring:
   config:
     activate:
       on-profile: test
 
   datasource:
-    url: jdbc:h2:mem:linkittest;DB_CLOSE_DELAY=-1;MODE=MySQL
-    driver-class-name: org.h2.Driver
-    username: sa
-    password:
-
-  h2:
-    console:
-      enabled: false
+    url: jdbc:sqlite:${DB_PATH:./linkit-test.db}
+    driver-class-name: org.sqlite.JDBC
 
   jpa:
     hibernate:
@@ -114,7 +108,7 @@ spring:
     show-sql: false
     properties:
       hibernate:
-        dialect: org.hibernate.dialect.H2Dialect
+        dialect: org.hibernate.community.dialect.SQLiteDialect
     open-in-view: false
 
 jwt:

@@ -1,127 +1,133 @@
 # LINKIT Backend
 
-Spring Boot 3.2 + JWT 기반 REST API 서버
+Spring Boot 3.2 + JWT based REST API server.
 
-## 기술 스택
+## Stack
 
-| 분류 | 기술 |
-|------|------|
+| Area | Technology |
+|------|------------|
 | Language | Java 17 |
 | Framework | Spring Boot 3.2 |
-| DB (개발) | H2 In-Memory |
-| DB (운영) | MySQL 8+ |
+| DB | SQLite |
 | ORM | Spring Data JPA / Hibernate |
-| 인증 | Spring Security + JWT (JJWT 0.12) |
+| Auth | Spring Security + JWT (JJWT 0.12) |
 | Build | Maven |
 
-## 빠른 시작
+## Quick Start
 
 ```bash
-# 1. 프로젝트 루트 (backend/) 이동
 cd backend
 
-# 2. 빌드 + 실행 (H2 개발 모드)
+# macOS/Linux
 ./mvnw spring-boot:run
 
 # Windows
 mvnw.cmd spring-boot:run
 ```
 
-서버: `http://localhost:8080`  
-H2 콘솔: `http://localhost:8080/h2-console` (JDBC URL: `jdbc:h2:mem:linkitdb`)
+Server: `http://localhost:8080`
 
-## API 목록
+Default development DB file: `backend/linkit-dev.db`
 
-### 인증
-| Method | URL | 설명 |
-|--------|-----|------|
-| POST | `/api/auth/register` | 회원가입 |
-| POST | `/api/auth/login` | 로그인 → JWT 발급 |
-
-### 유저
-| Method | URL | 설명 |
-|--------|-----|------|
-| GET | `/api/users/me` | 내 프로필 조회 🔒 |
-| PUT | `/api/users/me` | 내 프로필 수정 🔒 |
-| GET | `/api/users/{id}` | 특정 유저 조회 |
-
-### 클럽
-| Method | URL | 설명 |
-|--------|-----|------|
-| GET | `/api/clubs?category=전체&sort=최신순` | 클럽 목록 |
-| GET | `/api/clubs/{id}` | 클럽 상세 |
-| POST | `/api/clubs` | 클럽 생성 🔒 |
-| PUT | `/api/clubs/{id}` | 클럽 수정 🔒 (클럽장) |
-| DELETE | `/api/clubs/{id}` | 클럽 삭제 🔒 (클럽장) |
-| POST | `/api/clubs/{id}/join` | 모임 신청 🔒 |
-| DELETE | `/api/clubs/{id}/join` | 참여 취소 🔒 |
-| POST | `/api/clubs/{id}/bookmark` | 찜 토글 🔒 |
-
-### 클럽 게시판
-| Method | URL | 설명 |
-|--------|-----|------|
-| GET | `/api/clubs/{id}/posts` | 클럽 게시글 목록 |
-| POST | `/api/clubs/{id}/posts` | 게시글 작성 🔒 |
-| DELETE | `/api/clubs/{id}/posts/{postId}` | 게시글 삭제 🔒 |
-
-### 일정
-| Method | URL | 설명 |
-|--------|-----|------|
-| GET | `/api/schedules/me` | 내 일정 (가입 클럽) 🔒 |
-| GET | `/api/clubs/{id}/schedules` | 클럽 일정 목록 |
-| POST | `/api/schedules` | 일정 등록 🔒 (클럽장) |
-| DELETE | `/api/schedules/{id}` | 일정 삭제 🔒 (클럽장) |
-
-### 커뮤니티 게시글
-| Method | URL | 설명 |
-|--------|-----|------|
-| GET | `/api/posts?category=전체` | 게시글 목록 |
-| GET | `/api/posts/{id}` | 게시글 상세 (조회수 +1) |
-| POST | `/api/posts` | 게시글 작성 🔒 |
-| PUT | `/api/posts/{id}` | 게시글 수정 🔒 (작성자) |
-| DELETE | `/api/posts/{id}` | 게시글 삭제 🔒 (작성자) |
-| POST | `/api/posts/{id}/like` | 좋아요 토글 🔒 |
-| GET | `/api/posts/me` | 내 게시글 목록 🔒 |
-
-### 댓글
-| Method | URL | 설명 |
-|--------|-----|------|
-| GET | `/api/posts/{id}/comments` | 댓글 목록 |
-| POST | `/api/posts/{id}/comments` | 댓글 등록 🔒 |
-| DELETE | `/api/comments/{id}` | 댓글 삭제 🔒 (작성자) |
-
-### 알림
-| Method | URL | 설명 |
-|--------|-----|------|
-| GET | `/api/notifications` | 내 알림 목록 🔒 |
-| GET | `/api/notifications/unread-count` | 미읽음 수 🔒 |
-| PATCH | `/api/notifications/{id}/read` | 단건 읽음 처리 🔒 |
-| PATCH | `/api/notifications/read-all` | 전체 읽음 처리 🔒 |
-
-> 🔒 = `Authorization: Bearer <token>` 헤더 필요
-
-## 인증 사용 예시
+You can override the DB path:
 
 ```bash
-# 1. 로그인
-curl -X POST http://localhost:8080/api/auth/login \
-  -H "Content-Type: application/json" \
-  -d '{"handle":"linkit_user","password":"password123"}'
-
-# 2. 토큰으로 요청
-curl http://localhost:8080/api/users/me \
-  -H "Authorization: Bearer <위에서_받은_토큰>"
+DB_PATH=./linkit-dev.db ./mvnw spring-boot:run
 ```
 
-## 운영 환경 (MySQL) 전환
+## API Summary
 
-`application.yml`의 active profile을 `prod`로 변경하거나 환경변수 설정:
+Authenticated endpoints require `Authorization: Bearer <token>`.
+
+### Auth
+
+| Method | URL | Description |
+|--------|-----|-------------|
+| POST | `/api/auth/register` | Register |
+| POST | `/api/auth/login` | Login and issue JWT |
+
+### Users
+
+| Method | URL | Description |
+|--------|-----|-------------|
+| GET | `/api/users/me` | Current user profile |
+| PUT | `/api/users/me` | Update current user profile |
+| GET | `/api/users/{id}` | User profile |
+
+### Clubs
+
+| Method | URL | Description |
+|--------|-----|-------------|
+| GET | `/api/clubs` | Club list |
+| GET | `/api/clubs/{id}` | Club detail |
+| POST | `/api/clubs` | Create club |
+| PUT | `/api/clubs/{id}` | Update club |
+| DELETE | `/api/clubs/{id}` | Delete club |
+| POST | `/api/clubs/{id}/join` | Join/apply to club |
+| DELETE | `/api/clubs/{id}/join` | Leave/cancel club |
+| POST | `/api/clubs/{id}/bookmark` | Toggle bookmark |
+
+### Club Posts
+
+| Method | URL | Description |
+|--------|-----|-------------|
+| GET | `/api/clubs/{id}/posts` | Club post list |
+| POST | `/api/clubs/{id}/posts` | Create club post |
+| DELETE | `/api/clubs/{id}/posts/{postId}` | Delete club post |
+
+### Schedules
+
+| Method | URL | Description |
+|--------|-----|-------------|
+| GET | `/api/schedules/me` | My schedules |
+| GET | `/api/clubs/{id}/schedules` | Club schedules |
+| POST | `/api/schedules` | Create schedule |
+| DELETE | `/api/schedules/{id}` | Delete schedule |
+
+### Community Posts
+
+| Method | URL | Description |
+|--------|-----|-------------|
+| GET | `/api/posts` | Post list |
+| GET | `/api/posts/{id}` | Post detail |
+| POST | `/api/posts` | Create post |
+| PUT | `/api/posts/{id}` | Update post |
+| DELETE | `/api/posts/{id}` | Delete post |
+| POST | `/api/posts/{id}/like` | Toggle like |
+| GET | `/api/posts/me` | My posts |
+
+### Comments
+
+| Method | URL | Description |
+|--------|-----|-------------|
+| GET | `/api/posts/{id}/comments` | Comment list |
+| POST | `/api/posts/{id}/comments` | Create comment |
+| DELETE | `/api/comments/{id}` | Delete comment |
+
+### Notifications
+
+| Method | URL | Description |
+|--------|-----|-------------|
+| GET | `/api/notifications` | Notification list |
+| GET | `/api/notifications/unread-count` | Unread count |
+| PATCH | `/api/notifications/{id}/read` | Mark as read |
+| PATCH | `/api/notifications/read-all` | Mark all as read |
+
+## SQLite Profiles
+
+Development uses SQLite by default:
+
+```yaml
+spring.datasource.url: jdbc:sqlite:${DB_PATH:./linkit-dev.db}
+```
+
+Production also uses SQLite and reads `DB_PATH`:
 
 ```bash
-export SPRING_PROFILES_ACTIVE=prod
-export DB_HOST=localhost
-export DB_NAME=linkitdb
-export DB_USER=linkit
-export DB_PASSWORD=비밀번호
-export JWT_SECRET=256비트_이상_시크릿키
+set SPRING_PROFILES_ACTIVE=prod
+set DB_PATH=C:\data\linkit.db
+set JWT_SECRET=256bit_or_longer_secret
+set CORS_ORIGINS=http://localhost:3000,https://k7788.github.io
 ```
+
+The test profile also uses SQLite and defaults to `backend/linkit-test.db`.

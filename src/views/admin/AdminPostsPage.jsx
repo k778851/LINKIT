@@ -6,7 +6,7 @@ import { adminPosts, reportInbox } from './adminDemoData';
 import s from './admin.module.css';
 
 const filters = ['전체', '노출', '숨김', '삭제', '대기'];
-const bannedWords = [
+const initialBannedWords = [
   ['욕설', 12],
   ['비방', 8],
   ['스팸', 5],
@@ -17,15 +17,32 @@ const bannedWords = [
 export function AdminPostsPage() {
   const [query, setQuery] = useState('');
   const [filter, setFilter] = useState('전체');
+  const [posts, setPosts] = useState(adminPosts);
+  const [reports, setReports] = useState(reportInbox);
+  const [bannedWords, setBannedWords] = useState(initialBannedWords);
 
-  const posts = useMemo(() => {
+  const visiblePosts = useMemo(() => {
     const q = query.trim().toLowerCase();
-    return adminPosts.filter((post) => {
+    return posts.filter((post) => {
       const matched = !q || post.title.toLowerCase().includes(q) || post.author.toLowerCase().includes(q);
       const statusMatched = filter === '전체' || post.status === filter;
       return matched && statusMatched;
     });
-  }, [query, filter]);
+  }, [posts, query, filter]);
+
+  const updatePostStatus = (id, status) => {
+    setPosts((prev) => prev.map((post) => post.id === id ? { ...post, status } : post));
+  };
+
+  const resolveFirstReport = () => {
+    setReports((prev) => prev.slice(1));
+    setPosts((prev) => prev.map((post, index) => index === 0 ? { ...post, status: '숨김' } : post));
+  };
+
+  const addBannedWord = () => {
+    const nextIndex = bannedWords.length + 1;
+    setBannedWords((prev) => [...prev, [`운영키워드${nextIndex}`, 0]]);
+  };
 
   return (
     <div>
@@ -36,16 +53,16 @@ export function AdminPostsPage() {
           <p className={s.pageDesc}>게시글·댓글 관리와 신고 접수를 한 화면에서 처리합니다.</p>
         </div>
         <div className={s.headerActions}>
-          <button className={s.ghostBtn}><AlertTriangle size={16} /> 신고 처리</button>
-          <button className={s.primaryBtn}><Plus size={16} /> 금칙어 추가</button>
+          <button className={s.ghostBtn} onClick={resolveFirstReport}><AlertTriangle size={16} /> 신고 처리</button>
+          <button className={s.primaryBtn} onClick={addBannedWord}><Plus size={16} /> 금칙어 추가</button>
         </div>
       </div>
 
       <div className={s.statGrid}>
         <Metric label="총 게시글" value="1,234" trend="▲ 5.2%" />
-        <Metric label="신고 접수" value="45" trend="▲ 12.5%" />
-        <Metric label="처리 완료" value="38" trend="✓ 84%" />
-        <Metric label="대기 중" value="7" trend="평균 15분" />
+        <Metric label="신고 접수" value={String(reports.length)} trend="대기 큐" />
+        <Metric label="처리 완료" value={String(45 - reports.length)} trend="즉시 반영" />
+        <Metric label="대기 중" value={String(posts.filter((post) => post.status === '대기').length)} trend="평균 15분" />
       </div>
 
       <div className={s.grid2}>
@@ -79,16 +96,22 @@ export function AdminPostsPage() {
                 </tr>
               </thead>
               <tbody>
-                {posts.map((post) => (
+                {visiblePosts.map((post) => (
                   <tr key={post.id}>
                     <td>{post.id}</td>
                     <td>{post.author}</td>
                     <td><span className={`${s.badge} ${s.badgeBlue}`}>{post.category}</span></td>
                     <td><strong>{post.title}</strong></td>
                     <td>{post.reports}</td>
-                    <td><span className={`${s.badge} ${post.status === '숨김' ? s.badgeOrange : post.status === '대기' ? s.badgeRed : s.badgeGreen}`}>{post.status}</span></td>
+                    <td><span className={`${s.badge} ${post.status === '숨김' ? s.badgeOrange : post.status === '대기' ? s.badgeRed : post.status === '삭제' ? s.badgeGray : s.badgeGreen}`}>{post.status}</span></td>
                     <td>{post.createdAt}</td>
-                    <td><button className={s.smallBtn}>처리</button></td>
+                    <td>
+                      <div className={s.actionGroup}>
+                        <button className={s.smallBtn} onClick={() => updatePostStatus(post.id, '노출')}>노출</button>
+                        <button className={s.rejectBtn} onClick={() => updatePostStatus(post.id, '숨김')}>숨김</button>
+                        <button className={s.deleteBtn} onClick={() => updatePostStatus(post.id, '삭제')}>삭제</button>
+                      </div>
+                    </td>
                   </tr>
                 ))}
               </tbody>
@@ -98,9 +121,9 @@ export function AdminPostsPage() {
 
         <aside>
           <section className={s.card}>
-            <p className={s.cardTitle}>신고 접수함 <span className={s.sectionNote}>5건</span></p>
+            <p className={s.cardTitle}>신고 접수함 <span className={s.sectionNote}>{reports.length}건</span></p>
             <div className={s.queueList}>
-              {reportInbox.map((item) => (
+              {reports.length === 0 ? <p className={s.empty}>대기 중인 신고가 없습니다.</p> : reports.map((item) => (
                 <div key={item.title} className={s.queueItem}>
                   <div>
                     <p className={s.itemTitle}>{item.title}</p>

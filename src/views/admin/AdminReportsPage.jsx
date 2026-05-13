@@ -1,13 +1,14 @@
 'use client';
 
+import { useState } from 'react';
 import { Download } from 'lucide-react';
 import s from './admin.module.css';
 
 const metrics = [
-  ['총 회원', '12,458', '▲ 5.2% vs 지난주'],
-  ['활성 회원', '8,234', '▲ 3.8% vs 지난주'],
-  ['신규 가입', '156', '▲ 12.5% vs 어제'],
-  ['이탈률', '2.3%', '▼ 0.5% vs 지난주'],
+  ['전체 회원', '12,458', '+5.2% vs 지난주'],
+  ['활성 회원', '8,234', '+3.8% vs 지난주'],
+  ['신규 가입', '156', '+12.5% vs 어제'],
+  ['이탈률', '2.3%', '-0.5% vs 지난주'],
 ];
 
 const ops = [
@@ -19,15 +20,24 @@ const ops = [
 ];
 
 export function AdminReportsPage() {
+  const [exportedAt, setExportedAt] = useState('');
+
+  const handleExport = () => {
+    setExportedAt(new Date().toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' }));
+  };
+
   return (
     <div>
       <div className={s.pageHeader}>
         <div>
           <p className={s.eyebrow}>STATISTICS</p>
           <h1 className={s.pageTitle}>통계 및 리포트</h1>
-          <p className={s.pageDesc}>성장·건전성 지표를 바탕으로 운영 의사결정을 지원합니다.</p>
+          <p className={s.pageDesc}>성장, 신고, 처리 속도 지표를 바탕으로 운영 의사결정을 지원합니다.</p>
         </div>
-        <button className={s.primaryBtn}><Download size={16} /> CSV 내보내기</button>
+        <div className={s.headerActions}>
+          {exportedAt && <span className={`${s.badge} ${s.badgeGreen}`}>{exportedAt} 생성됨</span>}
+          <button className={s.primaryBtn} onClick={handleExport}><Download size={16} /> CSV 내보내기</button>
+        </div>
       </div>
 
       <div className={s.statGrid}>

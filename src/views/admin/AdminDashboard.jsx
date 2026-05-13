@@ -1,20 +1,22 @@
 'use client';
 
 import { AlertTriangle, BookOpen, CheckCircle2, Clock, FileText, Search, Users } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 import { useClubStore } from '../../store/clubStore';
 import { useCommunityStore } from '../../store/communityStore';
 import { dashboardTasks, reportInbox } from './adminDemoData';
 import s from './admin.module.css';
 
 export function AdminDashboard() {
+  const router = useRouter();
   const clubs = useClubStore((state) => state.clubs);
   const posts = useCommunityStore((state) => state.posts);
 
   const cards = [
-    { label: '총 회원', value: '12,458', trend: '▲ 5.2%', icon: Users },
-    { label: '활성 클럽', value: clubs.length.toLocaleString(), trend: '▲ 3.8%', icon: BookOpen },
-    { label: '오늘 신고', value: '5', trend: '▼ 12.5%', icon: AlertTriangle, down: true },
-    { label: '전체 게시글', value: posts.length.toLocaleString(), trend: '▲ 8.3%', icon: FileText },
+    { label: '전체 회원', value: '12,458', trend: '+5.2%', icon: Users },
+    { label: '활성 클럽', value: clubs.length.toLocaleString(), trend: '+3.8%', icon: BookOpen },
+    { label: '오늘 신고', value: '5', trend: '-12.5%', icon: AlertTriangle, down: true },
+    { label: '전체 게시글', value: posts.length.toLocaleString(), trend: '+8.3%', icon: FileText },
   ];
 
   return (
@@ -26,8 +28,8 @@ export function AdminDashboard() {
           <p className={s.pageDesc}>핵심 지표, 승인 대기, 신고 알림, 오늘의 운영 업무를 한눈에 확인합니다.</p>
         </div>
         <div className={s.headerActions}>
-          <button className={s.ghostBtn}><Search size={16} /> 회원 검색</button>
-          <button className={s.primaryBtn}><CheckCircle2 size={16} /> 클럽 승인</button>
+          <button className={s.ghostBtn} onClick={() => router.push('/admin/users')}><Search size={16} /> 회원 검색</button>
+          <button className={s.primaryBtn} onClick={() => router.push('/admin/clubs')}><CheckCircle2 size={16} /> 클럽 승인</button>
         </div>
       </div>
 
@@ -46,7 +48,7 @@ export function AdminDashboard() {
 
       <div className={s.grid2}>
         <section className={s.card}>
-          <p className={s.cardTitle}>오늘의 할 일 <span className={s.sectionNote}>4건</span></p>
+          <p className={s.cardTitle}>오늘의 업무 <span className={s.sectionNote}>4건</span></p>
           <div className={s.grid3}>
             {dashboardTasks.map((task) => (
               <div key={task.title} className={s.queueItem}>
@@ -83,7 +85,7 @@ export function AdminDashboard() {
         <div className={s.grid3}>
           {[
             ['회원/권한', '회원 관리, 권한 설정'],
-            ['클럽/신청', '클럽 관리, 신청 처리'],
+            ['클럽/신청', '클럽 관리, 가입 승인 처리'],
             ['커뮤니티/신고', '게시글, 댓글, 신고 관리'],
             ['메인 노출', '배너, 키워드 관리'],
             ['통계/리포트', '데이터 분석, 리포트'],
@@ -94,7 +96,7 @@ export function AdminDashboard() {
                 <p className={s.itemTitle}>{title}</p>
                 <p className={s.itemMeta}>{desc}</p>
               </div>
-              <span className={s.badge + ' ' + s.badgeBlue}>운영</span>
+              <span className={`${s.badge} ${s.badgeBlue}`}>운영</span>
             </div>
           ))}
         </div>

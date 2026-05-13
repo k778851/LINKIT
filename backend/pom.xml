@@ -61,13 +61,6 @@
       <artifactId>hibernate-community-dialects</artifactId>
     </dependency>
 
-    <!-- H2 (테스트 전용) -->
-    <dependency>
-      <groupId>com.h2database</groupId>
-      <artifactId>h2</artifactId>
-      <scope>test</scope>
-    </dependency>
-
     <!-- Lombok -->
     <dependency>
       <groupId>org.projectlombok</groupId>
