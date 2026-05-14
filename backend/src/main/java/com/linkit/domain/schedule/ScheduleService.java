@@ -24,6 +24,7 @@ public class ScheduleService {
     private final ScheduleRepository   scheduleRepository;
     private final ClubRepository       clubRepository;
     private final ClubMemberRepository clubMemberRepository;
+    private final ScheduleAttendeeRepository scheduleAttendeeRepository;
 
     /** 유저가 가입한 클럽들의 다가오는 일정 */
     public List<ScheduleDto.Response> getMySchedules(String userId) {
@@ -92,5 +93,24 @@ public class ScheduleService {
         if (!club.getCreatedBy().equals(userId))
             throw new AccessDeniedException("일정 삭제 권한이 없습니다.");
         scheduleRepository.delete(schedule);
+    }
+
+    @Transactional
+    public void applySchedule(String scheduleId, String userId) {
+        Schedule schedule = scheduleRepository.findById(scheduleId)
+                .orElseThrow(() -> new EntityNotFoundException("일정을 찾을 수 없습니다."));
+        if (!clubMemberRepository.existsByClubIdAndUserId(schedule.getClubId(), userId)) {
+            throw new AccessDeniedException("클럽 멤버만 일정에 신청할 수 있습니다.");
+        }
+        if (!scheduleAttendeeRepository.existsByScheduleIdAndUserId(scheduleId, userId)) {
+            scheduleAttendeeRepository.save(new ScheduleAttendee(scheduleId, userId, null));
+        }
+    }
+
+    @Transactional
+    public void cancelSchedule(String scheduleId, String userId) {
+        scheduleRepository.findById(scheduleId)
+                .orElseThrow(() -> new EntityNotFoundException("일정을 찾을 수 없습니다."));
+        scheduleAttendeeRepository.deleteByScheduleIdAndUserId(scheduleId, userId);
     }
 }

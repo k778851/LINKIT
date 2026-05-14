@@ -7,6 +7,14 @@ import styles from './ImageUpload.module.css';
 
 const BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:8080';
 
+const readAsDataUrl = (file) =>
+  new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result);
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+
 /**
  * 이미지 업로드 컴포넌트
  *
@@ -23,7 +31,7 @@ export function ImageUpload({ value, onChange, shape = 'square', placeholder = '
   const [error, setError] = useState(null);
 
   // 서버 URL이면 BASE_URL 접두어 붙이기
-  const displayUrl = preview ?? (value ? (value.startsWith('http') ? value : `${BASE_URL}${value}`) : null);
+  const displayUrl = preview ?? (value ? (value.startsWith('http') || value.startsWith('data:') ? value : `${BASE_URL}${value}`) : null);
 
   const handleFileChange = async (e) => {
     const file = e.target.files?.[0];
@@ -43,6 +51,7 @@ export function ImageUpload({ value, onChange, shape = 'square', placeholder = '
 
     // 즉시 로컬 미리보기
     const localUrl = URL.createObjectURL(file);
+    const localDataUrl = await readAsDataUrl(file);
     setPreview(localUrl);
 
     // 서버 업로드
@@ -53,9 +62,10 @@ export function ImageUpload({ value, onChange, shape = 'square', placeholder = '
       onChange(serverUrl);
       URL.revokeObjectURL(localUrl);
     } catch {
-      // 오프라인 or 서버 오류 → 로컬 URL을 임시로 사용
-      onChange(localUrl);
+      // 오프라인 or 서버 오류 → 새로고침 후에도 유지되는 data URL로 데모를 계속 진행
+      onChange(localDataUrl);
       setPreview(null);
+      URL.revokeObjectURL(localUrl);
     } finally {
       setUploading(false);
       // input 초기화 (같은 파일 재선택 가능하게)

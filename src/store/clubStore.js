@@ -2,7 +2,8 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { sampleClubs, sampleSchedules } from '../data/sampleData';
 import { clubApi } from '../api/clubApi';
-import { ApiError, tokenStorage } from '../api/apiClient';
+import { scheduleApi } from '../api/scheduleApi';
+import { ApiError } from '../api/apiClient';
 
 /** 백엔드 미연결 or 미인증 — 로컬 fallback 허용 */
 const shouldFallback = (e) =>
@@ -14,6 +15,7 @@ export const useClubStore = create(
       clubs:            sampleClubs,
       pendingClubs:     [],      // 관리자 승인 대기 중인 클럽
       schedules:        sampleSchedules,
+      appliedScheduleIds: [],
       selectedCategory: '전체',
       selectedSort:     '최신순',
       loaded:           false,   // API에서 한 번이라도 로드했는지
@@ -23,10 +25,6 @@ export const useClubStore = create(
 
       /* ── API: 클럽 목록 로드 ──────────────────────────── */
       fetchClubs: async () => {
-        if (!tokenStorage.get()) {
-          set({ loaded: true });
-          return;
-        }
         const { selectedCategory, selectedSort } = get();
         try {
           const clubs = await clubApi.getAll(selectedCategory, selectedSort);
@@ -190,6 +188,34 @@ export const useClubStore = create(
           if (!shouldFallback(e)) throw e;
         }
         get().decrementMemberCount(clubId);
+      },
+
+      applySchedule: async (scheduleId) => {
+        const alreadyApplied = get().appliedScheduleIds.includes(scheduleId);
+        if (alreadyApplied) return;
+        set((s) => ({ appliedScheduleIds: [...s.appliedScheduleIds, scheduleId] }));
+        try {
+          await scheduleApi.apply(scheduleId);
+        } catch (e) {
+          if (!shouldFallback(e)) {
+            set((s) => ({ appliedScheduleIds: s.appliedScheduleIds.filter((id) => id !== scheduleId) }));
+            throw e;
+          }
+        }
+      },
+
+      cancelSchedule: async (scheduleId) => {
+        const wasApplied = get().appliedScheduleIds.includes(scheduleId);
+        if (!wasApplied) return;
+        set((s) => ({ appliedScheduleIds: s.appliedScheduleIds.filter((id) => id !== scheduleId) }));
+        try {
+          await scheduleApi.cancel(scheduleId);
+        } catch (e) {
+          if (!shouldFallback(e)) {
+            set((s) => ({ appliedScheduleIds: [...s.appliedScheduleIds, scheduleId] }));
+            throw e;
+          }
+        }
       },
 
       /* ── 일정 ─────────────────────────────────────────── */

@@ -46,4 +46,21 @@ public class ScheduleController {
         scheduleService.deleteSchedule(scheduleId, principal.getUsername());
         return ApiResponse.ok("일정을 삭제했어요.");
     }
+    /** 일정 신청 */
+    @PostMapping("/api/schedules/{scheduleId}/attendees")
+    public ApiResponse<Void> apply(
+            @AuthenticationPrincipal UserDetails principal,
+            @PathVariable String scheduleId) {
+        scheduleService.applySchedule(scheduleId, principal.getUsername());
+        return ApiResponse.ok("일정 신청이 완료되었습니다.");
+    }
+
+    /** 일정 신청 취소 */
+    @DeleteMapping("/api/schedules/{scheduleId}/attendees")
+    public ApiResponse<Void> cancel(
+            @AuthenticationPrincipal UserDetails principal,
+            @PathVariable String scheduleId) {
+        scheduleService.cancelSchedule(scheduleId, principal.getUsername());
+        return ApiResponse.ok("일정 신청이 취소되었습니다.");
+    }
 }

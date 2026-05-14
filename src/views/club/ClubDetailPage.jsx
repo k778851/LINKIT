@@ -36,12 +36,14 @@ export function ClubDetailPage({ clubId }) {
   const leaveClubStore = useAuthStore((s) => s.leaveClub);
   const joinClubApi = useClubStore((s) => s.joinClubApi);
   const leaveClubApi = useClubStore((s) => s.leaveClubApi);
+  const appliedScheduleIds = useClubStore((s) => s.appliedScheduleIds);
+  const applySchedule = useClubStore((s) => s.applySchedule);
+  const cancelSchedule = useClubStore((s) => s.cancelSchedule);
   const { showToast } = useToastContext();
 
   const [tab, setTab] = useState('intro');
   const [openMenuUserId, setOpenMenuUserId] = useState(null);
   const [showLeaveConfirm, setShowLeaveConfirm] = useState(false);
-  const [appliedScheduleIds, setAppliedScheduleIds] = useState([]);
 
   if (!club) return <EmptyState emoji="😢" title="클럽을 찾을 수 없어요" />;
 
@@ -80,19 +82,19 @@ export function ClubDetailPage({ clubId }) {
     showToast(isBookmarked ? '찜 목록에서 제거했어요.' : '찜 목록에 추가했어요.', isBookmarked ? 'info' : 'success');
   };
 
-  const joinForSchedule = (scheduleId) => {
+  const joinForSchedule = async (scheduleId) => {
     const isApplied = appliedScheduleIds.includes(scheduleId);
     if (isApplied) {
-      setAppliedScheduleIds((prev) => prev.filter((id) => id !== scheduleId));
+      await cancelSchedule(scheduleId);
       showToast('일정 신청을 취소했어요.', 'info');
       return;
     }
-    setAppliedScheduleIds((prev) => [...prev, scheduleId]);
     if (!isJoined) {
       joinClubStore(clubId, { name: club.name, memberCount: club.memberCount });
       incrementMemberCount(clubId);
-      joinClubApi(clubId).catch(() => {});
+      await joinClubApi(clubId);
     }
+    await applySchedule(scheduleId);
     showToast(`${club.name} 일정에 신청했어요.`, 'success');
   };
 
