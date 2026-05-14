@@ -39,6 +39,33 @@
   color: var(--ink-2); white-space: nowrap; flex-shrink: 0;
 }
 
+.regionRow {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding: 10px 16px;
+  background: var(--base-white);
+  border-bottom: 1px solid var(--base-border);
+}
+
+.regionChip {
+  flex-shrink: 0;
+  height: 30px;
+  padding: 0 13px;
+  border-radius: 999px;
+  border: 1.5px solid var(--base-border);
+  background: var(--base-white);
+  color: var(--ink-3);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.regionChipActive {
+  border-color: var(--blue);
+  background: var(--blue-soft);
+  color: var(--blue);
+}
+
 /* ── Body ── */
 .body { flex: 1; overflow-y: auto; padding: 0 0 32px; }
 

@@ -4,6 +4,7 @@ import { useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Plus, SlidersHorizontal, X } from 'lucide-react';
 import { useClubStore } from '../../store/clubStore';
+import { REGION_OPTIONS, matchesRegion } from '../../data/regions';
 import { Chip } from '../../components/common/Chip';
 import { ClubCard } from '../../components/club/ClubCard';
 import { FAB } from '../../components/common/FAB';
@@ -20,34 +21,53 @@ export function ClubListPage() {
   const {
     selectedCategory, setCategory,
     selectedSort, setSort,
+    selectedRegion, setRegion,
     getFilteredClubs,
     clubs: allClubs,
     loaded, fetchClubs,
   } = useClubStore();
+
   const clubs = getFilteredClubs();
-  const isFiltered = selectedCategory !== '전체' || selectedSort !== '최신순';
-  const resetFilter = () => { setCategory('전체'); setSort('최신순'); };
+  const regionClubCount = allClubs.filter((club) => matchesRegion(club, selectedRegion)).length;
+  const isFiltered = selectedCategory !== '전체' || selectedSort !== '최신순' || selectedRegion !== '전체';
+
+  const resetFilter = () => {
+    setCategory('전체');
+    setSort('최신순');
+    setRegion('전체');
+  };
 
   useEffect(() => {
     const cat = searchParams.get('category');
     if (cat && CATEGORIES.includes(cat)) setCategory(cat);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [searchParams]);
+  }, [searchParams, setCategory]);
+
+  useEffect(() => {
+    if (!CATEGORIES.includes(selectedCategory)) setCategory('전체');
+    if (!SORTS.includes(selectedSort)) setSort('최신순');
+    if (!REGION_OPTIONS.includes(selectedRegion)) setRegion('전체');
+  }, [selectedCategory, selectedRegion, selectedSort, setCategory, setRegion, setSort]);
 
   useEffect(() => {
     if (!loaded) fetchClubs();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [loaded]);
+  }, [loaded, fetchClubs]);
 
   return (
     <div className={styles.page}>
       <header className={styles.header}>
         <h1 className={styles.title}>클럽</h1>
-        <span className={styles.headerCount}>{allClubs.length}개</span>
+        <span className={styles.headerCount}>{regionClubCount}개</span>
       </header>
 
-      {/* 카테고리 필터 */}
-      <div className={`${styles.chipRow} hide-scrollbar`}>
+      <div className={`${styles.chipRow} hide-scrollbar`} aria-label="운영 지역">
+        {REGION_OPTIONS.map((region) => (
+          <Chip key={region} active={selectedRegion === region} onClick={() => setRegion(region)}>
+            {region}
+          </Chip>
+        ))}
+      </div>
+
+      <div className={`${styles.chipRow} hide-scrollbar`} aria-label="카테고리">
         {CATEGORIES.map((cat) => (
           <Chip key={cat} active={selectedCategory === cat} onClick={() => setCategory(cat)}>
             {cat}
@@ -55,7 +75,6 @@ export function ClubListPage() {
         ))}
       </div>
 
-      {/* 정렬 + 결과 수 바 */}
       <div className={styles.sortBar}>
         <span className={styles.resultCount}>
           {isFiltered
@@ -88,9 +107,9 @@ export function ClubListPage() {
         </div>
       ) : clubs.length === 0 ? (
         <EmptyState
-          emoji="🔍"
+          emoji="🔎"
           title="클럽이 없어요"
-          description="조건에 맞는 클럽이 없어요. 직접 만들어 보세요!"
+          description="선택한 지역과 조건에 맞는 클럽이 없어요. 다른 조건으로 확인해보세요."
           action={
             <button
               onClick={resetFilter}

@@ -4,7 +4,9 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Plus } from 'lucide-react';
 import { useCommunityStore } from '../../store/communityStore';
+import { useClubStore } from '../../store/clubStore';
 import { tokenStorage } from '../../api/apiClient';
+import { REGION_OPTIONS, matchesRegion } from '../../data/regions';
 import { getPostDetailPath } from '../../lib/communityRoutes';
 import { Chip } from '../../components/common/Chip';
 import { PostCard } from '../../components/community/PostCard';
@@ -17,8 +19,11 @@ const CATEGORIES = ['전체', '인기', '일상', '질문', '모임', '나눔', 
 
 export function CommunityListPage() {
   const router = useRouter();
-  const { selectedCategory, setCategory, getFilteredPosts, fetchPosts } = useCommunityStore();
-  const posts = getFilteredPosts();
+  const posts = useCommunityStore((s) => s.posts);
+  const fetchPosts = useCommunityStore((s) => s.fetchPosts);
+  const selectedRegion = useClubStore((s) => s.selectedRegion);
+  const setRegion = useClubStore((s) => s.setRegion);
+  const [selectedCategory, setSelectedCategory] = useState('전체');
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -30,8 +35,14 @@ export function CommunityListPage() {
     fetchPosts(selectedCategory)
       .catch(() => {})
       .finally(() => setLoading(false));
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedCategory]);
+  }, [selectedCategory, fetchPosts]);
+
+  const regionPosts = posts.filter((post) => matchesRegion(post, selectedRegion));
+  const visiblePosts = selectedCategory === '전체'
+    ? regionPosts
+    : selectedCategory === '인기'
+      ? [...regionPosts].sort((a, b) => b.likeCount - a.likeCount)
+      : regionPosts.filter((post) => post.category === selectedCategory);
 
   return (
     <div className={styles.page}>
@@ -40,8 +51,16 @@ export function CommunityListPage() {
       </header>
 
       <div className={`${styles.chipRow} hide-scrollbar`}>
+        {REGION_OPTIONS.map((region) => (
+          <Chip key={region} active={selectedRegion === region} onClick={() => setRegion(region)}>
+            {region}
+          </Chip>
+        ))}
+      </div>
+
+      <div className={`${styles.chipRow} hide-scrollbar`}>
         {CATEGORIES.map((cat) => (
-          <Chip key={cat} active={selectedCategory === cat} onClick={() => setCategory(cat)}>
+          <Chip key={cat} active={selectedCategory === cat} onClick={() => setSelectedCategory(cat)}>
             {cat}
           </Chip>
         ))}
@@ -50,11 +69,11 @@ export function CommunityListPage() {
       <div className={styles.list}>
         {loading
           ? Array.from({ length: 5 }).map((_, i) => <PostCardSkeleton key={i} />)
-          : posts.length === 0
+          : visiblePosts.length === 0
             ? <EmptyState
-                emoji="📭"
+                emoji="✍️"
                 title="게시글이 없어요"
-                description="첫 번째 글을 작성해 보세요!"
+                description="선택한 지역에 아직 게시글이 없어요. 첫 글을 작성해보세요."
                 action={
                   <button
                     onClick={() => router.push('/community/new')}
@@ -68,7 +87,7 @@ export function CommunityListPage() {
                   </button>
                 }
               />
-            : posts.map((post, idx) => (
+            : visiblePosts.map((post, idx) => (
                 <div
                   key={post.id}
                   className="card-animate"

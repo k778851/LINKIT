@@ -44,8 +44,38 @@
   border: 1.5px solid var(--base-white);
 }
 
+.regionBar {
+  position: sticky;
+  top: 52px;
+  z-index: 45;
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding: 10px 16px;
+  background: var(--base-white);
+  border-bottom: 1px solid var(--base-border);
+}
+
+.regionChip {
+  flex-shrink: 0;
+  height: 32px;
+  padding: 0 14px;
+  border-radius: 999px;
+  border: 1.5px solid var(--base-border);
+  background: var(--base-white);
+  color: var(--ink-3);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.regionChipActive {
+  border-color: var(--blue);
+  background: var(--blue-soft);
+  color: var(--blue);
+}
+
 .firstFold {
-  min-height: calc(100dvh - 52px);
+  min-height: calc(100dvh - 95px);
   display: flex;
   flex-direction: column;
   padding-bottom: 12px;

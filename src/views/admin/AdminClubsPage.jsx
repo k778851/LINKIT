@@ -3,6 +3,7 @@
 import { CheckCircle2, Search } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 import { adminApi } from '../../api/adminApi';
+import { REGION_OPTIONS, matchesRegion } from '../../data/regions';
 import { adminClubs } from './adminDemoData';
 import s from './admin.module.css';
 
@@ -17,7 +18,8 @@ function mapApiClub(club) {
     category: club.category,
     owner: club.ownerNickname ?? club.createdBy ?? '운영자',
     ownerId: club.createdBy ?? '-',
-    ownerRegion: '미등록',
+    ownerRegion: club.ownerRegion ?? club.location ?? '미등록',
+    serviceRegion: club.serviceRegion,
     ownerUniqueNo: club.createdBy ?? '-',
     ownerPhone: '미등록',
     memberCurrent: club.memberCount ?? 0,
@@ -32,6 +34,7 @@ function mapApiClub(club) {
 export function AdminClubsPage() {
   const [query, setQuery] = useState('');
   const [filter, setFilter] = useState('전체');
+  const [regionFilter, setRegionFilter] = useState('전체');
   const [clubs, setClubs] = useState(adminClubs);
   const [modal, setModal] = useState(null);
 
@@ -46,9 +49,10 @@ export function AdminClubsPage() {
     return clubs.filter((club) => {
       const matched = !q || club.name.toLowerCase().includes(q) || club.owner.toLowerCase().includes(q) || club.id.toLowerCase().includes(q);
       const statusMatched = filter === '전체' || club.status === filter;
-      return matched && statusMatched;
+      const regionMatched = matchesRegion(club, regionFilter);
+      return matched && statusMatched && regionMatched;
     });
-  }, [clubs, query, filter]);
+  }, [clubs, query, filter, regionFilter]);
 
   const requestClubStatus = (club, nextStatus) => {
     const label = nextStatus === '승인' ? '승인 확인' : '해제';
@@ -64,10 +68,11 @@ export function AdminClubsPage() {
     });
   };
 
-  const pendingCount = clubs.filter((club) => club.status === '대기').length;
-  const activeCount = clubs.filter((club) => club.status === '승인').length;
-  const stoppedCount = clubs.filter((club) => club.status === '중지').length;
-  const memberCount = clubs.reduce((sum, club) => sum + club.memberCurrent, 0);
+  const scopedClubs = clubs.filter((club) => matchesRegion(club, regionFilter));
+  const pendingCount = scopedClubs.filter((club) => club.status === '대기').length;
+  const activeCount = scopedClubs.filter((club) => club.status === '승인').length;
+  const stoppedCount = scopedClubs.filter((club) => club.status === '중지').length;
+  const memberCount = scopedClubs.reduce((sum, club) => sum + club.memberCurrent, 0);
 
   return (
     <div>
@@ -75,9 +80,15 @@ export function AdminClubsPage() {
         <div>
           <p className={s.eyebrow}>CLUB MANAGEMENT</p>
           <h1 className={s.pageTitle}>클럽 관리</h1>
-          <p className={s.pageDesc}>클럽 상태, 운영자 상세, 가입 인원 정보를 확인하고 승인 처리를 진행합니다.</p>
+          <p className={s.pageDesc}>운영 지역별 클럽 상태, 운영자 상세, 가입 인원 정보를 확인하고 승인 처리를 진행합니다.</p>
         </div>
         <button className={s.primaryBtn} onClick={() => setFilter('대기')}><CheckCircle2 size={16} /> 승인 대기 보기</button>
+      </div>
+
+      <div className={s.filterRow} style={{ marginBottom: 14 }}>
+        {REGION_OPTIONS.map((item) => (
+          <button key={item} className={`${s.filterBtn} ${regionFilter === item ? s.filterActive : ''}`} onClick={() => setRegionFilter(item)}>{item}</button>
+        ))}
       </div>
 
       <div className={s.statGrid}>
@@ -117,7 +128,7 @@ export function AdminClubsPage() {
       </section>
 
       {modal?.type === 'confirm' && <InfoModal title={modal.title} onClose={() => setModal(null)}><p className={s.itemMeta}>{modal.message}</p><div className={s.modalFooter}><button className={s.ghostBtn} onClick={() => setModal(null)}>취소</button><button className={s.primaryBtn} onClick={async () => { await modal.onConfirm(); setModal(null); }}>{modal.confirmLabel}</button></div></InfoModal>}
-      {modal?.type === 'owner' && <InfoModal title="운영자 상세" onClose={() => setModal(null)}><div className={s.detailGrid}><Detail label="운영자" value={modal.club.owner} /><Detail label="회원ID" value={modal.club.ownerId} /><Detail label="고유번호" value={modal.club.ownerUniqueNo} /><Detail label="지역" value={modal.club.ownerRegion} /><Detail label="연락처" value={modal.club.ownerPhone} /></div></InfoModal>}
+      {modal?.type === 'owner' && <InfoModal title="운영자 상세" onClose={() => setModal(null)}><div className={s.detailGrid}><Detail label="운영자" value={modal.club.owner} /><Detail label="회원ID" value={modal.club.ownerId} /><Detail label="고유번호" value={modal.club.ownerUniqueNo} /><Detail label="운영 지역" value={modal.club.serviceRegion ?? '미등록'} /><Detail label="상세 지역" value={modal.club.ownerRegion} /><Detail label="연락처" value={modal.club.ownerPhone} /></div></InfoModal>}
       {modal?.type === 'club' && <InfoModal title="클럽 상세" onClose={() => setModal(null)}><div className={s.detailGrid}><Detail label="클럽ID" value={modal.club.id} /><Detail label="클럽명" value={modal.club.name} /><Detail label="상태" value={modal.club.status} /><Detail label="카테고리" value={modal.club.category} /><Detail label="개설일" value={modal.club.createdAt} /><Detail label="신고" value={`${modal.club.reports}건`} /></div></InfoModal>}
       {modal?.type === 'members' && <InfoModal title="가입 인원 정보" onClose={() => setModal(null)}><div className={s.detailGrid}><Detail label="정원" value={`${modal.club.memberLimit}명`} /><Detail label="현재 가입" value={`${modal.club.memberCurrent}명`} /><Detail label="활성 회원" value={`${modal.club.memberActive}명`} /><Detail label="가입 대기" value={`${modal.club.memberPending}명`} /></div></InfoModal>}
     </div>

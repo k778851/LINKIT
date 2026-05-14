@@ -39,6 +39,7 @@ export const sampleClubs = [
     posterImages: [SAMPLE_CLUB_IMAGES['club-1']],
     schedule: '매주 금요일 20:00',
     location: '여의도',
+    serviceRegion: '본부',
     createdBy: 'user-1',
     createdAt: '2026-03-01T00:00:00.000Z',
     members: [
@@ -62,6 +63,7 @@ export const sampleClubs = [
     posterImages: [SAMPLE_CLUB_IMAGES['club-2']],
     schedule: '매주 토요일 12:00',
     location: '서울 전역',
+    serviceRegion: '본부',
     createdBy: 'user-2',
     createdAt: '2026-03-05T00:00:00.000Z',
     members: [
@@ -84,6 +86,7 @@ export const sampleClubs = [
     posterImages: [SAMPLE_CLUB_IMAGES['club-3']],
     schedule: '매월 둘째 주 일요일',
     location: '성수동',
+    serviceRegion: '본부',
     createdBy: 'user-3',
     createdAt: '2026-03-10T00:00:00.000Z',
     members: [
@@ -105,6 +108,7 @@ export const sampleClubs = [
     posterImages: [SAMPLE_CLUB_IMAGES['club-4']],
     schedule: '매주 수요일 19:00',
     location: '홍대',
+    serviceRegion: '본부',
     createdBy: 'user-4',
     createdAt: '2026-03-12T00:00:00.000Z',
     members: [
@@ -127,6 +131,7 @@ export const sampleClubs = [
     posterImages: [SAMPLE_CLUB_IMAGES['club-5']],
     schedule: '매월 마지막 주 토요일',
     location: '강남',
+    serviceRegion: '광산',
     createdBy: 'user-5',
     createdAt: '2026-03-15T00:00:00.000Z',
     members: [
@@ -149,6 +154,7 @@ export const sampleClubs = [
     posterImages: [SAMPLE_CLUB_IMAGES['club-6']],
     schedule: '매주 일요일 15:00',
     location: '오치동',
+    serviceRegion: '북구',
     createdBy: 'user-me',
     createdAt: '2026-03-20T00:00:00.000Z',
     members: [
@@ -167,6 +173,7 @@ export const samplePosts = [
     content: '이번 주말 여의도 벚꽃 축제 같이 가실 분 계신가요? 토요일 오후 2시에 모여서 산책하면 좋을 것 같아요 :)',
     image: 'https://images.unsplash.com/photo-1522383225653-ed111181a951?w=300&h=300&q=80&auto=format&fit=crop',
     location: '여의도',
+    serviceRegion: '본부',
     authorId: 'user-me',
     authorNickname: '링킷유저',
     handle: 'linkit_user',
@@ -185,6 +192,7 @@ export const samplePosts = [
     content: '이번 일요일 오후 3시 오치동 풋살장에서 진행합니다. 자리 2~3명 남았어요!',
     image: 'https://images.unsplash.com/photo-1575361204480-aadea25e6e68?w=300&h=300&q=80&auto=format&fit=crop',
     location: '오치동',
+    serviceRegion: '북구',
     authorId: 'user-6',
     authorNickname: '풋살왕',
     handle: 'futsal_king',
@@ -273,6 +281,7 @@ export const samplePosts = [
     content: '다음 주 성수동 나들이 계획 중인데요, 필름 카메라 가져오실 분 같이 사진 찍어요!',
     image: 'https://images.unsplash.com/photo-1516035069371-29a1b244cc32?w=300&h=300&q=80&auto=format&fit=crop',
     location: '성수동',
+    serviceRegion: '본부',
     authorId: 'user-3',
     authorNickname: '필름감성',
     handle: 'film_feel',
@@ -290,6 +299,7 @@ export const samplePosts = [
     title: '용봉동 24시 약국 위치 공유해요 💊',
     content: '용봉동 GS25 편의점 옆 건물 1층에 24시간 운영하는 약국이 있어요. 늦은 밤에도 이용 가능합니다!',
     location: '용봉동',
+    serviceRegion: '북구',
     authorId: 'user-me',
     authorNickname: '링킷유저',
     handle: 'linkit_user',
@@ -419,6 +429,7 @@ export const sampleSchedules = [
     time: '20:00',
     startAt: '2026-05-16T11:00:00.000Z',   // 5/16 20:00 KST
     location: '여의도 한강공원',
+    serviceRegion: '본부',
     description: '5km 라이트 런 (초보 환영)',
   },
   {
@@ -430,6 +441,7 @@ export const sampleSchedules = [
     time: '20:00',
     startAt: '2026-05-23T11:00:00.000Z',   // 5/23 20:00 KST
     location: '여의도 한강공원',
+    serviceRegion: '본부',
     description: '10km 인터벌 트레이닝',
   },
   /* ── club-6 풋살 크루 ── */
@@ -442,6 +454,7 @@ export const sampleSchedules = [
     time: '15:00',
     startAt: '2026-05-17T06:00:00.000Z',   // 5/17 15:00 KST
     location: '오치동 풋살장',
+    serviceRegion: '북구',
     description: '주말 정기전 진행',
   },
   {
@@ -453,6 +466,7 @@ export const sampleSchedules = [
     time: '15:00',
     startAt: '2026-05-24T06:00:00.000Z',   // 5/24 15:00 KST
     location: '오치동 풋살장',
+    serviceRegion: '북구',
     description: '주말 정기전 진행',
   },
 ];

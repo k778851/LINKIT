@@ -8,6 +8,7 @@ import { useCommunityStore } from '../store/communityStore';
 import { searchApi } from '../api/searchApi';
 import { tokenStorage } from '../api/apiClient';
 import { CATEGORY_COLORS, SAMPLE_CLUB_IMAGES } from '../data/sampleData';
+import { REGION_OPTIONS, matchesRegion } from '../data/regions';
 import { assetPath } from '../lib/assetPath';
 import { getPostDetailPath } from '../lib/communityRoutes';
 import styles from './SearchPage.module.css';
@@ -16,25 +17,26 @@ const TRENDING = ['러닝', '독서모임', '풋살', '맛집탐방', '사진', 
 const DEBOUNCE_MS = 350;
 
 export function SearchPage() {
-  const router   = useRouter();
+  const router = useRouter();
   const inputRef = useRef(null);
   const timerRef = useRef(null);
 
-  const [query,         setQuery]         = useState('');
-  const [tab,           setTab]           = useState('all');
-  const [apiClubs,      setApiClubs]      = useState(null);   // null = 아직 API 미호출
-  const [apiPosts,      setApiPosts]      = useState(null);
-  const [searching,     setSearching]     = useState(false);
+  const [query, setQuery] = useState('');
+  const [tab, setTab] = useState('all');
+  const [apiClubs, setApiClubs] = useState(null);
+  const [apiPosts, setApiPosts] = useState(null);
+  const [searching, setSearching] = useState(false);
   const [recentSearches, setRecentSearches] = useState(
     () => JSON.parse(typeof window !== 'undefined' ? localStorage.getItem('linkit-recent-searches') || '[]' : '[]')
   );
 
   const clubs = useClubStore((s) => s.clubs);
+  const selectedRegion = useClubStore((s) => s.selectedRegion);
+  const setRegion = useClubStore((s) => s.setRegion);
   const posts = useCommunityStore((s) => s.posts);
 
   useEffect(() => { inputRef.current?.focus(); }, []);
 
-  /* ── 디바운스 API 검색 ──────────────────────────────── */
   const fetchSearch = useCallback(async (q) => {
     if (!q.trim()) { setApiClubs(null); setApiPosts(null); return; }
     if (!tokenStorage.get()) { setApiClubs(null); setApiPosts(null); setSearching(false); return; }
@@ -44,7 +46,6 @@ export function SearchPage() {
       setApiClubs(result.clubs ?? []);
       setApiPosts(result.posts ?? []);
     } catch {
-      // 오프라인 → API 결과 null 유지 → 로컬 필터 사용
       setApiClubs(null);
       setApiPosts(null);
     } finally {
@@ -60,7 +61,6 @@ export function SearchPage() {
     return () => clearTimeout(timerRef.current);
   }, [query, fetchSearch]);
 
-  /* ── 로컬 필터 (API 오프라인 fallback) ─────────────── */
   const q = query.trim().toLowerCase();
   const localClubs = q
     ? clubs.filter(
@@ -77,11 +77,9 @@ export function SearchPage() {
       )
     : [];
 
-  // API 결과가 있으면 우선 사용, 없으면 로컬
-  const matchedClubs = apiClubs ?? localClubs;
-  const matchedPosts = apiPosts ?? localPosts;
+  const matchedClubs = (apiClubs ?? localClubs).filter((club) => matchesRegion(club, selectedRegion));
+  const matchedPosts = (apiPosts ?? localPosts).filter((post) => matchesRegion(post, selectedRegion));
 
-  /* ── 최근 검색어 ────────────────────────────────────── */
   const saveRecent = (term) => {
     const next = [term, ...recentSearches.filter((r) => r !== term)].slice(0, 8);
     setRecentSearches(next);
@@ -99,7 +97,6 @@ export function SearchPage() {
 
   return (
     <div className={styles.page}>
-      {/* 검색 헤더 */}
       <div className={styles.searchBar}>
         <form className={styles.inputWrap} onSubmit={handleSubmit}>
           <Search size={18} color="var(--ink-3)" className={styles.searchIcon} />
@@ -119,8 +116,19 @@ export function SearchPage() {
         <button className={styles.cancelBtn} onClick={() => router.back()}>취소</button>
       </div>
 
+      <div className={`${styles.regionRow} hide-scrollbar`}>
+        {REGION_OPTIONS.map((region) => (
+          <button
+            key={region}
+            className={`${styles.regionChip} ${selectedRegion === region ? styles.regionChipActive : ''}`}
+            onClick={() => setRegion(region)}
+          >
+            {region}
+          </button>
+        ))}
+      </div>
+
       {!showResults ? (
-        /* 검색 전 — 최근 검색어 + 트렌딩 */
         <div className={styles.body}>
           {recentSearches.length > 0 && (
             <section className={styles.section}>
@@ -160,12 +168,10 @@ export function SearchPage() {
           </section>
         </div>
       ) : (
-        /* 검색 결과 */
         <div className={styles.body}>
-          {/* 탭 */}
           <div className={styles.tabRow}>
             {[
-              { id: 'all',   label: `전체 ${matchedClubs.length + matchedPosts.length}` },
+              { id: 'all', label: `전체 ${matchedClubs.length + matchedPosts.length}` },
               { id: 'clubs', label: `클럽 ${matchedClubs.length}` },
               { id: 'posts', label: `게시글 ${matchedPosts.length}` },
             ].map(({ id, label }) => (
@@ -179,10 +185,9 @@ export function SearchPage() {
             ))}
           </div>
 
-          {/* 로딩 스켈레톤 */}
           {searching && (
             <div style={{ padding: '8px 0', display: 'flex', flexDirection: 'column', gap: 10 }}>
-              {[1,2,3,4].map((i) => (
+              {[1, 2, 3, 4].map((i) => (
                 <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '4px 0' }}>
                   <div className="skeleton" style={{ width: 48, height: 48, borderRadius: 14, flexShrink: 0 }} />
                   <div style={{ flex: 1 }}>
@@ -194,16 +199,14 @@ export function SearchPage() {
             </div>
           )}
 
-          {/* 결과 없음 */}
           {!searching && matchedClubs.length === 0 && matchedPosts.length === 0 && (
             <div className={styles.empty}>
-              <p className={styles.emptyIcon}>🔍</p>
+              <p className={styles.emptyIcon}>🔎</p>
               <p className={styles.emptyTitle}>검색 결과가 없어요</p>
-              <p className={styles.emptyDesc}>다른 키워드로 검색해보세요</p>
+              <p className={styles.emptyDesc}>선택한 지역 또는 다른 검색어로 다시 찾아보세요.</p>
             </div>
           )}
 
-          {/* 클럽 결과 */}
           {!searching && (tab === 'all' || tab === 'clubs') && matchedClubs.length > 0 && (
             <section className={styles.section}>
               {tab === 'all' && <p className={styles.sectionTitle}>클럽</p>}
@@ -237,7 +240,6 @@ export function SearchPage() {
             </section>
           )}
 
-          {/* 게시글 결과 */}
           {!searching && (tab === 'all' || tab === 'posts') && matchedPosts.length > 0 && (
             <section className={styles.section}>
               {tab === 'all' && <p className={styles.sectionTitle}>게시글</p>}
@@ -265,7 +267,6 @@ export function SearchPage() {
   );
 }
 
-/* 검색어 하이라이트 */
 function Highlight({ text, query }) {
   if (!query || !text) return text ?? '';
   const escaped = query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');

@@ -3,29 +3,40 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useCommunityStore } from '../../store/communityStore';
+import { useClubStore } from '../../store/clubStore';
 import { useAuthStore } from '../../store/authStore';
 import { Header } from '../../components/layout/Header';
 import { useToastContext } from '../../context/ToastContext';
 import { ImageUpload } from '../../components/ui/ImageUpload';
+import { REGION_OPTIONS } from '../../data/regions';
 import { getPostDetailPath } from '../../lib/communityRoutes';
 import styles from './PostCreatePage.module.css';
 
 const CATEGORIES = ['일상', '질문', '모임', '나눔', '생활정보'];
+const SERVICE_REGIONS = REGION_OPTIONS.filter((region) => region !== '전체');
 
 export function PostCreatePage() {
   const router = useRouter();
   const addPost = useCommunityStore((s) => s.addPost);
+  const selectedRegion = useClubStore((s) => s.selectedRegion);
   const user = useAuthStore((s) => s.user);
-  const [form, setForm] = useState({ category: '', title: '', content: '', image: null });
+  const [form, setForm] = useState({
+    category: '',
+    serviceRegion: selectedRegion === '전체' ? '북구' : selectedRegion,
+    title: '',
+    content: '',
+    image: null,
+  });
   const [errors, setErrors] = useState({});
   const [submitting, setSubmitting] = useState(false);
   const { showToast } = useToastContext();
 
   const set = (key, val) => setForm((f) => ({ ...f, [key]: val }));
-  const isValid = form.category && form.title.trim() && form.content.trim();
+  const isValid = form.category && form.serviceRegion && form.title.trim() && form.content.trim();
 
   const validate = () => {
     const e = {};
+    if (!form.serviceRegion) e.serviceRegion = '운영 지역을 선택하세요';
     if (!form.category) e.category = '카테고리를 선택하세요';
     if (!form.title.trim()) e.title = '제목을 입력하세요';
     if (form.title.length > 50) e.title = '최대 50자까지 입력 가능해요';
@@ -41,6 +52,7 @@ export function PostCreatePage() {
     try {
       const created = await addPost({
         ...form,
+        location: form.serviceRegion,
         authorId: user?.id,
         authorNickname: user?.nickname ?? '익명',
       });
@@ -65,6 +77,20 @@ export function PostCreatePage() {
       } />
 
       <div className={styles.body}>
+        <div className={styles.section}>
+          <p className={styles.label}>운영 지역 <span className={styles.req}>*</span></p>
+          <div className={styles.chipRow}>
+            {SERVICE_REGIONS.map((region) => (
+              <button key={region} type="button"
+                className={`${styles.chip} ${form.serviceRegion === region ? styles.chipActive : ''}`}
+                onClick={() => set('serviceRegion', region)}>
+                {region}
+              </button>
+            ))}
+          </div>
+          {errors.serviceRegion && <p className={styles.errMsg}>{errors.serviceRegion}</p>}
+        </div>
+
         <div className={styles.section}>
           <p className={styles.label}>카테고리 <span className={styles.req}>*</span></p>
           <div className={styles.chipRow}>

@@ -8,6 +8,7 @@ import { useAuthStore } from '../store/authStore';
 import { useNotificationStore } from '../store/notificationStore';
 import { calcDdayNum, getDdayLabel } from '../utils/formatDate';
 import { sampleBanners, CATEGORY_COLORS, SAMPLE_CLUB_IMAGES } from '../data/sampleData';
+import { REGION_OPTIONS, matchesRegion } from '../data/regions';
 import { assetPath } from '../lib/assetPath';
 import { LinkitWordmark } from '../components/common/LinkitWordmark';
 import styles from './HomePage.module.css';
@@ -16,6 +17,8 @@ export function HomePage() {
   const router = useRouter();
   const clubs = useClubStore((s) => s.clubs);
   const schedules = useClubStore((s) => s.schedules);
+  const selectedRegion = useClubStore((s) => s.selectedRegion);
+  const setRegion = useClubStore((s) => s.setRegion);
   const user = useAuthStore((s) => s.user);
   const unreadCount = useNotificationStore((s) => s.notifications.filter((n) => !n.read).length);
   const timerRef = useRef(null);
@@ -26,7 +29,9 @@ export function HomePage() {
   const slides = [sampleBanners[total - 1], ...sampleBanners, sampleBanners[0]];
   const [slideIdx, setSlideIdx] = useState(1);
   const [animated, setAnimated] = useState(true);
+  const [homeClubTab, setHomeClubTab] = useState('전체');
   const bannerIdx = slideIdx === 0 ? total - 1 : slideIdx === total + 1 ? 0 : slideIdx - 1;
+  const regionClubs = clubs.filter((club) => matchesRegion(club, selectedRegion));
 
   useEffect(() => {
     if (slideIdx === 0) {
@@ -51,6 +56,10 @@ export function HomePage() {
     timerRef.current = setInterval(() => setSlideIdx((i) => i + 1), 5000);
     return () => clearInterval(timerRef.current);
   }, []);
+
+  useEffect(() => {
+    setHomeClubTab('전체');
+  }, [selectedRegion]);
 
   const resetBannerTimer = () => {
     clearInterval(timerRef.current);
@@ -94,16 +103,16 @@ export function HomePage() {
 
   const nextSchedule = schedules
     .filter((s) => user?.joinedClubs?.includes(s.clubId))
+    .filter((s) => matchesRegion(s, selectedRegion))
     .map((s) => ({ ...s, dday: calcDdayNum(s.startAt) }))
     .filter((s) => s.dday >= 0)
     .sort((a, b) => a.dday - b.dday)[0] ?? null;
 
-  const popularClubs = clubs.slice(0, 4);
-  const homeClubCategories = ['전체', ...Array.from(new Set(clubs.map((club) => club.category)))];
-  const [homeClubTab, setHomeClubTab] = useState('전체');
+  const popularClubs = regionClubs.slice(0, 4);
+  const homeClubCategories = ['전체', ...Array.from(new Set(regionClubs.map((club) => club.category)))];
   const homeClubList = (homeClubTab === '전체'
-    ? clubs
-    : clubs.filter((club) => club.category === homeClubTab)
+    ? regionClubs
+    : regionClubs.filter((club) => club.category === homeClubTab)
   ).slice(0, 6);
 
   return (
@@ -120,6 +129,18 @@ export function HomePage() {
           </button>
         </div>
       </header>
+
+      <div className={`${styles.regionBar} hide-scrollbar`}>
+        {REGION_OPTIONS.map((region) => (
+          <button
+            key={region}
+            className={`${styles.regionChip} ${selectedRegion === region ? styles.regionChipActive : ''}`}
+            onClick={() => setRegion(region)}
+          >
+            {region}
+          </button>
+        ))}
+      </div>
 
       <section className={styles.firstFold}>
         <div
@@ -186,9 +207,7 @@ export function HomePage() {
         )}
 
         <div className={styles.statRow}>
-          <span className={styles.statText}>
-            지금 함께할 모임을 찾아보세요
-          </span>
+          <span className={styles.statText}>지금 함께할 모임을 찾아보세요</span>
           <button className={styles.exploreBtn} onClick={() => router.push('/clubs')}>
             탐색하기
           </button>

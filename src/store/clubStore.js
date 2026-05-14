@@ -1,93 +1,107 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { sampleClubs, sampleSchedules } from '../data/sampleData';
+import { matchesRegion } from '../data/regions';
 import { clubApi } from '../api/clubApi';
 import { scheduleApi } from '../api/scheduleApi';
 import { ApiError } from '../api/apiClient';
 
-/** 백엔드 미연결 or 미인증 — 로컬 fallback 허용 */
 const shouldFallback = (e) =>
   e instanceof ApiError && (e.status === 0 || e.status === 401 || e.status === 403);
 
 export const useClubStore = create(
   persist(
     (set, get) => ({
-      clubs:            sampleClubs,
-      pendingClubs:     [],      // 관리자 승인 대기 중인 클럽
-      schedules:        sampleSchedules,
+      clubs: sampleClubs,
+      pendingClubs: [],
+      schedules: sampleSchedules,
       appliedScheduleIds: [],
       selectedCategory: '전체',
-      selectedSort:     '최신순',
-      loaded:           false,   // API에서 한 번이라도 로드했는지
+      selectedSort: '최신순',
+      selectedRegion: '전체',
+      loaded: false,
 
       setCategory: (category) => set({ selectedCategory: category }),
-      setSort:     (sort)     => set({ selectedSort: sort }),
+      setSort: (sort) => set({ selectedSort: sort }),
+      setRegion: (region) => set({ selectedRegion: region }),
 
-      /* ── API: 클럽 목록 로드 ──────────────────────────── */
       fetchClubs: async () => {
         const { selectedCategory, selectedSort } = get();
         try {
           const clubs = await clubApi.getAll(selectedCategory, selectedSort);
-          // 백엔드 DB가 비어 있으면 sampleData 유지
           if (clubs && clubs.length > 0) set({ clubs, loaded: true });
           else set({ loaded: true });
         } catch (e) {
-          // 오프라인/미인증 → sampleData 유지
           if (shouldFallback(e)) set({ loaded: true });
+          else throw e;
         }
       },
 
-      /* ── 필터/정렬 (로컬) ─────────────────────────────── */
       getFilteredClubs: () => {
-        const { clubs, selectedCategory, selectedSort } = get();
+        const { clubs, selectedCategory, selectedSort, selectedRegion } = get();
         let result = selectedCategory === '전체'
           ? [...clubs]
-          : clubs.filter((c) => c.category === selectedCategory);
+          : clubs.filter((club) => club.category === selectedCategory);
 
-        if (selectedSort === '인기순') result.sort((a, b) => b.memberCount - a.memberCount);
-        else if (selectedSort === '신규순') result.sort((a, b) => (b.newCount ?? 0) - (a.newCount ?? 0));
-        else result.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+        result = result.filter((club) => matchesRegion(club, selectedRegion));
+
+        if (selectedSort === '인기순') {
+          result.sort((a, b) => b.memberCount - a.memberCount);
+        } else if (selectedSort === '신규순') {
+          result.sort((a, b) => (b.newCount ?? 0) - (a.newCount ?? 0));
+        } else {
+          result.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+        }
 
         return result;
       },
 
-      getClubById: (id) => get().clubs.find((c) => c.id === id),
+      getClubById: (id) => get().clubs.find((club) => club.id === id),
 
-      /* ── 멤버 관리 ────────────────────────────────────── */
       getClubMembers: (clubId) => {
-        const club = get().clubs.find(c => c.id === clubId);
+        const club = get().clubs.find((item) => item.id === clubId);
         return club?.members ?? [];
       },
 
       setMemberRole: (clubId, userId, newRole) =>
-        set(s => ({
-          clubs: s.clubs.map(c =>
-            c.id === clubId
-              ? { ...c, members: c.members.map(m => m.userId === userId ? { ...m, role: newRole } : m) }
-              : c
-          )
+        set((state) => ({
+          clubs: state.clubs.map((club) =>
+            club.id === clubId
+              ? {
+                  ...club,
+                  members: (club.members ?? []).map((member) =>
+                    member.userId === userId ? { ...member, role: newRole } : member
+                  ),
+                }
+              : club
+          ),
         })),
 
       removeMember: (clubId, userId) =>
-        set(s => ({
-          clubs: s.clubs.map(c =>
-            c.id === clubId
-              ? { ...c, members: c.members.filter(m => m.userId !== userId), memberCount: Math.max(0, c.memberCount - 1) }
-              : c
-          )
+        set((state) => ({
+          clubs: state.clubs.map((club) =>
+            club.id === clubId
+              ? {
+                  ...club,
+                  members: (club.members ?? []).filter((member) => member.userId !== userId),
+                  memberCount: Math.max(0, club.memberCount - 1),
+                }
+              : club
+          ),
         })),
 
       addMember: (clubId, userId) =>
-        set(s => ({
-          clubs: s.clubs.map(c => {
-            if (c.id !== clubId) return c;
-            const already = c.members?.some(m => m.userId === userId);
-            if (already) return c;
-            return { ...c, members: [...(c.members ?? []), { userId, role: 'member', joinedAt: new Date().toISOString() }] };
-          })
+        set((state) => ({
+          clubs: state.clubs.map((club) => {
+            if (club.id !== clubId) return club;
+            if (club.members?.some((member) => member.userId === userId)) return club;
+            return {
+              ...club,
+              members: [...(club.members ?? []), { userId, role: 'member', joinedAt: new Date().toISOString() }],
+            };
+          }),
         })),
 
-      /* ── 승인 대기 클럽 추가 (클럽 개설 신청) ─────────── */
       submitClubForApproval: (club) => {
         const pending = {
           id: club.id ?? `club-${Date.now()}`,
@@ -97,131 +111,116 @@ export const useClubStore = create(
           appliedAt: new Date().toISOString(),
           members: [{ userId: club.createdBy, role: 'owner', joinedAt: new Date().toISOString() }],
         };
-        // 승인 대기 목록 + 클럽 목록에 즉시 추가 (로컬 미리보기)
-        set((s) => ({
-          pendingClubs: [pending, ...s.pendingClubs],
-          clubs: [pending, ...s.clubs],
+        set((state) => ({
+          pendingClubs: [pending, ...state.pendingClubs],
+          clubs: [pending, ...state.clubs],
         }));
         return pending;
       },
 
-      /* ── 관리자: 클럽 승인 ────────────────────────────── */
       approveClub: (clubId) => {
-        const { pendingClubs } = get();
-        const club = pendingClubs.find((c) => c.id === clubId);
+        const club = get().pendingClubs.find((item) => item.id === clubId);
         if (!club) return;
         const approved = { ...club, status: 'active' };
-        set((s) => ({
-          pendingClubs: s.pendingClubs.filter((c) => c.id !== clubId),
-          clubs: [approved, ...s.clubs],
+        set((state) => ({
+          pendingClubs: state.pendingClubs.filter((item) => item.id !== clubId),
+          clubs: [approved, ...state.clubs.filter((item) => item.id !== clubId)],
         }));
       },
 
-      /* ── 관리자: 클럽 반려 ────────────────────────────── */
       rejectClub: (clubId) => {
-        set((s) => ({ pendingClubs: s.pendingClubs.filter((c) => c.id !== clubId) }));
+        set((state) => ({ pendingClubs: state.pendingClubs.filter((club) => club.id !== clubId) }));
       },
 
-      /* ── API: 클럽 생성 ───────────────────────────────── */
       addClub: async (club) => {
         try {
           const created = await clubApi.create(club);
-          set((s) => ({ clubs: [created, ...s.clubs] }));
+          set((state) => ({ clubs: [created, ...state.clubs] }));
           return created;
         } catch (e) {
-          if (shouldFallback(e)) {
-            const newClub = { id: club.id ?? `club-${Date.now()}`, ...club, createdAt: new Date().toISOString() };
-            set((s) => ({ clubs: [newClub, ...s.clubs] }));
-            return newClub;
-          }
-          throw e;
+          if (!shouldFallback(e)) throw e;
+          const newClub = { id: club.id ?? `club-${Date.now()}`, ...club, createdAt: new Date().toISOString() };
+          set((state) => ({ clubs: [newClub, ...state.clubs] }));
+          return newClub;
         }
       },
 
-      /* ── API: 클럽 수정 ───────────────────────────────── */
       updateClub: async (clubId, patch) => {
         try {
           const updated = await clubApi.update(clubId, patch);
-          set((s) => ({ clubs: s.clubs.map((c) => c.id === clubId ? updated : c) }));
+          set((state) => ({ clubs: state.clubs.map((club) => club.id === clubId ? updated : club) }));
         } catch (e) {
-          if (shouldFallback(e)) {
-            set((s) => ({ clubs: s.clubs.map((c) => c.id === clubId ? { ...c, ...patch } : c) }));
-          } else throw e;
+          if (!shouldFallback(e)) throw e;
+          set((state) => ({ clubs: state.clubs.map((club) => club.id === clubId ? { ...club, ...patch } : club) }));
         }
       },
 
-      /* ── API: 클럽 삭제 ───────────────────────────────── */
       deleteClub: async (clubId) => {
         try {
           await clubApi.remove(clubId);
         } catch (e) {
           if (!shouldFallback(e)) throw e;
         }
-        set((s) => ({ clubs: s.clubs.filter((c) => c.id !== clubId) }));
+        set((state) => ({ clubs: state.clubs.filter((club) => club.id !== clubId) }));
       },
 
-      /* ── 멤버 수 (낙관적) ─────────────────────────────── */
       incrementMemberCount: (clubId) =>
-        set((s) => ({
-          clubs: s.clubs.map((c) =>
-            c.id === clubId ? { ...c, memberCount: c.memberCount + 1 } : c
-          ),
+        set((state) => ({
+          clubs: state.clubs.map((club) => club.id === clubId ? { ...club, memberCount: club.memberCount + 1 } : club),
         })),
 
       decrementMemberCount: (clubId) =>
-        set((s) => ({
-          clubs: s.clubs.map((c) =>
-            c.id === clubId ? { ...c, memberCount: Math.max(0, c.memberCount - 1) } : c
-          ),
+        set((state) => ({
+          clubs: state.clubs.map((club) => club.id === clubId ? { ...club, memberCount: Math.max(0, club.memberCount - 1) } : club),
         })),
 
-      /* ── API: join / leave ────────────────────────────── */
       joinClubApi: async (clubId) => {
-        try { await clubApi.join(clubId); } catch (e) {
+        try {
+          await clubApi.join(clubId);
+        } catch (e) {
           if (!shouldFallback(e)) throw e;
         }
         get().incrementMemberCount(clubId);
       },
 
       leaveClubApi: async (clubId) => {
-        try { await clubApi.leave(clubId); } catch (e) {
+        try {
+          await clubApi.leave(clubId);
+        } catch (e) {
           if (!shouldFallback(e)) throw e;
         }
         get().decrementMemberCount(clubId);
       },
 
       applySchedule: async (scheduleId) => {
-        const alreadyApplied = get().appliedScheduleIds.includes(scheduleId);
-        if (alreadyApplied) return;
-        set((s) => ({ appliedScheduleIds: [...s.appliedScheduleIds, scheduleId] }));
+        if (get().appliedScheduleIds.includes(scheduleId)) return;
+        set((state) => ({ appliedScheduleIds: [...state.appliedScheduleIds, scheduleId] }));
         try {
           await scheduleApi.apply(scheduleId);
         } catch (e) {
           if (!shouldFallback(e)) {
-            set((s) => ({ appliedScheduleIds: s.appliedScheduleIds.filter((id) => id !== scheduleId) }));
+            set((state) => ({ appliedScheduleIds: state.appliedScheduleIds.filter((id) => id !== scheduleId) }));
             throw e;
           }
         }
       },
 
       cancelSchedule: async (scheduleId) => {
-        const wasApplied = get().appliedScheduleIds.includes(scheduleId);
-        if (!wasApplied) return;
-        set((s) => ({ appliedScheduleIds: s.appliedScheduleIds.filter((id) => id !== scheduleId) }));
+        if (!get().appliedScheduleIds.includes(scheduleId)) return;
+        set((state) => ({ appliedScheduleIds: state.appliedScheduleIds.filter((id) => id !== scheduleId) }));
         try {
           await scheduleApi.cancel(scheduleId);
         } catch (e) {
           if (!shouldFallback(e)) {
-            set((s) => ({ appliedScheduleIds: [...s.appliedScheduleIds, scheduleId] }));
+            set((state) => ({ appliedScheduleIds: [...state.appliedScheduleIds, scheduleId] }));
             throw e;
           }
         }
       },
 
-      /* ── 일정 ─────────────────────────────────────────── */
       getMySchedules: (userId) =>
-        get().schedules.filter((sch) => {
-          const club = get().clubs.find((c) => c.id === sch.clubId);
+        get().schedules.filter((schedule) => {
+          const club = get().clubs.find((item) => item.id === schedule.clubId);
           return club?.createdBy === userId;
         }),
     }),
@@ -230,16 +229,23 @@ export const useClubStore = create(
       merge: (persisted, initial) => ({
         ...initial,
         ...persisted,
-        // 클럽 목록: localStorage에 빈 배열이면 sampleData 유지
+        selectedCategory: persisted?.selectedCategory && ['전체', '운동', '음식', '아트', '스터디', '음악', '기타'].includes(persisted.selectedCategory)
+          ? persisted.selectedCategory
+          : initial.selectedCategory,
+        selectedSort: persisted?.selectedSort && ['최신순', '인기순', '신규순'].includes(persisted.selectedSort)
+          ? persisted.selectedSort
+          : initial.selectedSort,
+        selectedRegion: persisted?.selectedRegion && ['전체', '북구', '광산', '본부'].includes(persisted.selectedRegion)
+          ? persisted.selectedRegion
+          : initial.selectedRegion,
         clubs: (() => {
           const sampleIds = new Set(initial.clubs.map((club) => club.id));
-          const userAdded = (persisted.clubs ?? []).filter((club) => !sampleIds.has(club.id));
+          const userAdded = (persisted?.clubs ?? []).filter((club) => !sampleIds.has(club.id));
           return [...initial.clubs, ...userAdded];
         })(),
-        // 일정: sampleData를 항상 포함 (날짜 업데이트 반영)
         schedules: (() => {
-          const sampleIds = new Set(initial.schedules.map((s) => s.id));
-          const userAdded = (persisted.schedules ?? []).filter((s) => !sampleIds.has(s.id));
+          const sampleIds = new Set(initial.schedules.map((schedule) => schedule.id));
+          const userAdded = (persisted?.schedules ?? []).filter((schedule) => !sampleIds.has(schedule.id));
           return [...initial.schedules, ...userAdded];
         })(),
       }),

@@ -3,6 +3,7 @@
 import { Search } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 import { adminApi } from '../../api/adminApi';
+import { REGION_OPTIONS, matchesRegion } from '../../data/regions';
 import { adminUsers } from './adminDemoData';
 import s from './admin.module.css';
 
@@ -16,6 +17,7 @@ function mapApiUser(user) {
     handle: user.handle ?? user.id,
     status: user.status === 'SUSPENDED' ? '정지' : '정상',
     region: user.region ?? '미등록',
+    serviceRegion: user.serviceRegion,
     uniqueNo: user.uniqueNo ?? user.id,
     phone: user.phone ?? '미등록',
     joined: user.joined ?? 0,
@@ -29,6 +31,7 @@ function mapApiUser(user) {
 export function AdminUsersPage() {
   const [query, setQuery] = useState('');
   const [filter, setFilter] = useState('전체');
+  const [regionFilter, setRegionFilter] = useState('전체');
   const [users, setUsers] = useState(adminUsers);
   const [selectedUserId, setSelectedUserId] = useState(adminUsers[0]?.id ?? null);
   const [confirmAction, setConfirmAction] = useState(null);
@@ -46,11 +49,16 @@ export function AdminUsersPage() {
   const visibleUsers = useMemo(() => {
     const q = query.trim().toLowerCase();
     return users.filter((user) => {
-      const matched = !q || user.name.toLowerCase().includes(q) || user.id.toLowerCase().includes(q) || user.handle.toLowerCase().includes(q) || user.phone.includes(q);
+      const matched = !q ||
+        user.name.toLowerCase().includes(q) ||
+        user.id.toLowerCase().includes(q) ||
+        user.handle.toLowerCase().includes(q) ||
+        user.phone.includes(q);
       const statusMatched = filter === '전체' || user.status === filter;
-      return matched && statusMatched;
+      const regionMatched = matchesRegion(user, regionFilter);
+      return matched && statusMatched && regionMatched;
     });
-  }, [users, query, filter]);
+  }, [users, query, filter, regionFilter]);
 
   const selectedUser = users.find((user) => user.id === selectedUserId) ?? visibleUsers[0] ?? users[0];
 
@@ -79,7 +87,7 @@ export function AdminUsersPage() {
         <div>
           <p className={s.eyebrow}>USER MANAGEMENT</p>
           <h1 className={s.pageTitle}>회원 관리</h1>
-          <p className={s.pageDesc}>회원 상세 정보에서 경고, 정지, 해제 처리를 진행합니다.</p>
+          <p className={s.pageDesc}>지역별 회원 현황을 나눠 보고 상세 정보에서 경고, 정지, 해제를 처리합니다.</p>
         </div>
       </div>
 
@@ -90,6 +98,11 @@ export function AdminUsersPage() {
               <Search size={16} className={s.searchIcon} />
               <input className={s.searchInput} placeholder="회원 ID, 이름, 연락처 검색" value={query} onChange={(event) => setQuery(event.target.value)} />
             </div>
+          </div>
+          <div className={s.filterRow}>
+            {REGION_OPTIONS.map((item) => (
+              <button key={item} className={`${s.filterBtn} ${regionFilter === item ? s.filterActive : ''}`} onClick={() => setRegionFilter(item)}>{item}</button>
+            ))}
           </div>
           <div className={s.filterRow}>
             {filters.map((item) => (
@@ -106,7 +119,7 @@ export function AdminUsersPage() {
                     <td>{user.id}</td>
                     <td><strong>{user.name}</strong><p className={s.itemMeta}>@{user.handle}</p></td>
                     <td><span className={`${s.badge} ${statusClass(user.status)}`}>{user.status}</span></td>
-                    <td>{user.region}</td>
+                    <td>{user.serviceRegion ?? user.region}</td>
                     <td>{user.joinedAt}</td>
                     <td>{user.reports}</td>
                     <td>{user.joined}</td>
@@ -127,7 +140,8 @@ export function AdminUsersPage() {
                 <Detail label="고유번호" value={selectedUser.uniqueNo} />
                 <Detail label="이름" value={`${selectedUser.name} (@${selectedUser.handle})`} />
                 <Detail label="연락처" value={selectedUser.phone} />
-                <Detail label="지역" value={selectedUser.region} />
+                <Detail label="운영 지역" value={selectedUser.serviceRegion ?? '미등록'} />
+                <Detail label="상세 지역" value={selectedUser.region} />
                 <Detail label="마지막 로그인" value={selectedUser.lastLogin} />
               </div>
               <div className={s.queueItem}><span className={s.itemMeta}>현재 상태</span><span className={`${s.badge} ${statusClass(selectedUser.status)}`}>{selectedUser.status}</span></div>
