@@ -1,13 +1,18 @@
 .page { min-height: 100dvh; background: var(--base); }
 
 .headerBtns {
-  display: flex; align-items: center; gap: 10px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding-right: 4px;
 }
 .headerIconBtn {
   width: 40px; height: 40px;
   display: flex; align-items: center; justify-content: center;
   border-radius: 50%;
   background: var(--base-white);
+  border: 1px solid var(--base-border);
+  flex-shrink: 0;
 }
 
 .body { padding: 20px; }
@@ -102,7 +107,7 @@
 /* ── Comment input bar ── */
 .inputBar {
   position: fixed;
-  bottom: var(--height-tab-bar);
+  bottom: calc(var(--height-tab-bar) + env(safe-area-inset-bottom, 0px));
   left: 50%; transform: translateX(-50%);
   width: 100%; max-width: var(--max-width);
   display: flex; align-items: center; gap: 8px;
@@ -110,6 +115,17 @@
   background: var(--base-white);
   border-top: 1px solid var(--base-border);
   z-index: 50;
+}
+
+@media (max-width: 380px) {
+  .headerBtns {
+    gap: 8px;
+  }
+
+  .headerIconBtn {
+    width: 38px;
+    height: 38px;
+  }
 }
 
 .commentInput {

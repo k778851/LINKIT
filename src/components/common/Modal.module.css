@@ -2,11 +2,11 @@
   position: fixed;
   inset: 0;
   background: rgba(0, 0, 0, 0.5);
-  z-index: 1000;
+  z-index: 1200;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 24px 16px calc(var(--height-tab-bar) + 24px);
+  padding: 24px 16px;
   animation: fadeIn 0.2s ease;
 }
 
@@ -15,10 +15,11 @@
   border-radius: 20px;
   padding: 24px 20px 20px;
   width: 100%;
-  max-width: var(--max-width);
-  max-height: calc(100dvh - var(--height-tab-bar) - 48px);
+  max-width: min(420px, calc(100vw - 32px));
+  max-height: calc(100dvh - 48px);
   overflow-y: auto;
   animation: slideUp 0.25s ease;
+  box-shadow: 0 20px 70px rgba(0, 0, 0, 0.24);
 }
 
 .title {
@@ -52,4 +53,15 @@
 @keyframes slideUp {
   from { transform: translateY(24px); opacity: 0; }
   to { transform: translateY(0); opacity: 1; }
+}
+
+@media (max-width: 640px) {
+  .overlay {
+    align-items: center;
+    padding: 20px 16px;
+  }
+
+  .sheet {
+    border-radius: 18px;
+  }
 }

@@ -53,7 +53,7 @@
   margin-top: -24px;
   position: relative;
   z-index: 1;
-  padding: 24px 20px 0;
+  padding: 24px 20px calc(var(--height-tab-bar) + 92px);
   min-height: 60dvh;
 }
 
@@ -176,6 +176,8 @@
 
 .scheduleApplyBtn {
   flex-shrink: 0;
+  min-width: 74px;
+  text-align: center;
   font-size: 0; font-weight: 700;
   color: var(--blue); background: var(--blue-soft);
   padding: 7px 14px; border-radius: 999px;
@@ -334,7 +336,7 @@
 /* ── CTA bar ── */
 .ctaBar {
   position: fixed;
-  bottom: var(--height-tab-bar);
+  bottom: calc(var(--height-tab-bar) + env(safe-area-inset-bottom, 0px));
   left: 50%;
   transform: translateX(-50%);
   width: 100%;
@@ -346,6 +348,21 @@
   display: flex;
   gap: 12px;
   align-items: center;
+}
+
+@media (max-width: 380px) {
+  .scheduleCard {
+    align-items: flex-start;
+    flex-wrap: wrap;
+  }
+
+  .scheduleInfo {
+    flex-basis: calc(100% - 66px);
+  }
+
+  .scheduleApplyBtn {
+    margin-left: 66px;
+  }
 }
 
 .bookmarkCta {

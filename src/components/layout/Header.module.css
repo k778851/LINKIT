@@ -8,6 +8,7 @@
   padding: 0 8px;
   background-color: var(--base-white);
   border-bottom: 1px solid var(--base-border);
+  width: 100%;
 }
 
 .transparent {
@@ -25,14 +26,19 @@
 
 .right {
   justify-content: flex-end;
+  min-width: 44px;
 }
 
 .title {
   flex: 1;
+  min-width: 0;
   text-align: center;
   font-size: var(--text-body);
   font-weight: 600;
   color: var(--ink);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .iconBtn {
