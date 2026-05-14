@@ -1,17 +1,39 @@
 'use client';
 
 import { Search } from 'lucide-react';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
+import { adminApi } from '../../api/adminApi';
 import { adminPosts, reportInbox } from './adminDemoData';
 import s from './admin.module.css';
 
 const filters = ['전체', '정상', '검토', '숨김'];
+
+function mapApiPost(post) {
+  return {
+    id: post.id,
+    author: post.authorNickname ?? post.authorId ?? '작성자',
+    category: post.category,
+    title: post.title,
+    content: post.content ?? '서버에서 불러온 게시글입니다.',
+    reportReason: post.reportReason ?? '신고 없음',
+    reporter: post.reporter ?? '-',
+    reports: post.reports ?? 0,
+    status: post.status === 'HIDDEN' ? '숨김' : post.status === 'PENDING' ? '검토' : '정상',
+    createdAt: String(post.createdAt ?? '').slice(0, 10) || '-',
+  };
+}
 
 export function AdminPostsPage() {
   const [query, setQuery] = useState('');
   const [filter, setFilter] = useState('전체');
   const [posts, setPosts] = useState(adminPosts);
   const [selectedReport, setSelectedReport] = useState(null);
+
+  useEffect(() => {
+    adminApi.getPosts().then((list) => {
+      if (Array.isArray(list) && list.length > 0) setPosts(list.map(mapApiPost));
+    }).catch(() => {});
+  }, []);
 
   const visiblePosts = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -22,8 +44,9 @@ export function AdminPostsPage() {
     });
   }, [posts, query, filter]);
 
-  const updatePostStatus = (id, status) => {
+  const updatePostStatus = async (id, status) => {
     setPosts((prev) => prev.map((post) => post.id === id ? { ...post, status } : post));
+    await adminApi.updatePostStatus(id, status === '숨김' ? 'HIDDEN' : 'ACTIVE').catch(() => {});
   };
 
   return (
@@ -37,7 +60,7 @@ export function AdminPostsPage() {
       </div>
 
       <div className={s.statGrid}>
-        <Metric label="전체 게시글" value="1,234" />
+        <Metric label="전체 게시글" value={`${posts.length}건`} />
         <Metric label="신고 접수" value={`${reportInbox.length}건`} />
         <Metric label="검토 중" value={`${posts.filter((post) => post.status === '검토').length}건`} />
         <Metric label="숨김 처리" value={`${posts.filter((post) => post.status === '숨김').length}건`} />
@@ -46,33 +69,11 @@ export function AdminPostsPage() {
       <div className={s.grid2}>
         <section className={s.card}>
           <p className={s.cardTitle}>게시글 · 댓글 목록</p>
-          <div className={s.searchBar}>
-            <div className={s.searchWrap}>
-              <Search size={16} className={s.searchIcon} />
-              <input className={s.searchInput} placeholder="작성자, 제목 검색" value={query} onChange={(e) => setQuery(e.target.value)} />
-            </div>
-          </div>
-          <div className={s.filterRow}>
-            {filters.map((item) => (
-              <button key={item} className={`${s.filterBtn} ${filter === item ? s.filterActive : ''}`} onClick={() => setFilter(item)}>
-                {item}
-              </button>
-            ))}
-          </div>
+          <div className={s.searchBar}><div className={s.searchWrap}><Search size={16} className={s.searchIcon} /><input className={s.searchInput} placeholder="작성자, 제목 검색" value={query} onChange={(e) => setQuery(e.target.value)} /></div></div>
+          <div className={s.filterRow}>{filters.map((item) => <button key={item} className={`${s.filterBtn} ${filter === item ? s.filterActive : ''}`} onClick={() => setFilter(item)}>{item}</button>)}</div>
           <div className={s.tableWrap}>
             <table className={s.table}>
-              <thead>
-                <tr>
-                  <th>ID</th>
-                  <th>작성자</th>
-                  <th>카테고리</th>
-                  <th>제목</th>
-                  <th>신고</th>
-                  <th>상태</th>
-                  <th>작성일</th>
-                  <th>액션</th>
-                </tr>
-              </thead>
+              <thead><tr><th>ID</th><th>작성자</th><th>카테고리</th><th>제목</th><th>신고</th><th>상태</th><th>작성일</th><th>액션</th></tr></thead>
               <tbody>
                 {visiblePosts.map((post) => (
                   <tr key={post.id}>
@@ -83,9 +84,7 @@ export function AdminPostsPage() {
                     <td>{post.reports}</td>
                     <td><span className={`${s.badge} ${statusClass(post.status)}`}>{post.status}</span></td>
                     <td>{post.createdAt}</td>
-                    <td>
-                      <button className={s.smallBtn} onClick={() => setSelectedReport(post)}>신고 내용</button>
-                    </td>
+                    <td><button className={s.smallBtn} onClick={() => setSelectedReport(post)}>신고 내용</button></td>
                   </tr>
                 ))}
               </tbody>
@@ -99,10 +98,7 @@ export function AdminPostsPage() {
             <div className={s.queueList}>
               {reportInbox.map((item) => (
                 <button key={item.title} className={s.queueItem} onClick={() => setSelectedReport(item)}>
-                  <div>
-                    <p className={s.itemTitle}>{item.title}</p>
-                    <p className={s.itemMeta}>{item.time} · {item.reason}</p>
-                  </div>
+                  <div><p className={s.itemTitle}>{item.title}</p><p className={s.itemMeta}>{item.time} · {item.reason}</p></div>
                   <span className={`${s.badge} ${item.severity === '높음' ? s.badgeRed : s.badgeOrange}`}>{item.severity}</span>
                 </button>
               ))}
@@ -114,10 +110,7 @@ export function AdminPostsPage() {
       {selectedReport && (
         <div className={s.modalBackdrop} role="presentation">
           <div className={s.modal} role="dialog" aria-modal="true">
-            <div className={s.modalHeader}>
-              <h2 className={s.modalTitle}>신고 내용 확인</h2>
-              <button className={s.iconBtn} onClick={() => setSelectedReport(null)} aria-label="닫기">×</button>
-            </div>
+            <div className={s.modalHeader}><h2 className={s.modalTitle}>신고 내용 확인</h2><button className={s.iconBtn} onClick={() => setSelectedReport(null)} aria-label="닫기">×</button></div>
             <div className={s.modalBody}>
               <div className={s.detailGrid}>
                 <Detail label="대상" value={selectedReport.targetTitle ?? selectedReport.title} />
@@ -128,8 +121,8 @@ export function AdminPostsPage() {
               <div className={s.textPanel}>{selectedReport.content}</div>
               {selectedReport.id && (
                 <div className={s.modalFooter}>
-                  <button className={s.ghostBtn} onClick={() => { updatePostStatus(selectedReport.id, '정상'); setSelectedReport(null); }}>신고 반려</button>
-                  <button className={s.primaryBtn} onClick={() => { updatePostStatus(selectedReport.id, '숨김'); setSelectedReport(null); }}>게시글 숨김</button>
+                  <button className={s.ghostBtn} onClick={async () => { await updatePostStatus(selectedReport.id, '정상'); setSelectedReport(null); }}>신고 반려</button>
+                  <button className={s.primaryBtn} onClick={async () => { await updatePostStatus(selectedReport.id, '숨김'); setSelectedReport(null); }}>게시글 숨김</button>
                 </div>
               )}
             </div>
@@ -141,21 +134,11 @@ export function AdminPostsPage() {
 }
 
 function Metric({ label, value }) {
-  return (
-    <div className={s.statCard}>
-      <p className={s.statNum}>{value}</p>
-      <p className={s.statLabel}>{label}</p>
-    </div>
-  );
+  return <div className={s.statCard}><p className={s.statNum}>{value}</p><p className={s.statLabel}>{label}</p></div>;
 }
 
 function Detail({ label, value }) {
-  return (
-    <div className={s.detailItem}>
-      <span>{label}</span>
-      <strong>{value}</strong>
-    </div>
-  );
+  return <div className={s.detailItem}><span>{label}</span><strong>{value}</strong></div>;
 }
 
 function statusClass(status) {

@@ -4,6 +4,7 @@ import { useEffect, useRef } from 'react';
 import { useAuthStore } from '../store/authStore';
 import { useNotificationStore } from '../store/notificationStore';
 import { useClubStore } from '../store/clubStore';
+import { useCommunityStore } from '../store/communityStore';
 import { tokenStorage } from '../api/apiClient';
 
 export function AppInitProvider({ children }) {
@@ -12,6 +13,7 @@ export function AppInitProvider({ children }) {
   const syncProfile = useAuthStore((s) => s.syncProfile);
   const fetchNotifications = useNotificationStore((s) => s.fetchNotifications);
   const fetchClubs = useClubStore((s) => s.fetchClubs);
+  const fetchPosts = useCommunityStore((s) => s.fetchPosts);
 
   useEffect(() => {
     if (initialized.current) return;
@@ -23,6 +25,7 @@ export function AppInitProvider({ children }) {
     }
 
     fetchClubs();
+    fetchPosts();
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   return children;

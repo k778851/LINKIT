@@ -1,9 +1,11 @@
 'use client';
 
 import { AlertTriangle, BookOpen, CheckCircle2, Clock, FileText, Search, Users } from 'lucide-react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useClubStore } from '../../store/clubStore';
 import { useCommunityStore } from '../../store/communityStore';
+import { adminApi } from '../../api/adminApi';
 import { dashboardTasks, reportInbox } from './adminDemoData';
 import s from './admin.module.css';
 
@@ -11,12 +13,17 @@ export function AdminDashboard() {
   const router = useRouter();
   const clubs = useClubStore((state) => state.clubs);
   const posts = useCommunityStore((state) => state.posts);
+  const [stats, setStats] = useState(null);
+
+  useEffect(() => {
+    adminApi.getStats().then(setStats).catch(() => {});
+  }, []);
 
   const cards = [
-    { label: '전체 회원', value: '12,458', icon: Users },
-    { label: '활성 클럽', value: clubs.length.toLocaleString(), icon: BookOpen },
+    { label: '전체 회원', value: (stats?.totalUsers ?? 12458).toLocaleString(), icon: Users },
+    { label: '활성 클럽', value: (stats?.totalClubs ?? clubs.length).toLocaleString(), icon: BookOpen },
     { label: '오늘 신고', value: String(reportInbox.length), icon: AlertTriangle },
-    { label: '전체 게시글', value: posts.length.toLocaleString(), icon: FileText },
+    { label: '전체 게시글', value: (stats?.totalPosts ?? posts.length).toLocaleString(), icon: FileText },
   ];
 
   return (
@@ -36,9 +43,7 @@ export function AdminDashboard() {
       <div className={s.statGrid}>
         {cards.map(({ label, value, icon: Icon }) => (
           <div key={label} className={s.statCard}>
-            <div className={s.statTop}>
-              <span className={s.statIcon}><Icon size={19} /></span>
-            </div>
+            <div className={s.statTop}><span className={s.statIcon}><Icon size={19} /></span></div>
             <p className={s.statNum}>{value}</p>
             <p className={s.statLabel}>{label}</p>
           </div>
@@ -51,10 +56,7 @@ export function AdminDashboard() {
           <div className={s.grid3}>
             {dashboardTasks.map((task) => (
               <div key={task.title} className={s.queueItem}>
-                <div>
-                  <p className={s.itemTitle}>{task.title}</p>
-                  <p className={s.itemMeta}>{task.meta}</p>
-                </div>
+                <div><p className={s.itemTitle}>{task.title}</p><p className={s.itemMeta}>{task.meta}</p></div>
                 <Clock size={16} color="#1677ff" />
               </div>
             ))}
@@ -66,10 +68,7 @@ export function AdminDashboard() {
           <div className={s.queueList}>
             {reportInbox.map((item) => (
               <div key={item.title} className={s.queueItem}>
-                <div>
-                  <p className={s.itemTitle}>{item.title}</p>
-                  <p className={s.itemMeta}>{item.time} · {item.reason}</p>
-                </div>
+                <div><p className={s.itemTitle}>{item.title}</p><p className={s.itemMeta}>{item.time} · {item.reason}</p></div>
                 <span className={`${s.badge} ${item.severity === '높음' ? s.badgeRed : s.badgeOrange}`}>{item.severity}</span>
               </div>
             ))}
@@ -89,10 +88,7 @@ export function AdminDashboard() {
             ['정책 감사로그', '정책 초안과 관리자 작업 로그 관리'],
           ].map(([title, desc]) => (
             <div key={title} className={s.activityItem}>
-              <div>
-                <p className={s.itemTitle}>{title}</p>
-                <p className={s.itemMeta}>{desc}</p>
-              </div>
+              <div><p className={s.itemTitle}>{title}</p><p className={s.itemMeta}>{desc}</p></div>
               <span className={`${s.badge} ${s.badgeBlue}`}>운영</span>
             </div>
           ))}
