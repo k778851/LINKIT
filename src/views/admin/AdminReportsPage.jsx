@@ -1,26 +1,49 @@
 'use client';
 
-import { useState } from 'react';
 import { Download } from 'lucide-react';
+import { useMemo, useState } from 'react';
 import s from './admin.module.css';
 
-const metrics = [
-  ['전체 회원', '12,458', '+5.2% vs 지난주'],
-  ['활성 회원', '8,234', '+3.8% vs 지난주'],
-  ['신규 가입', '156', '+12.5% vs 어제'],
-  ['이탈률', '2.3%', '-0.5% vs 지난주'],
-];
+const summaryByPeriod = {
+  '1일': [
+    ['신규 회원', '38', '+4.1%'],
+    ['신규 클럽', '3', '+1.2%'],
+    ['게시글 작성', '96', '+7.4%'],
+    ['신고 접수', '5', '-2.0%'],
+  ],
+  '7일': [
+    ['신규 회원', '212', '+5.8%'],
+    ['신규 클럽', '18', '+3.4%'],
+    ['게시글 작성', '642', '+9.1%'],
+    ['신고 접수', '31', '-4.2%'],
+  ],
+  '30일': [
+    ['신규 회원', '1,024', '+12.6%'],
+    ['신규 클럽', '74', '+8.5%'],
+    ['게시글 작성', '2,840', '+15.2%'],
+    ['신고 접수', '126', '-6.8%'],
+  ],
+};
 
-const ops = [
-  ['신고 처리 속도', '2.3분', 72],
-  ['클럽 승인률', '94.2%', 94],
-  ['커뮤니티 활성도', '87.5%', 88],
-  ['신고 제재율', '12.8%', 13],
-  ['평균 응답 속도', '1.2초', 83],
+const growthRows = [
+  ['회원 성장', '12,458명', '+1,024', '+12.6%', 82],
+  ['클럽 성장', '384개', '+74', '+8.5%', 68],
+  ['활성 회원', '8,234명', '+488', '+6.3%', 74],
+  ['운영 처리율', '94.2%', '+2.1', '+2.1%', 94],
 ];
 
 export function AdminReportsPage() {
+  const [period, setPeriod] = useState('7일');
+  const [startDate, setStartDate] = useState('2026-04-15');
+  const [endDate, setEndDate] = useState('2026-05-15');
   const [exportedAt, setExportedAt] = useState('');
+
+  const rangeDays = useMemo(() => {
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+    const diff = Math.round((end - start) / (1000 * 60 * 60 * 24));
+    return Number.isFinite(diff) ? Math.max(diff, 0) : 0;
+  }, [startDate, endDate]);
 
   const handleExport = () => {
     setExportedAt(new Date().toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' }));
@@ -32,7 +55,7 @@ export function AdminReportsPage() {
         <div>
           <p className={s.eyebrow}>STATISTICS</p>
           <h1 className={s.pageTitle}>통계 및 리포트</h1>
-          <p className={s.pageDesc}>성장, 신고, 처리 속도 지표를 바탕으로 운영 의사결정을 지원합니다.</p>
+          <p className={s.pageDesc}>1일, 7일, 30일 기준과 직접 기간 설정으로 성장 추이를 확인합니다.</p>
         </div>
         <div className={s.headerActions}>
           {exportedAt && <span className={`${s.badge} ${s.badgeGreen}`}>{exportedAt} 생성됨</span>}
@@ -40,56 +63,56 @@ export function AdminReportsPage() {
         </div>
       </div>
 
+      <section className={s.card}>
+        <p className={s.cardTitle}>기간 설정 <span className={s.sectionNote}>최대 1년</span></p>
+        <div className={s.rangeControls}>
+          {['1일', '7일', '30일'].map((item) => (
+            <button key={item} className={`${s.filterBtn} ${period === item ? s.filterActive : ''}`} onClick={() => setPeriod(item)}>{item}</button>
+          ))}
+          <input className={s.input} type="date" value={startDate} onChange={(event) => setStartDate(event.target.value)} />
+          <input className={s.input} type="date" value={endDate} onChange={(event) => setEndDate(event.target.value)} />
+          <span className={`${s.badge} ${rangeDays > 365 ? s.badgeRed : s.badgeBlue}`}>{rangeDays}일</span>
+        </div>
+      </section>
+
       <div className={s.statGrid}>
-        {metrics.map(([label, value, trend]) => (
+        {summaryByPeriod[period].map(([label, value, trend]) => (
           <div key={label} className={s.statCard}>
             <p className={s.statNum}>{value}</p>
             <p className={s.statLabel}>{label}</p>
-            <p className={s.itemMeta}>{trend}</p>
+            <p className={trend.startsWith('-') ? s.negativeMeta : s.positiveMeta}>{trend}</p>
           </div>
         ))}
       </div>
 
       <div className={s.grid2}>
         <section className={s.card}>
-          <p className={s.cardTitle}>회원 / 클럽 성장 추이 <span className={s.sectionNote}>30일</span></p>
-          {['회원 성장', '클럽 생성', '게시글 작성'].map((label, idx) => (
-            <div key={label} style={{ marginBottom: 18 }}>
-              <p className={s.itemTitle}>{label}</p>
-              <div className={s.metricBar}><div className={s.metricFill} style={{ width: `${72 + idx * 8}%` }} /></div>
+          <p className={s.cardTitle}>회원/클럽 성장 추이 <span className={s.sectionNote}>{period} 기준</span></p>
+          {growthRows.map(([label, value, delta, percent, width]) => (
+            <div key={label} className={s.metricRow}>
+              <div>
+                <p className={s.itemTitle}>{label}</p>
+                <p className={s.itemMeta}>{value} · {delta} · {percent}</p>
+              </div>
+              <div className={s.metricBar}><div className={s.metricFill} style={{ width: `${width}%` }} /></div>
             </div>
           ))}
         </section>
         <section className={s.card}>
-          <p className={s.cardTitle}>인기 클럽 / 키워드 TOP 5</p>
+          <p className={s.cardTitle}>인기 카테고리 TOP 5</p>
           <div className={s.queueList}>
             {[
-              ['운동/스포츠', '1,234'],
-              ['독서/문학', '892'],
+              ['운동', '1,234'],
+              ['독서/스터디', '892'],
               ['음악', '624'],
               ['사진', '511'],
-              ['스터디', '402'],
+              ['맛집', '402'],
             ].map(([name, value]) => (
               <div key={name} className={s.keywordItem}><span className={s.itemTitle}>{name}</span><span>{value}</span></div>
             ))}
           </div>
         </section>
       </div>
-
-      <section className={s.card}>
-        <p className={s.cardTitle}>운영 지표 <span className={s.sectionNote}>실시간</span></p>
-        <div className={s.grid3}>
-          {ops.map(([label, value, percent]) => (
-            <div key={label} className={s.activityItem}>
-              <div style={{ width: '100%' }}>
-                <p className={s.itemTitle}>{label}</p>
-                <p className={s.itemMeta}>{value}</p>
-                <div className={s.metricBar}><div className={s.metricFill} style={{ width: `${percent}%` }} /></div>
-              </div>
-            </div>
-          ))}
-        </div>
-      </section>
     </div>
   );
 }

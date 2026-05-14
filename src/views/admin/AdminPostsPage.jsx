@@ -1,25 +1,17 @@
 'use client';
 
-import { AlertTriangle, Plus, Search } from 'lucide-react';
+import { Search } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { adminPosts, reportInbox } from './adminDemoData';
 import s from './admin.module.css';
 
-const filters = ['전체', '노출', '숨김', '삭제', '대기'];
-const initialBannedWords = [
-  ['욕설', 12],
-  ['비방', 8],
-  ['스팸', 5],
-  ['광고', 3],
-  ['정치', 2],
-];
+const filters = ['전체', '정상', '검토', '숨김'];
 
 export function AdminPostsPage() {
   const [query, setQuery] = useState('');
   const [filter, setFilter] = useState('전체');
   const [posts, setPosts] = useState(adminPosts);
-  const [reports, setReports] = useState(reportInbox);
-  const [bannedWords, setBannedWords] = useState(initialBannedWords);
+  const [selectedReport, setSelectedReport] = useState(null);
 
   const visiblePosts = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -34,35 +26,21 @@ export function AdminPostsPage() {
     setPosts((prev) => prev.map((post) => post.id === id ? { ...post, status } : post));
   };
 
-  const resolveFirstReport = () => {
-    setReports((prev) => prev.slice(1));
-    setPosts((prev) => prev.map((post, index) => index === 0 ? { ...post, status: '숨김' } : post));
-  };
-
-  const addBannedWord = () => {
-    const nextIndex = bannedWords.length + 1;
-    setBannedWords((prev) => [...prev, [`운영키워드${nextIndex}`, 0]]);
-  };
-
   return (
     <div>
       <div className={s.pageHeader}>
         <div>
           <p className={s.eyebrow}>COMMUNITY & REPORTS</p>
           <h1 className={s.pageTitle}>커뮤니티 · 신고 관리</h1>
-          <p className={s.pageDesc}>게시글·댓글 관리와 신고 접수를 한 화면에서 처리합니다.</p>
-        </div>
-        <div className={s.headerActions}>
-          <button className={s.ghostBtn} onClick={resolveFirstReport}><AlertTriangle size={16} /> 신고 처리</button>
-          <button className={s.primaryBtn} onClick={addBannedWord}><Plus size={16} /> 금칙어 추가</button>
+          <p className={s.pageDesc}>신고된 게시글과 댓글 내용을 확인하고 숨김 또는 반려 처리를 진행합니다.</p>
         </div>
       </div>
 
       <div className={s.statGrid}>
-        <Metric label="총 게시글" value="1,234" trend="▲ 5.2%" />
-        <Metric label="신고 접수" value={String(reports.length)} trend="대기 큐" />
-        <Metric label="처리 완료" value={String(45 - reports.length)} trend="즉시 반영" />
-        <Metric label="대기 중" value={String(posts.filter((post) => post.status === '대기').length)} trend="평균 15분" />
+        <Metric label="전체 게시글" value="1,234" />
+        <Metric label="신고 접수" value={`${reportInbox.length}건`} />
+        <Metric label="검토 중" value={`${posts.filter((post) => post.status === '검토').length}건`} />
+        <Metric label="숨김 처리" value={`${posts.filter((post) => post.status === '숨김').length}건`} />
       </div>
 
       <div className={s.grid2}>
@@ -103,14 +81,10 @@ export function AdminPostsPage() {
                     <td><span className={`${s.badge} ${s.badgeBlue}`}>{post.category}</span></td>
                     <td><strong>{post.title}</strong></td>
                     <td>{post.reports}</td>
-                    <td><span className={`${s.badge} ${post.status === '숨김' ? s.badgeOrange : post.status === '대기' ? s.badgeRed : post.status === '삭제' ? s.badgeGray : s.badgeGreen}`}>{post.status}</span></td>
+                    <td><span className={`${s.badge} ${statusClass(post.status)}`}>{post.status}</span></td>
                     <td>{post.createdAt}</td>
                     <td>
-                      <div className={s.actionGroup}>
-                        <button className={s.smallBtn} onClick={() => updatePostStatus(post.id, '노출')}>노출</button>
-                        <button className={s.rejectBtn} onClick={() => updatePostStatus(post.id, '숨김')}>숨김</button>
-                        <button className={s.deleteBtn} onClick={() => updatePostStatus(post.id, '삭제')}>삭제</button>
-                      </div>
+                      <button className={s.smallBtn} onClick={() => setSelectedReport(post)}>신고 내용</button>
                     </td>
                   </tr>
                 ))}
@@ -121,42 +95,72 @@ export function AdminPostsPage() {
 
         <aside>
           <section className={s.card}>
-            <p className={s.cardTitle}>신고 접수함 <span className={s.sectionNote}>{reports.length}건</span></p>
+            <p className={s.cardTitle}>신고 접수함 <span className={s.sectionNote}>{reportInbox.length}건</span></p>
             <div className={s.queueList}>
-              {reports.length === 0 ? <p className={s.empty}>대기 중인 신고가 없습니다.</p> : reports.map((item) => (
-                <div key={item.title} className={s.queueItem}>
+              {reportInbox.map((item) => (
+                <button key={item.title} className={s.queueItem} onClick={() => setSelectedReport(item)}>
                   <div>
                     <p className={s.itemTitle}>{item.title}</p>
-                    <p className={s.itemMeta}>{item.time}</p>
+                    <p className={s.itemMeta}>{item.time} · {item.reason}</p>
                   </div>
                   <span className={`${s.badge} ${item.severity === '높음' ? s.badgeRed : s.badgeOrange}`}>{item.severity}</span>
-                </div>
-              ))}
-            </div>
-          </section>
-          <section className={s.card}>
-            <p className={s.cardTitle}>금칙어 관리</p>
-            <div className={s.keywordList}>
-              {bannedWords.map(([word, count]) => (
-                <div key={word} className={s.keywordItem}>
-                  <span className={s.itemTitle}>{word}</span>
-                  <span className={s.badge + ' ' + s.badgeGray}>{count}</span>
-                </div>
+                </button>
               ))}
             </div>
           </section>
         </aside>
       </div>
+
+      {selectedReport && (
+        <div className={s.modalBackdrop} role="presentation">
+          <div className={s.modal} role="dialog" aria-modal="true">
+            <div className={s.modalHeader}>
+              <h2 className={s.modalTitle}>신고 내용 확인</h2>
+              <button className={s.iconBtn} onClick={() => setSelectedReport(null)} aria-label="닫기">×</button>
+            </div>
+            <div className={s.modalBody}>
+              <div className={s.detailGrid}>
+                <Detail label="대상" value={selectedReport.targetTitle ?? selectedReport.title} />
+                <Detail label="작성자" value={selectedReport.targetAuthor ?? selectedReport.author} />
+                <Detail label="신고 사유" value={selectedReport.reason ?? selectedReport.reportReason} />
+                <Detail label="신고자" value={selectedReport.reporter ?? '-'} />
+              </div>
+              <div className={s.textPanel}>{selectedReport.content}</div>
+              {selectedReport.id && (
+                <div className={s.modalFooter}>
+                  <button className={s.ghostBtn} onClick={() => { updatePostStatus(selectedReport.id, '정상'); setSelectedReport(null); }}>신고 반려</button>
+                  <button className={s.primaryBtn} onClick={() => { updatePostStatus(selectedReport.id, '숨김'); setSelectedReport(null); }}>게시글 숨김</button>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
 
-function Metric({ label, value, trend }) {
+function Metric({ label, value }) {
   return (
     <div className={s.statCard}>
       <p className={s.statNum}>{value}</p>
       <p className={s.statLabel}>{label}</p>
-      <p className={s.itemMeta}>{trend}</p>
     </div>
   );
+}
+
+function Detail({ label, value }) {
+  return (
+    <div className={s.detailItem}>
+      <span>{label}</span>
+      <strong>{value}</strong>
+    </div>
+  );
+}
+
+function statusClass(status) {
+  if (status === '정상') return s.badgeGreen;
+  if (status === '검토') return s.badgeOrange;
+  if (status === '숨김') return s.badgeRed;
+  return s.badgeGray;
 }

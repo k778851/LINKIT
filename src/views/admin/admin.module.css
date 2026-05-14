@@ -330,6 +330,211 @@
   font-size: 14px;
 }
 
+.inlineLink {
+  margin-left: 8px;
+  color: #1677ff;
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.iconBtn {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #64748b;
+  background: #eef4fb;
+  font-size: 20px;
+  line-height: 1;
+}
+
+.modalBackdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: rgba(15, 23, 42, 0.45);
+}
+
+.modal {
+  width: min(520px, 100%);
+  max-height: calc(100vh - 48px);
+  overflow-y: auto;
+  background: #fff;
+  border: 1px solid #dfe7f3;
+  border-radius: 8px;
+  padding: 18px;
+  box-shadow: 0 24px 70px rgba(15, 23, 42, 0.24);
+}
+
+.wideModal {
+  width: min(820px, 100%);
+}
+
+.modalHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.modalTitle {
+  font-size: 18px;
+  font-weight: 900;
+  color: #061427;
+}
+
+.modalBody {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.modalFooter {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 16px;
+  grid-column: 1 / -1;
+}
+
+.detailGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.detailItem {
+  min-height: 58px;
+  padding: 11px 12px;
+  border: 1px solid #e7eef8;
+  border-radius: 8px;
+  background: #f8fbff;
+}
+
+.detailItem span {
+  display: block;
+  margin-bottom: 5px;
+  color: #64748b;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.detailItem strong {
+  color: #061427;
+  font-size: 13px;
+  font-weight: 900;
+}
+
+.formGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.formField {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  color: #475569;
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.fullField {
+  grid-column: 1 / -1;
+}
+
+.input,
+.textarea {
+  width: 100%;
+  border: 1px solid #dfe7f3;
+  border-radius: 8px;
+  background: #f8fbff;
+  color: #061427;
+  font-size: 13px;
+  outline: none;
+}
+
+.input {
+  height: 40px;
+  padding: 0 11px;
+}
+
+.textarea {
+  min-height: 112px;
+  padding: 11px;
+  resize: vertical;
+}
+
+.input:focus,
+.textarea:focus {
+  border-color: #1677ff;
+  background: #fff;
+}
+
+.dividerTitle {
+  grid-column: 1 / -1;
+  margin-top: 8px;
+  padding-top: 12px;
+  border-top: 1px solid #e7eef8;
+  color: #1677ff;
+  font-size: 13px;
+  font-weight: 900;
+}
+
+.textPanel {
+  padding: 12px;
+  border-radius: 8px;
+  background: #f8fbff;
+  border: 1px solid #e7eef8;
+  color: #263246;
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.rangeControls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.rangeControls .input {
+  width: 160px;
+}
+
+.metricRow {
+  margin-bottom: 18px;
+}
+
+.positiveMeta {
+  color: #12a150;
+  font-size: 12px;
+  font-weight: 900;
+  margin-top: 8px;
+}
+
+.negativeMeta {
+  color: #e03131;
+  font-size: 12px;
+  font-weight: 900;
+  margin-top: 8px;
+}
+
+.pagination {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 14px;
+}
+
 @media (max-width: 1080px) {
   .statGrid,
   .grid3 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
@@ -341,4 +546,10 @@
   .headerActions { justify-content: flex-start; }
   .statGrid,
   .grid3 { grid-template-columns: 1fr; }
+  .detailGrid,
+  .formGrid { grid-template-columns: 1fr; }
+  .modalBackdrop {
+    align-items: flex-end;
+    padding: 12px;
+  }
 }
