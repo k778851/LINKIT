@@ -39,6 +39,8 @@ jwt:
   refresh-expiration: 604800000  # Refresh Token: 7일 (ms)
 
 app:
+  encryption:
+    key: ${APPLICATION_ENC_KEY:}
   cors:
     allowed-origins: "http://localhost:3000,https://k7788.github.io"
   upload:
@@ -82,6 +84,8 @@ jwt:
   refresh-expiration: 604800000
 
 app:
+  encryption:
+    key: ${APPLICATION_ENC_KEY:}
   cors:
     allowed-origins: ${CORS_ORIGINS:http://localhost:3000}
   upload:
@@ -117,6 +121,8 @@ jwt:
   refresh-expiration: 604800000
 
 app:
+  encryption:
+    key: ${APPLICATION_ENC_KEY:}
   cors:
     allowed-origins: "http://localhost:3000"
   upload:

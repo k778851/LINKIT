@@ -39,7 +39,7 @@ public class CommentService {
                 .authorId(userId)
                 .build();
 
-        post.setCommentCount(post.getCommentCount() + 1);
+        postRepository.incrementCommentCount(postId);
         CommentDto.Response saved = CommentDto.Response.from(commentRepository.save(comment));
 
         // 게시글 작성자에게 댓글 알림 전송 (본인 댓글 제외)
@@ -66,9 +66,8 @@ public class CommentService {
         if (!comment.getAuthorId().equals(userId))
             throw new org.springframework.security.access.AccessDeniedException("댓글 삭제 권한이 없습니다.");
 
-        // commentCount 감소
-        postRepository.findById(comment.getPostId()).ifPresent(p ->
-                p.setCommentCount(Math.max(0, p.getCommentCount() - 1)));
+        // commentCount 감소 (원자적 업데이트)
+        postRepository.decrementCommentCount(comment.getPostId());
 
         commentRepository.delete(comment);
     }

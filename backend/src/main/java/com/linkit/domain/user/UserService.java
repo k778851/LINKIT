@@ -9,6 +9,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.linkit.domain.follow.FollowRepository;
 import com.linkit.security.JwtTokenProvider;
+import com.linkit.security.PiiEncryptionService;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -22,6 +23,8 @@ public class UserService {
     private final JwtTokenProvider tokenProvider;
     private final RefreshTokenRepository refreshTokenRepository;
     private final FollowRepository followRepository;
+    private final UserPiiRepository userPiiRepository;
+    private final PiiEncryptionService piiEncryptionService;
 
     @Value("${jwt.refresh-expiration:2592000000}")
     private long refreshExpiration;
@@ -47,14 +50,27 @@ public class UserService {
         //       인증 실패 시 BadCredentialsException 던지도록 구현
 
         // ── 2. 유저 조회 or 생성 ──────────────────────────────
+        boolean[] createdFlag = { false };
         User user = userRepository.findByHandle(req.getHandle())
-                .orElseGet(() -> userRepository.save(
-                        User.builder()
-                                .id("user-" + UUID.randomUUID().toString().replace("-", "").substring(0, 8))
-                                .handle(req.getHandle())
-                                .provider("ZION")
-                                .build()
-                ));
+                .orElseGet(() -> {
+                    createdFlag[0] = true;
+                    return userRepository.save(
+                            User.builder()
+                                    .id("user-" + UUID.randomUUID().toString().replace("-", "").substring(0, 8))
+                                    .handle(req.getHandle())
+                                    .provider("ZION")
+                                    .build()
+                    );
+                });
+
+        // ── 2-1. 신규 가입 시 user_pii 레코드 생성 (handle 암호화/해시) ──
+        if (createdFlag[0] && !userPiiRepository.existsByUserId(user.getId())) {
+            userPiiRepository.save(UserPii.builder()
+                    .userId(user.getId())
+                    .handleEnc(piiEncryptionService.encrypt(req.getHandle()))
+                    .handleHash(piiEncryptionService.hash(req.getHandle()))
+                    .build());
+        }
 
         // ── 3. 마지막 로그인 시각 갱신 ───────────────────────
         user.setLastLoginAt(LocalDateTime.now());
@@ -136,6 +152,17 @@ public class UserService {
             user.setMarketingOptedIn(req.getMarketingOptedIn());
         }
         user.setStatus(UserStatus.ACTIVE);
+
+        // bio 가 있으면 user_pii 에 암호화 저장
+        if (req.getBio() != null && !req.getBio().isBlank()) {
+            UserPii pii = userPiiRepository.findById(userId).orElseGet(() -> UserPii.builder()
+                    .userId(userId)
+                    .handleEnc(piiEncryptionService.encrypt(user.getHandle()))
+                    .handleHash(piiEncryptionService.hash(user.getHandle()))
+                    .build());
+            pii.setBioEnc(piiEncryptionService.encrypt(req.getBio()));
+            userPiiRepository.save(pii);
+        }
         return UserDto.ProfileResponse.from(user);
     }
 
@@ -163,6 +190,22 @@ public class UserService {
         if (req.getNickname()     != null) user.setNickname(req.getNickname());
         if (req.getBio()          != null) user.setBio(req.getBio());
         if (req.getProfileImage() != null) user.setProfileImage(req.getProfileImage());
+
+        // bio / profileImage 변경 시 user_pii 동기화
+        if (req.getBio() != null || req.getProfileImage() != null) {
+            UserPii pii = userPiiRepository.findById(userId).orElseGet(() -> UserPii.builder()
+                    .userId(userId)
+                    .handleEnc(piiEncryptionService.encrypt(user.getHandle()))
+                    .handleHash(piiEncryptionService.hash(user.getHandle()))
+                    .build());
+            if (req.getBio() != null) {
+                pii.setBioEnc(piiEncryptionService.encrypt(req.getBio()));
+            }
+            if (req.getProfileImage() != null) {
+                pii.setProfileImageEnc(piiEncryptionService.encrypt(req.getProfileImage()));
+            }
+            userPiiRepository.save(pii);
+        }
         return UserDto.ProfileResponse.from(user);
     }
 

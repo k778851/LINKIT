@@ -2,7 +2,8 @@
 
 import { useEffect, useRef } from 'react';
 import { useAuthStore } from '../store/authStore';
-import { api, tokenStorage } from '../api/apiClient';
+import { tokenStorage, ApiError } from '../api/apiClient';
+import { webPushApi } from '../api/webPushApi';
 
 /**
  * Web Push 구독 훅
@@ -33,7 +34,8 @@ export function useWebPush() {
           if (permission !== 'granted') return;
 
           // 4. 서버에서 VAPID 공개키 가져오기
-          const publicKey = await api.get('/api/push/public-key');
+          const publicKey = await webPushApi.getPublicKey();
+          if (!publicKey) return;
 
           // 5. Push 구독 생성
           subscription = await reg.pushManager.subscribe({
@@ -43,10 +45,12 @@ export function useWebPush() {
         }
 
         // 6. 구독 정보를 서버에 전송
-        await api.post('/api/push/subscribe', subscription.toJSON());
+        await webPushApi.subscribe(subscription.toJSON());
 
         subscribedRef.current = true;
       } catch (err) {
+        // 백엔드 미연결 (데모 모드) → 조용히 실패
+        if (err instanceof ApiError && err.status === 0) return;
         // 권한 거부, 비지원 환경 등 — 조용히 실패 처리
         if (process.env.NODE_ENV === 'development') {
           console.debug('[WebPush] 구독 실패:', err.message);

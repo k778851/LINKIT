@@ -37,7 +37,7 @@ public class ClubController {
             @AuthenticationPrincipal UserDetails principal,
             @RequestBody @Valid ClubDto.CreateRequest req) {
         ClubDto.Response club = clubService.createClub(req, principal.getUsername());
-        // 생성자 자동 가입 (ClubService.joinClub 내부에서 memberCount +1 처리)
+        // 생성자 자동 가입 (OWNER 역할 부여 + memberCount +1)
         clubService.joinClub(principal.getUsername(), club.getId());
         return ApiResponse.ok("클럽을 개설했어요 🎉", club);
     }
@@ -61,13 +61,20 @@ public class ClubController {
     /* ── 멤버십 (join/leave/bookmark) ─────────────────── */
 
     @PostMapping("/{clubId}/join")
-    public ApiResponse<Void> join(
+    public ApiResponse<JoinRequestDto.JoinResult> join(
             @AuthenticationPrincipal UserDetails principal,
-            @PathVariable String clubId) {
-        // joinClub 내부에서 ClubMember 저장 + memberCount +1 처리
-        clubService.joinClub(principal.getUsername(), clubId);
+            @PathVariable String clubId,
+            @RequestBody(required = false) @Valid JoinRequestDto.CreateRequest body) {
 
-        // 클럽장에게 새 멤버 알림 전송 (본인이 만든 클럽에 본인이 가입하는 경우 제외)
+        String message = body != null ? body.getMessage() : null;
+        JoinRequestDto.JoinResult result =
+                clubService.joinClub(principal.getUsername(), clubId, message);
+
+        if ("PENDING".equals(result.getStatus())) {
+            return ApiResponse.ok("가입을 신청했어요. 승인을 기다려주세요 ✋", result);
+        }
+
+        // 즉시 가입 — 클럽장에게 새 멤버 알림 (본인이 만든 클럽이면 생략)
         ClubDto.Response club = clubService.getClub(clubId);
         if (!club.getCreatedBy().equals(principal.getUsername())) {
             notificationService.send(
@@ -80,7 +87,46 @@ public class ClubController {
             );
         }
 
-        return ApiResponse.ok("모임에 신청했어요 🎉");
+        return ApiResponse.ok("모임에 가입했어요 🎉", result);
+    }
+
+    /* ── 가입 신청 관리 (비공개 클럽) ────────────────────── */
+
+    @GetMapping("/{clubId}/join-requests")
+    public ApiResponse<List<JoinRequestDto.Response>> listJoinRequests(
+            @AuthenticationPrincipal UserDetails principal,
+            @PathVariable String clubId) {
+        return ApiResponse.ok(
+                clubService.listPendingJoinRequests(clubId, principal.getUsername()));
+    }
+
+    @PostMapping("/{clubId}/join-requests")
+    public ApiResponse<JoinRequestDto.JoinResult> submitJoinRequest(
+            @AuthenticationPrincipal UserDetails principal,
+            @PathVariable String clubId,
+            @RequestBody(required = false) @Valid JoinRequestDto.CreateRequest body) {
+        String message = body != null ? body.getMessage() : null;
+        JoinRequestDto.JoinResult result =
+                clubService.joinClub(principal.getUsername(), clubId, message);
+        return ApiResponse.ok(result);
+    }
+
+    @PatchMapping("/{clubId}/join-requests/{requestId}/approve")
+    public ApiResponse<JoinRequestDto.Response> approveJoinRequest(
+            @AuthenticationPrincipal UserDetails principal,
+            @PathVariable String clubId,
+            @PathVariable Long requestId) {
+        return ApiResponse.ok("가입을 승인했어요 🎉",
+                clubService.approveJoinRequest(clubId, requestId, principal.getUsername()));
+    }
+
+    @PatchMapping("/{clubId}/join-requests/{requestId}/reject")
+    public ApiResponse<JoinRequestDto.Response> rejectJoinRequest(
+            @AuthenticationPrincipal UserDetails principal,
+            @PathVariable String clubId,
+            @PathVariable Long requestId) {
+        return ApiResponse.ok("가입 신청을 거절했어요.",
+                clubService.rejectJoinRequest(clubId, requestId, principal.getUsername()));
     }
 
     @DeleteMapping("/{clubId}/join")
@@ -91,6 +137,20 @@ public class ClubController {
         clubService.leaveClub(principal.getUsername(), clubId);
         return ApiResponse.ok("참여를 취소했어요.");
     }
+
+    /* ── 멤버 역할 변경 ───────────────────────────────── */
+
+    @PatchMapping("/{clubId}/members/{userId}/role")
+    public ApiResponse<Void> changeMemberRole(
+            @AuthenticationPrincipal UserDetails principal,
+            @PathVariable String clubId,
+            @PathVariable String userId,
+            @RequestBody ChangeRoleRequest body) {
+        clubService.changeMemberRole(clubId, principal.getUsername(), userId, body.role());
+        return ApiResponse.ok("멤버 역할을 변경했어요.");
+    }
+
+    public record ChangeRoleRequest(ClubMemberRole role) {}
 
     @PostMapping("/{clubId}/bookmark")
     public ApiResponse<Void> bookmark(

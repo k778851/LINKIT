@@ -12,4 +12,6 @@ public interface ClubJoinRequestRepository extends JpaRepository<ClubJoinRequest
     Optional<ClubJoinRequest> findByClubIdAndUserId(String clubId, String userId);
 
     boolean existsByClubIdAndUserIdAndStatus(String clubId, String userId, JoinRequestStatus status);
+
+    Optional<ClubJoinRequest> findByIdAndClubId(Long id, String clubId);
 }

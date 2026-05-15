@@ -65,20 +65,24 @@ public class PostService {
 
     @Transactional
     public void incrementView(String postId) {
-        Post post = findById(postId);
-        post.setViewCount(post.getViewCount() + 1);
+        if (!postRepository.existsById(postId)) {
+            throw new EntityNotFoundException("게시글을 찾을 수 없습니다.");
+        }
+        postRepository.incrementViewCount(postId);
     }
 
     @Transactional
     public boolean toggleLike(String postId, String userId) {
-        Post post = findById(postId);
+        if (!postRepository.existsById(postId)) {
+            throw new EntityNotFoundException("게시글을 찾을 수 없습니다.");
+        }
         if (likeRepository.existsByPostIdAndUserId(postId, userId)) {
             likeRepository.deleteByPostIdAndUserId(postId, userId);
-            post.setLikeCount(Math.max(0, post.getLikeCount() - 1));
+            postRepository.decrementLikeCount(postId);
             return false;
         } else {
             likeRepository.save(new PostLike(postId, userId));
-            post.setLikeCount(post.getLikeCount() + 1);
+            postRepository.incrementLikeCount(postId);
             return true;
         }
     }
