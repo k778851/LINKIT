@@ -5,10 +5,12 @@ import { useRouter } from 'next/navigation';
 import { Search, X, Clock, TrendingUp } from 'lucide-react';
 import { useClubStore } from '../store/clubStore';
 import { useCommunityStore } from '../store/communityStore';
+import { useAuthStore } from '../store/authStore';
 import { searchApi } from '../api/searchApi';
 import { tokenStorage } from '../api/apiClient';
 import { CATEGORY_COLORS, SAMPLE_CLUB_IMAGES } from '../data/sampleData';
 import { REGION_OPTIONS, matchesRegion } from '../data/regions';
+import { isSuperAdmin } from '../utils/permissions';
 import { assetPath } from '../lib/assetPath';
 import { getPostDetailPath } from '../lib/communityRoutes';
 import styles from './SearchPage.module.css';
@@ -34,6 +36,8 @@ export function SearchPage() {
   const selectedRegion = useClubStore((s) => s.selectedRegion);
   const setRegion = useClubStore((s) => s.setRegion);
   const posts = useCommunityStore((s) => s.posts);
+  const user = useAuthStore((s) => s.user);
+  const showRegionFilter = isSuperAdmin(user);
 
   useEffect(() => { inputRef.current?.focus(); }, []);
 
@@ -116,17 +120,19 @@ export function SearchPage() {
         <button className={styles.cancelBtn} onClick={() => router.back()}>취소</button>
       </div>
 
-      <div className={`${styles.regionRow} hide-scrollbar`}>
-        {REGION_OPTIONS.map((region) => (
-          <button
-            key={region}
-            className={`${styles.regionChip} ${selectedRegion === region ? styles.regionChipActive : ''}`}
-            onClick={() => setRegion(region)}
-          >
-            {region}
-          </button>
-        ))}
-      </div>
+      {showRegionFilter && (
+        <div className={`${styles.regionRow} hide-scrollbar`}>
+          {REGION_OPTIONS.map((region) => (
+            <button
+              key={region}
+              className={`${styles.regionChip} ${selectedRegion === region ? styles.regionChipActive : ''}`}
+              onClick={() => setRegion(region)}
+            >
+              {region}
+            </button>
+          ))}
+        </div>
+      )}
 
       {!showResults ? (
         <div className={styles.body}>

@@ -4,7 +4,9 @@ import { useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Plus, SlidersHorizontal, X } from 'lucide-react';
 import { useClubStore } from '../../store/clubStore';
+import { useAuthStore } from '../../store/authStore';
 import { REGION_OPTIONS, matchesRegion } from '../../data/regions';
+import { isSuperAdmin } from '../../utils/permissions';
 import { Chip } from '../../components/common/Chip';
 import { ClubCard } from '../../components/club/ClubCard';
 import { FAB } from '../../components/common/FAB';
@@ -26,6 +28,8 @@ export function ClubListPage() {
     clubs: allClubs,
     loaded, fetchClubs,
   } = useClubStore();
+  const user = useAuthStore((s) => s.user);
+  const showRegionFilter = isSuperAdmin(user);
 
   const clubs = getFilteredClubs();
   const regionClubCount = allClubs.filter((club) => matchesRegion(club, selectedRegion)).length;
@@ -59,13 +63,15 @@ export function ClubListPage() {
         <span className={styles.headerCount}>{regionClubCount}개</span>
       </header>
 
-      <div className={`${styles.chipRow} hide-scrollbar`} aria-label="운영 지역">
-        {REGION_OPTIONS.map((region) => (
-          <Chip key={region} active={selectedRegion === region} onClick={() => setRegion(region)}>
-            {region}
-          </Chip>
-        ))}
-      </div>
+      {showRegionFilter && (
+        <div className={`${styles.chipRow} hide-scrollbar`} aria-label="운영 지역">
+          {REGION_OPTIONS.map((region) => (
+            <Chip key={region} active={selectedRegion === region} onClick={() => setRegion(region)}>
+              {region}
+            </Chip>
+          ))}
+        </div>
+      )}
 
       <div className={`${styles.chipRow} hide-scrollbar`} aria-label="카테고리">
         {CATEGORIES.map((cat) => (

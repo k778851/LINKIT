@@ -9,6 +9,7 @@ import { useNotificationStore } from '../store/notificationStore';
 import { calcDdayNum, getDdayLabel } from '../utils/formatDate';
 import { sampleBanners, CATEGORY_COLORS, SAMPLE_CLUB_IMAGES } from '../data/sampleData';
 import { REGION_OPTIONS, matchesRegion } from '../data/regions';
+import { isSuperAdmin } from '../utils/permissions';
 import { assetPath } from '../lib/assetPath';
 import { LinkitWordmark } from '../components/common/LinkitWordmark';
 import styles from './HomePage.module.css';
@@ -130,17 +131,19 @@ export function HomePage() {
         </div>
       </header>
 
-      <div className={`${styles.regionBar} hide-scrollbar`}>
-        {REGION_OPTIONS.map((region) => (
-          <button
-            key={region}
-            className={`${styles.regionChip} ${selectedRegion === region ? styles.regionChipActive : ''}`}
-            onClick={() => setRegion(region)}
-          >
-            {region}
-          </button>
-        ))}
-      </div>
+      {isSuperAdmin(user) && (
+        <div className={`${styles.regionBar} hide-scrollbar`}>
+          {REGION_OPTIONS.map((region) => (
+            <button
+              key={region}
+              className={`${styles.regionChip} ${selectedRegion === region ? styles.regionChipActive : ''}`}
+              onClick={() => setRegion(region)}
+            >
+              {region}
+            </button>
+          ))}
+        </div>
+      )}
 
       <section className={styles.firstFold}>
         <div

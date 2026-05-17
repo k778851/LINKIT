@@ -5,8 +5,10 @@ import { useRouter } from 'next/navigation';
 import { Plus } from 'lucide-react';
 import { useCommunityStore } from '../../store/communityStore';
 import { useClubStore } from '../../store/clubStore';
+import { useAuthStore } from '../../store/authStore';
 import { tokenStorage } from '../../api/apiClient';
 import { REGION_OPTIONS, matchesRegion } from '../../data/regions';
+import { isSuperAdmin } from '../../utils/permissions';
 import { getPostDetailPath } from '../../lib/communityRoutes';
 import { Chip } from '../../components/common/Chip';
 import { PostCard } from '../../components/community/PostCard';
@@ -23,6 +25,8 @@ export function CommunityListPage() {
   const fetchPosts = useCommunityStore((s) => s.fetchPosts);
   const selectedRegion = useClubStore((s) => s.selectedRegion);
   const setRegion = useClubStore((s) => s.setRegion);
+  const user = useAuthStore((s) => s.user);
+  const showRegionFilter = isSuperAdmin(user);
   const [selectedCategory, setSelectedCategory] = useState('전체');
   const [loading, setLoading] = useState(true);
 
@@ -50,13 +54,15 @@ export function CommunityListPage() {
         <h1 className={styles.title}>커뮤니티</h1>
       </header>
 
-      <div className={`${styles.chipRow} hide-scrollbar`}>
-        {REGION_OPTIONS.map((region) => (
-          <Chip key={region} active={selectedRegion === region} onClick={() => setRegion(region)}>
-            {region}
-          </Chip>
-        ))}
-      </div>
+      {showRegionFilter && (
+        <div className={`${styles.chipRow} hide-scrollbar`}>
+          {REGION_OPTIONS.map((region) => (
+            <Chip key={region} active={selectedRegion === region} onClick={() => setRegion(region)}>
+              {region}
+            </Chip>
+          ))}
+        </div>
+      )}
 
       <div className={`${styles.chipRow} hide-scrollbar`}>
         {CATEGORIES.map((cat) => (

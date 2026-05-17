@@ -546,6 +546,7 @@ export const defaultUser = {
   id: 'user-me',
   nickname: '링킷유저',
   handle: 'linkit_user',
+  role: 'SUPER_ADMIN',          // 데모 계정 — 전체관리자 권한 (운영 지역 필터 표시)
   bio: '소모임을 사랑하는 사람 🙌',
   joinedClubs: ['club-1', 'club-6'],
   ownedClubs: ['club-6'],
