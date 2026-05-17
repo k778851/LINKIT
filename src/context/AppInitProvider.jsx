@@ -6,7 +6,7 @@ import { useNotificationStore } from '../store/notificationStore';
 import { useClubStore } from '../store/clubStore';
 import { useCommunityStore } from '../store/communityStore';
 import { tokenStorage } from '../api/apiClient';
-import { isSuperAdmin } from '../utils/permissions';
+import { getAdminRegion, isSuperAdmin, isJipa } from '../utils/permissions';
 
 export function AppInitProvider({ children }) {
   const initialized = useRef(false);
@@ -32,10 +32,18 @@ export function AppInitProvider({ children }) {
     fetchPosts();
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // 전체관리자가 아닐 때는 지역 필터를 '전체'로 강제 (UI 미노출 + 의도치 않은 필터링 방지)
+  // 지역 자동 고정 — 역할별 처리
   useEffect(() => {
-    if (!isSuperAdmin(user) && selectedRegion !== '전체') {
-      setRegion('전체');
+    if (!user) return;
+    // 전체관리자·지파: 지역 제한 없음, 항상 '전체' 보기
+    if (isSuperAdmin(user) || isJipa(user)) {
+      if (selectedRegion !== '전체') setRegion('전체');
+      return;
+    }
+    // 지역관리자: role에서 지역 결정 / 일반 유저: serviceRegion 필드 사용
+    const lockedRegion = getAdminRegion(user) ?? user.serviceRegion ?? null;
+    if (lockedRegion && selectedRegion !== lockedRegion) {
+      setRegion(lockedRegion);
     }
   }, [user, selectedRegion, setRegion]);
 

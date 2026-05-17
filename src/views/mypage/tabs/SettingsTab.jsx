@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { ChevronRight, Bell, Lock, Globe, Moon, Info, LogOut } from 'lucide-react';
+import { ChevronRight, Bell, Moon, Info, LogOut } from 'lucide-react';
 import { useAuthStore } from '../../../store/authStore';
 import { useTheme } from '../../../hooks/useTheme';
 import { Modal } from '../../../components/common/Modal';
@@ -21,8 +21,6 @@ export function SettingsTab() {
 
   const rows = [
     { icon: Bell,  label: '알림 설정', to: '/mypage/settings/notifications' },
-    { icon: Lock,  label: '개인정보 · 보안', to: '/mypage/settings/privacy' },
-    { icon: Globe, label: '언어', to: '/mypage/settings/language' },
     { icon: Info,  label: '앱 정보', to: '/mypage/settings/about' },
   ];
 

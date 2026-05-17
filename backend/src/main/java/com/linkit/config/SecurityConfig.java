@@ -48,7 +48,7 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.GET, "/api/clubs/{id}/schedules").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/search").permitAll()
                 .requestMatchers(HttpMethod.GET, "/uploads/**").permitAll()
-                .requestMatchers("/api/admin/**").hasRole("ADMIN")
+                .requestMatchers("/api/admin/**").hasAnyRole("ADMIN", "SUPER_ADMIN")
                 .anyRequest().authenticated()
             )
             .exceptionHandling(ex -> ex

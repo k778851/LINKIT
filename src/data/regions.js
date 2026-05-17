@@ -1,4 +1,4 @@
-export const REGION_OPTIONS = ['전체', '북구', '광산', '본부'];
+export const REGION_OPTIONS = ['전체', '본부', '광산', '북구'];
 
 const REGION_ALIASES = {
   북구: ['북구', '오치동', '용봉동', '전남대', '풋살장'],

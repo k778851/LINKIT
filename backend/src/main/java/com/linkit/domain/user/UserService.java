@@ -29,6 +29,9 @@ public class UserService {
     @Value("${jwt.refresh-expiration:2592000000}")
     private long refreshExpiration;
 
+    @Value("${spring.profiles.active:dev}")
+    private String activeProfile;
+
     /* ── 로그인 / 최초 가입 ──────────────────────────────── */
 
     /**
@@ -47,7 +50,16 @@ public class UserService {
     public UserDto.LoginResponse login(UserDto.LoginRequest req) {
         // ── 1. 시온 API 검증 ─────────────────────────────────
         // TODO: ZionApiClient.validate(req.getHandle(), req.getPassword())
-        //       인증 실패 시 BadCredentialsException 던지도록 구현
+        // dev 프로파일: 테스트 계정은 고정 비밀번호로 허용
+        if (!isDev()) {
+            // TODO: 운영 환경에서 시온 API 검증 구현
+            throw new org.springframework.security.authentication.BadCredentialsException("시온 API가 연동되지 않았습니다.");
+        }
+        // dev: 비밀번호 검증 — 테스트 계정 고정 비밀번호
+        String expectedPassword = getDevPassword(req.getHandle());
+        if (expectedPassword != null && !expectedPassword.equals(req.getPassword())) {
+            throw new org.springframework.security.authentication.BadCredentialsException("고유번호 또는 비밀번호가 올바르지 않습니다.");
+        }
 
         // ── 2. 유저 조회 or 생성 ──────────────────────────────
         boolean[] createdFlag = { false };
@@ -210,6 +222,22 @@ public class UserService {
     }
 
     /* ── 내부 헬퍼 ───────────────────────────────────── */
+
+    private static final java.util.Map<String, String> DEV_PASSWORDS = java.util.Map.of(
+        "00000000-00000", "admin1234",
+        "00371210-00149", "linkit1234",
+        "00371210-00150", "linkit1234",
+        "00371210-00151", "linkit1234",
+        "20240001-00099", "linkit1234"
+    );
+
+    private String getDevPassword(String handle) {
+        return DEV_PASSWORDS.getOrDefault(handle, "linkit1234");
+    }
+
+    private boolean isDev() {
+        return activeProfile.contains("dev");
+    }
 
     private User getUser(String id) {
         return userRepository.findById(id)

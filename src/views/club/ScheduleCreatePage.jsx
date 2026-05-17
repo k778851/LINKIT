@@ -25,14 +25,16 @@ export function ScheduleCreatePage({ clubId }) {
   });
   const [submitting, setSubmitting] = useState(false);
 
-  // 방장만 접근 가능
+  // 방장 또는 관리자만 접근 가능
   if (!club) return null;
-  if (club.createdBy !== user?.id) {
+  const myRole = useClubStore.getState().getClubMembers(clubId).find((m) => m.userId === user?.id)?.role;
+  const canCreate = club.createdBy === user?.id || myRole === 'owner' || myRole === 'admin';
+  if (!canCreate) {
     return (
       <EmptyState
         emoji="🔒"
         title="권한이 없어요"
-        description="모임 개설은 클럽 방장만 할 수 있어요."
+        description="모임 개설은 클럽 방장 또는 관리자만 할 수 있어요."
       />
     );
   }
@@ -58,7 +60,7 @@ export function ScheduleCreatePage({ clubId }) {
       // schedules 로컬 추가
       useClubStore.setState((s) => ({ schedules: [...s.schedules, newSchedule] }));
       showToast('모임이 개설되었습니다. 🎉', 'success');
-      router.back();
+      router.replace(`/clubs/${clubId}?tab=schedules`);
     } finally {
       setSubmitting(false);
     }
@@ -93,6 +95,7 @@ export function ScheduleCreatePage({ clubId }) {
             className={styles.input}
             type="date"
             value={form.date}
+            min={new Date().toISOString().split('T')[0]}
             onChange={(e) => set('date', e.target.value)}
           />
         </div>

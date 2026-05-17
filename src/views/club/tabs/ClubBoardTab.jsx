@@ -2,19 +2,18 @@
 
 import { useState } from 'react';
 import { createPortal } from 'react-dom';
-import { Heart, MessageCircle, Eye, Send, X, ChevronDown, ChevronUp } from 'lucide-react';
+import { Heart, MessageCircle, Eye, Send, X, ChevronDown, ChevronUp, MoreHorizontal } from 'lucide-react';
 import { useCommunityStore } from '../../../store/communityStore';
 import { useAuthStore } from '../../../store/authStore';
 import { useToastContext } from '../../../context/ToastContext';
 import { formatRelativeTime } from '../../../utils/formatDate';
 import styles from './ClubBoardTab.module.css';
 
-const BOARD_CATEGORIES = ['전체', '공지', '자유', '질문'];
+const BOARD_CATEGORIES = ['전체', '공지', '자유'];
 
 const CATEGORY_COLORS = {
   공지: { color: 'var(--pink)', bg: 'var(--pink-soft)' },
   자유: { color: 'var(--blue)', bg: 'var(--blue-soft)' },
-  질문: { color: 'var(--mint)', bg: 'var(--mint-soft)' },
 };
 
 export function ClubBoardTab({ clubId }) {
@@ -25,6 +24,8 @@ export function ClubBoardTab({ clubId }) {
   const addClubPost = useCommunityStore((s) => s.addClubPost);
   const toggleClubPostLike = useCommunityStore((s) => s.toggleClubPostLike);
   const addClubComment = useCommunityStore((s) => s.addClubComment);
+  const deleteClubComment = useCommunityStore((s) => s.deleteClubComment);
+  const updateClubComment = useCommunityStore((s) => s.updateClubComment);
   const allComments = useCommunityStore((s) => s.comments);
 
   const [filter, setFilter] = useState('전체');
@@ -33,10 +34,18 @@ export function ClubBoardTab({ clubId }) {
   const [writeErrors, setWriteErrors] = useState({});
   const [expandedPost, setExpandedPost] = useState(null);
   const [commentTexts, setCommentTexts] = useState({});
+  const [editingCommentId, setEditingCommentId] = useState(null);
+  const [editingCommentText, setEditingCommentText] = useState('');
+  const [commentMenuId, setCommentMenuId] = useState(null);
 
   const posts = clubPosts
     .filter((p) => p.clubId === clubId)
-    .filter((p) => filter === '전체' || p.category === filter);
+    .filter((p) => filter === '전체' || p.category === filter)
+    .sort((a, b) => {
+      if (a.category === '공지' && b.category !== '공지') return -1;
+      if (a.category !== '공지' && b.category === '공지') return 1;
+      return 0;
+    });
 
   const setField = (key, value) => setWriteForm((form) => ({ ...form, [key]: value }));
   const getPostComments = (postId) => allComments.filter((comment) => comment.postId === postId);
@@ -115,7 +124,7 @@ export function ClubBoardTab({ clubId }) {
                   </span>
                 </div>
                 <p className={styles.cardTitle}>{post.title}</p>
-                <p className={styles.cardContent}>{post.content}</p>
+                <p className={styles.cardContent} style={{ whiteSpace: 'pre-line' }}>{post.content}</p>
                 <div className={styles.cardMeta}>
                   <span className={styles.metaAuthor}>{post.authorNickname}</span>
                   <span className={styles.metaTime}>{formatRelativeTime(post.createdAt)}</span>
@@ -150,16 +159,81 @@ export function ClubBoardTab({ clubId }) {
                     {comments.length === 0 ? (
                       <p className={styles.noComment}>첫 댓글을 남겨보세요</p>
                     ) : (
-                      comments.map((comment) => (
-                        <div key={comment.id} className={styles.comment}>
-                          <span className={styles.commentEmoji}>{comment.authorNickname?.[0]?.toUpperCase() ?? '?'}</span>
-                          <div className={styles.commentBody}>
-                            <span className={styles.commentName}>{comment.authorNickname}</span>
-                            <span className={styles.commentTime}>{formatRelativeTime(comment.createdAt)}</span>
-                            <p className={styles.commentText}>{comment.content}</p>
+                      comments.map((comment) => {
+                        const isOwnComment = comment.authorId === user?.id;
+                        const menuOpen = commentMenuId === comment.id;
+                        const isEditing = editingCommentId === comment.id;
+                        return (
+                          <div key={comment.id} className={styles.comment}>
+                            <span className={styles.commentEmoji}>{comment.authorNickname?.[0]?.toUpperCase() ?? '?'}</span>
+                            <div className={styles.commentBody}>
+                              <div className={styles.commentTop}>
+                                <span className={styles.commentName}>{comment.authorNickname}</span>
+                                <span className={styles.commentTime}>{formatRelativeTime(comment.createdAt)}</span>
+                                {isOwnComment && (
+                                  <button
+                                    className={styles.commentMenuBtn}
+                                    onClick={() => setCommentMenuId(menuOpen ? null : comment.id)}
+                                    style={{ marginLeft: 'auto', background: 'none', border: 'none', cursor: 'pointer', padding: '0 4px' }}
+                                  >
+                                    <MoreHorizontal size={14} color="var(--ink-4)" />
+                                  </button>
+                                )}
+                              </div>
+                              {menuOpen && isOwnComment && (
+                                <div style={{ display: 'flex', gap: 8, margin: '4px 0' }}>
+                                  <button
+                                    style={{ fontSize: 12, color: 'var(--blue)', background: 'none', border: 'none', cursor: 'pointer', padding: '2px 6px' }}
+                                    onClick={() => {
+                                      setEditingCommentId(comment.id);
+                                      setEditingCommentText(comment.content);
+                                      setCommentMenuId(null);
+                                    }}
+                                  >수정</button>
+                                  <button
+                                    style={{ fontSize: 12, color: 'var(--pink)', background: 'none', border: 'none', cursor: 'pointer', padding: '2px 6px' }}
+                                    onClick={() => {
+                                      if (deleteClubComment) deleteClubComment(comment.id);
+                                      setCommentMenuId(null);
+                                      showToast('댓글을 삭제했어요.', 'info');
+                                    }}
+                                  >삭제</button>
+                                </div>
+                              )}
+                              {isEditing ? (
+                                <div style={{ display: 'flex', gap: 6, marginTop: 4 }}>
+                                  <input
+                                    style={{ flex: 1, fontSize: 13, padding: '4px 8px', borderRadius: 6, border: '1px solid var(--base-border)' }}
+                                    value={editingCommentText}
+                                    onChange={(e) => setEditingCommentText(e.target.value)}
+                                    onKeyDown={(e) => {
+                                      if (e.key === 'Enter') {
+                                        if (updateClubComment) updateClubComment(comment.id, editingCommentText.trim());
+                                        setEditingCommentId(null);
+                                        showToast('댓글을 수정했어요.', 'success');
+                                      }
+                                    }}
+                                  />
+                                  <button
+                                    style={{ fontSize: 12, color: 'var(--blue)', background: 'none', border: 'none', cursor: 'pointer' }}
+                                    onClick={() => {
+                                      if (updateClubComment) updateClubComment(comment.id, editingCommentText.trim());
+                                      setEditingCommentId(null);
+                                      showToast('댓글을 수정했어요.', 'success');
+                                    }}
+                                  >완료</button>
+                                  <button
+                                    style={{ fontSize: 12, color: 'var(--ink-4)', background: 'none', border: 'none', cursor: 'pointer' }}
+                                    onClick={() => setEditingCommentId(null)}
+                                  >취소</button>
+                                </div>
+                              ) : (
+                                <p className={styles.commentText}>{comment.content}</p>
+                              )}
+                            </div>
                           </div>
-                        </div>
-                      ))
+                        );
+                      })
                     )}
                     <div className={styles.commentInput}>
                       <input
@@ -198,7 +272,7 @@ export function ClubBoardTab({ clubId }) {
 
             <div className={styles.sheetSection}>
               <div className={styles.sheetChipRow}>
-                {['공지', '자유', '질문'].map((category) => (
+                {['공지', '자유'].map((category) => (
                   <button
                     key={category}
                     className={`${styles.sheetChip} ${writeForm.category === category ? styles.sheetChipActive : ''}`}

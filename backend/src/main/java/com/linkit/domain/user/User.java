@@ -48,6 +48,10 @@ public class User {
     @Column(length = 500)
     private String profileImage;
 
+    /** 소속 지역 — '본부' | '광산' | '북구' (null 이면 미설정) */
+    @Column(length = 10)
+    private String serviceRegion;
+
     // ── 계정 권한 / 상태 ─────────────────────────────────
     @Enumerated(EnumType.STRING)
     @Builder.Default

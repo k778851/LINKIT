@@ -17,7 +17,7 @@ import { EmptyState } from '../../components/common/EmptyState';
 import { PostCardSkeleton } from '../../components/common/SkeletonList';
 import styles from './CommunityListPage.module.css';
 
-const CATEGORIES = ['전체', '인기', '일상', '질문', '모임', '나눔', '생활정보'];
+const CATEGORIES = ['전체', '인기', '모임', '나눔', '생활정보', '일상'];
 
 export function CommunityListPage() {
   const router = useRouter();

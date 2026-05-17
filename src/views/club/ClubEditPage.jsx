@@ -160,9 +160,9 @@ export function ClubEditPage({ clubId }) {
             value={form.schedule} onChange={(e) => set('schedule', e.target.value)} />
         </div>
 
-        {/* 공개 범위 */}
+        {/* 가입 방식 */}
         <div className={styles.section}>
-          <p className={styles.label}>공개 범위</p>
+          <p className={styles.label}>가입 방식</p>
           <div className={styles.toggleRow}>
             <button type="button"
               className={`${styles.toggleBtn} ${!form.isPrivate ? styles.toggleActive : ''}`}

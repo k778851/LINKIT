@@ -6,15 +6,19 @@ import { clubApi } from '../api/clubApi';
 import { scheduleApi } from '../api/scheduleApi';
 import { ApiError } from '../api/apiClient';
 
-const shouldFallback = (e) =>
-  e instanceof ApiError && (e.status === 0 || e.status === 401 || e.status === 403);
+/** 네트워크 자체가 불통(백엔드 미실행)일 때만 샘플 데이터 사용 */
+const isOffline = (e) => e instanceof ApiError && e.status === 0;
+/** 인증 오류 — 백엔드는 살아있지만 로그인이 필요한 상태 */
+const isAuthError = (e) => e instanceof ApiError && (e.status === 401 || e.status === 403);
+/** 기존 코드 호환용 (write 경로에서 사용) */
+const shouldFallback = (e) => isOffline(e) || isAuthError(e);
 
 export const useClubStore = create(
   persist(
     (set, get) => ({
-      clubs: sampleClubs,
+      clubs: [],
       pendingClubs: [],
-      schedules: sampleSchedules,
+      schedules: [],
       appliedScheduleIds: [],
       selectedCategory: '전체',
       selectedSort: '최신순',
@@ -29,11 +33,15 @@ export const useClubStore = create(
         const { selectedCategory, selectedSort } = get();
         try {
           const clubs = await clubApi.getAll(selectedCategory, selectedSort);
-          if (clubs && clubs.length > 0) set({ clubs, loaded: true });
-          else set({ loaded: true });
+          set({ clubs: clubs ?? [], loaded: true });
         } catch (e) {
-          if (shouldFallback(e)) set({ loaded: true });
-          else throw e;
+          if (isOffline(e)) {
+            // 백엔드 미실행 → 샘플 데이터로 데모 모드
+            set({ clubs: sampleClubs, schedules: sampleSchedules, loaded: true });
+          } else {
+            // 백엔드는 살아있음 (401/403/기타) → 빈 목록, 샘플 데이터 표시 안 함
+            set({ loaded: true });
+          }
         }
       },
 
@@ -226,6 +234,7 @@ export const useClubStore = create(
     }),
     {
       name: 'linkit-clubs',
+      version: 2, // 샘플 데이터 초기값 제거로 인한 스키마 변경
       merge: (persisted, initial) => ({
         ...initial,
         ...persisted,
@@ -238,16 +247,9 @@ export const useClubStore = create(
         selectedRegion: persisted?.selectedRegion && ['전체', '북구', '광산', '본부'].includes(persisted.selectedRegion)
           ? persisted.selectedRegion
           : initial.selectedRegion,
-        clubs: (() => {
-          const sampleIds = new Set(initial.clubs.map((club) => club.id));
-          const userAdded = (persisted?.clubs ?? []).filter((club) => !sampleIds.has(club.id));
-          return [...initial.clubs, ...userAdded];
-        })(),
-        schedules: (() => {
-          const sampleIds = new Set(initial.schedules.map((schedule) => schedule.id));
-          const userAdded = (persisted?.schedules ?? []).filter((schedule) => !sampleIds.has(schedule.id));
-          return [...initial.schedules, ...userAdded];
-        })(),
+        // 클럽/일정은 항상 fetchClubs 결과로 채워짐 — 빈 상태로 시작
+        clubs: [],
+        schedules: [],
       }),
     }
   )

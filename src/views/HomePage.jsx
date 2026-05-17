@@ -7,7 +7,8 @@ import { useClubStore } from '../store/clubStore';
 import { useAuthStore } from '../store/authStore';
 import { useNotificationStore } from '../store/notificationStore';
 import { calcDdayNum, getDdayLabel } from '../utils/formatDate';
-import { sampleBanners, CATEGORY_COLORS, SAMPLE_CLUB_IMAGES } from '../data/sampleData';
+import { CATEGORY_COLORS, SAMPLE_CLUB_IMAGES } from '../data/sampleData';
+import { useBannerStore } from '../store/bannerStore';
 import { REGION_OPTIONS, matchesRegion } from '../data/regions';
 import { isSuperAdmin } from '../utils/permissions';
 import { assetPath } from '../lib/assetPath';
@@ -22,12 +23,15 @@ export function HomePage() {
   const setRegion = useClubStore((s) => s.setRegion);
   const user = useAuthStore((s) => s.user);
   const unreadCount = useNotificationStore((s) => s.notifications.filter((n) => !n.read).length);
+  const getBannersForRegion = useBannerStore((s) => s.getBannersForRegion);
+  const regionBanners = getBannersForRegion(selectedRegion);
+  const activeBanners = regionBanners.length > 0 ? regionBanners : getBannersForRegion('전체');
   const timerRef = useRef(null);
   const dragStartX = useRef(null);
   const draggingRef = useRef(false);
 
-  const total = sampleBanners.length;
-  const slides = [sampleBanners[total - 1], ...sampleBanners, sampleBanners[0]];
+  const total = activeBanners.length;
+  const slides = total > 0 ? [activeBanners[total - 1], ...activeBanners, activeBanners[0]] : [];
   const [slideIdx, setSlideIdx] = useState(1);
   const [animated, setAnimated] = useState(true);
   const [homeClubTab, setHomeClubTab] = useState('전체');
@@ -182,7 +186,7 @@ export function HomePage() {
             ))}
           </div>
           <div className={styles.dots}>
-            {sampleBanners.map((_, i) => (
+            {activeBanners.map((_, i) => (
               <button
                 key={i}
                 className={`${styles.dotBtn} ${i === bannerIdx ? styles.dotActive : ''}`}
@@ -226,34 +230,6 @@ export function HomePage() {
           {popularClubs.map((club) => (
             <HomeClubCard key={club.id} club={club} onClick={() => router.push(`/clubs/${club.id}`)} />
           ))}
-        </div>
-      </div>
-
-      <div className={styles.section}>
-        <div className={styles.sectionHeader}>
-          <h2 className={styles.sectionTitle}>클럽</h2>
-          <button className={styles.moreBtn} onClick={() => router.push('/clubs')}>전체 보기</button>
-        </div>
-        <div className={styles.clubTabsBlock}>
-          <div className={`${styles.clubTabs} hide-scrollbar`}>
-            {homeClubCategories.map((category) => (
-              <button
-                key={category}
-                className={`${styles.clubTab} ${homeClubTab === category ? styles.clubTabActive : ''}`}
-                onClick={() => setHomeClubTab(category)}
-              >
-                {category}
-              </button>
-            ))}
-          </div>
-          <div className={styles.clubTabList}>
-            {homeClubList.map((club) => (
-              <button key={club.id} className={styles.clubTabItem} onClick={() => router.push(`/clubs/${club.id}`)}>
-                <span className={styles.clubTabName}>{club.name}</span>
-                <span className={styles.clubTabMeta}>{club.category} · {club.memberCount.toLocaleString()}명</span>
-              </button>
-            ))}
-          </div>
         </div>
       </div>
 

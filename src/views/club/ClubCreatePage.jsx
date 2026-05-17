@@ -9,10 +9,13 @@ import { Header } from '../../components/layout/Header';
 import { ImageUpload } from '../../components/ui/ImageUpload';
 import { CATEGORY_COLORS } from '../../data/sampleData';
 import { REGION_OPTIONS } from '../../data/regions';
+import { isJipa } from '../../utils/permissions';
 import styles from './ClubCreatePage.module.css';
 
 const CATEGORIES = ['운동', '음식', '아트', '스터디', '음악', '기타'];
 const SERVICE_REGIONS = REGION_OPTIONS.filter((region) => region !== '전체');
+// 지파 유저용: 전체 포함
+const JIPA_REGIONS = REGION_OPTIONS;
 
 export function ClubCreatePage() {
   const router = useRouter();
@@ -20,10 +23,12 @@ export function ClubCreatePage() {
   const selectedRegion = useClubStore((s) => s.selectedRegion);
   const user = useAuthStore((s) => s.user);
   const { showToast } = useToastContext();
+  const jipaUser = isJipa(user);
+  const regionOptions = jipaUser ? JIPA_REGIONS : SERVICE_REGIONS;
   const [form, setForm] = useState({
     name: '',
     category: '',
-    serviceRegion: selectedRegion === '전체' ? '북구' : selectedRegion,
+    serviceRegion: jipaUser ? '전체' : (selectedRegion && selectedRegion !== '전체' ? selectedRegion : '본부'),
     coverImage: null,
     description: '',
     schedule: '',
@@ -41,7 +46,6 @@ export function ClubCreatePage() {
     if (!form.name.trim()) e.name = '클럽 이름을 입력해주세요';
     if (form.name.length > 15) e.name = '최대 15자까지 입력할 수 있어요';
     if (!form.category) e.category = '카테고리를 선택해주세요';
-    if (!form.serviceRegion) e.serviceRegion = '운영 지역을 선택해주세요';
     if (!form.description.trim()) e.description = '소개를 입력해주세요';
     if (form.description.length > 100) e.description = '최대 100자까지 입력할 수 있어요';
     setErrors(e);
@@ -79,7 +83,7 @@ export function ClubCreatePage() {
 
   const colors = CATEGORY_COLORS[form.category] ?? ['#8EC6FF', '#0088FF'];
   const previewGrad = `linear-gradient(135deg, ${colors[0]} 0%, ${colors[1]} 100%)`;
-  const isValid = form.name.trim() && form.category && form.serviceRegion && form.description.trim();
+  const isValid = form.name.trim() && form.category && form.description.trim();
 
   return (
     <div className={styles.page}>
@@ -134,23 +138,6 @@ export function ClubCreatePage() {
         </div>
 
         <div className={styles.section}>
-          <p className={styles.label}>운영 지역 <span className={styles.req}>*</span></p>
-          <div className={styles.chipRow}>
-            {SERVICE_REGIONS.map((region) => (
-              <button
-                key={region}
-                type="button"
-                className={`${styles.chip} ${form.serviceRegion === region ? styles.chipActive : ''}`}
-                onClick={() => set('serviceRegion', region)}
-              >
-                {region}
-              </button>
-            ))}
-          </div>
-          {errors.serviceRegion && <p className={styles.errMsg}>{errors.serviceRegion}</p>}
-        </div>
-
-        <div className={styles.section}>
           <p className={styles.label}>카테고리 <span className={styles.req}>*</span></p>
           <div className={styles.chipRow}>
             {CATEGORIES.map((cat) => (
@@ -197,10 +184,11 @@ export function ClubCreatePage() {
           </label>
           <input
             className={styles.input}
-            placeholder="예: 러닝, 주말, 북구"
+            placeholder="쉼표로 구분해 입력하세요. 예: 러닝,주말,북구"
             value={form.tags}
             onChange={(e) => set('tags', e.target.value)}
           />
+          <p className={styles.hint}>쉼표(,)로 구분하여 최대 3개 입력</p>
           {form.tags && (
             <div className={styles.tagPreview}>
               {form.tags.split(',').map((t) => t.trim()).filter(Boolean).slice(0, 3).map((t, i) => (
@@ -210,8 +198,29 @@ export function ClubCreatePage() {
           )}
         </div>
 
+        {jipaUser && (
+          <div className={styles.section}>
+            <p className={styles.label}>운영 지역</p>
+            <div className={styles.chipRow}>
+              {regionOptions.map((r) => (
+                <button
+                  key={r}
+                  type="button"
+                  className={`${styles.chip} ${form.serviceRegion === r ? styles.chipActive : ''}`}
+                  onClick={() => set('serviceRegion', r)}
+                >
+                  {r}
+                </button>
+              ))}
+            </div>
+            {form.serviceRegion === '전체' && (
+              <p className={styles.hint}>전체 지역에 노출되는 클럽으로 개설됩니다.</p>
+            )}
+          </div>
+        )}
+
         <div className={styles.section}>
-          <p className={styles.label}>공개 방식</p>
+          <p className={styles.label}>가입 방식</p>
           <div className={styles.toggleRow}>
             <button
               type="button"

@@ -157,10 +157,38 @@ export function LoginStep({ onNext }) {
             </button>
             <button
               className={styles.testHintRow}
+              onClick={() => { setZionId('00000000-00001'); setPassword('linkit1234'); setError(''); }}
+            >
+              <span className={styles.testHintLabel}>지파유저</span>
+              <span className={styles.testHintValue}>00000000-00001 · linkit1234</span>
+            </button>
+            <button
+              className={styles.testHintRow}
               onClick={() => { setZionId('00000000-00000'); setPassword('admin1234'); setError(''); }}
             >
-              <span className={styles.testHintLabel}>관리자</span>
+              <span className={styles.testHintLabel}>전체관리자</span>
               <span className={styles.testHintValue}>00000000-00000 · admin1234</span>
+            </button>
+            <button
+              className={styles.testHintRow}
+              onClick={() => { setZionId('00371210-00149'); setPassword('linkit1234'); setError(''); }}
+            >
+              <span className={styles.testHintLabel}>본부관리자</span>
+              <span className={styles.testHintValue}>00371210-00149 · linkit1234</span>
+            </button>
+            <button
+              className={styles.testHintRow}
+              onClick={() => { setZionId('00371210-00150'); setPassword('linkit1234'); setError(''); }}
+            >
+              <span className={styles.testHintLabel}>광산관리자</span>
+              <span className={styles.testHintValue}>00371210-00150 · linkit1234</span>
+            </button>
+            <button
+              className={styles.testHintRow}
+              onClick={() => { setZionId('00371210-00151'); setPassword('linkit1234'); setError(''); }}
+            >
+              <span className={styles.testHintLabel}>북구관리자</span>
+              <span className={styles.testHintValue}>00371210-00151 · linkit1234</span>
             </button>
           </div>
         </div>

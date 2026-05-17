@@ -1,60 +1,82 @@
 'use client';
 
-import { Bell, Edit3, Plus } from 'lucide-react';
+import { Bell, Edit3, Plus, Trash2 } from 'lucide-react';
 import { useState } from 'react';
-import { banners, keywords } from './adminDemoData';
+import { keywords } from './adminDemoData';
+import { useBannerStore, GRADIENT_PRESETS } from '../../store/bannerStore';
 import s from './admin.module.css';
 
-const initialRecommendedClubs = [
-  ['추천 클럽 1', '러닝 크루', '운동', '156명'],
-  ['추천 클럽 2', '감성 사진 모임', '사진', '43명'],
-  ['추천 클럽 3', '맛집 탐방대', '맛집', '89명'],
+const REGIONS = ['본부', '광산', '북구'];
+
+const initialNotices = [
+  { title: '서비스 점검 안내', position: '홈 공지', date: '2026.05.16 02:00' },
 ];
 
 export function AdminOperationsPage() {
-  const [bannerList, setBannerList] = useState(banners);
+  const banners = useBannerStore((st) => st.banners);
+  const addBanner = useBannerStore((st) => st.addBanner);
+  const updateBanner = useBannerStore((st) => st.updateBanner);
+  const deleteBanner = useBannerStore((st) => st.deleteBanner);
+  const toggleBannerActive = useBannerStore((st) => st.toggleBannerActive);
+
+  const [selectedRegion, setSelectedRegion] = useState('본부');
   const [keywordList, setKeywordList] = useState(keywords);
-  const [notices, setNotices] = useState([
-    { title: '서비스 점검 안내', position: '홈 공지', date: '2026.05.16 02:00' },
-  ]);
+  const [notices, setNotices] = useState(initialNotices);
   const [modal, setModal] = useState(null);
 
-  const toggleBanner = (banner) => {
-    const nextStatus = banner.status === '활성' ? '비활성' : '활성';
+  const regionBanners = banners.filter((b) => b.region === selectedRegion);
+
+  const handleDeleteBanner = (banner) => {
     setModal({
       type: 'confirm',
-      title: '메인 배너 상태 변경',
-      message: `'${banner.title}' 배너를 ${nextStatus} 처리할까요?`,
-      confirmLabel: nextStatus,
-      onConfirm: () => setBannerList((prev) => prev.map((item) => item.id === banner.id ? { ...item, status: nextStatus } : item)),
+      title: '배너 삭제',
+      message: `'${banner.title}' 배너를 삭제할까요?`,
+      confirmLabel: '삭제',
+      danger: true,
+      onConfirm: () => deleteBanner(banner.id),
     });
   };
 
-  const saveBanner = (event) => {
-    event.preventDefault();
-    const form = new FormData(event.currentTarget);
-    const id = form.get('id');
-    setBannerList((prev) => prev.map((banner) => banner.id === id ? {
-      ...banner,
+  const handleToggle = (banner) => {
+    const next = banner.active ? '비활성' : '활성';
+    setModal({
+      type: 'confirm',
+      title: '배너 상태 변경',
+      message: `'${banner.title}' 배너를 ${next} 처리할까요?`,
+      confirmLabel: next,
+      onConfirm: () => toggleBannerActive(banner.id),
+    });
+  };
+
+  const saveBanner = (e) => {
+    e.preventDefault();
+    const form = new FormData(e.currentTarget);
+    const data = {
+      region: form.get('region'),
+      tag: form.get('tag'),
       title: form.get('title'),
       subtitle: form.get('subtitle'),
-      imageUrl: form.get('imageUrl'),
-      period: form.get('period'),
-    } : banner));
+      gradient: form.get('gradient'),
+    };
+    if (modal.banner?.id) {
+      updateBanner(modal.banner.id, data);
+    } else {
+      addBanner(data);
+    }
     setModal(null);
   };
 
-  const addKeyword = (event) => {
-    event.preventDefault();
-    const keyword = String(new FormData(event.currentTarget).get('keyword') ?? '').trim();
-    if (!keyword) return;
-    setKeywordList((prev) => [...prev, keyword.startsWith('#') ? keyword : `#${keyword}`]);
+  const addKeyword = (e) => {
+    e.preventDefault();
+    const kw = String(new FormData(e.currentTarget).get('keyword') ?? '').trim();
+    if (!kw) return;
+    setKeywordList((prev) => [...prev, kw.startsWith('#') ? kw : `#${kw}`]);
     setModal(null);
   };
 
-  const addNotice = (event) => {
-    event.preventDefault();
-    const form = new FormData(event.currentTarget);
+  const addNotice = (e) => {
+    e.preventDefault();
+    const form = new FormData(e.currentTarget);
     setNotices((prev) => [{
       title: form.get('title'),
       position: form.get('position'),
@@ -70,69 +92,168 @@ export function AdminOperationsPage() {
         <div>
           <p className={s.eyebrow}>MAIN OPERATIONS</p>
           <h1 className={s.pageTitle}>메인 운영 관리</h1>
-          <p className={s.pageDesc}>홈 배너, 키워드, 추천 클럽, 공지사항을 운영합니다.</p>
+          <p className={s.pageDesc}>지역별 홈 배너, 키워드, 공지사항을 운영합니다.</p>
         </div>
-        <button className={s.primaryBtn} onClick={() => setModal({ type: 'notice' })}><Plus size={16} /> 공지 작성</button>
+        <button className={s.primaryBtn} onClick={() => setModal({ type: 'notice' })}>
+          <Plus size={16} /> 공지 작성
+        </button>
       </div>
 
-      <div className={s.grid2}>
-        <section className={s.card}>
-          <p className={s.cardTitle}>메인 배너</p>
+      {/* ── 배너 관리 ── */}
+      <section className={s.card} style={{ marginBottom: 20 }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
+          <p className={s.cardTitle} style={{ margin: 0 }}>지역별 메인 배너</p>
+          <button
+            className={s.primaryBtn}
+            onClick={() => setModal({ type: 'banner', banner: { region: selectedRegion } })}
+          >
+            <Plus size={14} /> 배너 추가
+          </button>
+        </div>
+
+        {/* 지역 탭 */}
+        <div style={{ display: 'flex', gap: 8, marginBottom: 16 }}>
+          {REGIONS.map((r) => (
+            <button
+              key={r}
+              onClick={() => setSelectedRegion(r)}
+              style={{
+                padding: '6px 16px',
+                borderRadius: 999,
+                border: '1.5px solid',
+                fontSize: 13,
+                fontWeight: 600,
+                cursor: 'pointer',
+                background: selectedRegion === r ? 'var(--blue)' : 'transparent',
+                color: selectedRegion === r ? '#fff' : 'var(--blue)',
+                borderColor: 'var(--blue)',
+                transition: 'all 0.15s',
+              }}
+            >
+              {r}
+            </button>
+          ))}
+        </div>
+
+        {/* 배너 목록 */}
+        {regionBanners.length === 0 ? (
+          <div style={{ textAlign: 'center', padding: '32px 0', color: 'var(--ink-4)', fontSize: 14 }}>
+            {selectedRegion} 지역 배너가 없어요.
+            <br />
+            <button
+              className={s.primaryBtn}
+              style={{ marginTop: 12 }}
+              onClick={() => setModal({ type: 'banner', banner: { region: selectedRegion } })}
+            >
+              <Plus size={14} /> 첫 배너 만들기
+            </button>
+          </div>
+        ) : (
           <div className={s.queueList}>
-            {bannerList.map((banner, index) => (
-              <div key={banner.id} className={s.queueItem}>
-                <div>
-                  <p className={s.itemTitle}>배너 {index + 1} · {banner.title}</p>
-                  <p className={s.itemMeta}>{banner.subtitle} · {banner.period}</p>
+            {regionBanners.map((banner, i) => (
+              <div key={banner.id} className={s.queueItem} style={{ alignItems: 'center', gap: 12 }}>
+                {/* 미리보기 썸네일 */}
+                <div style={{
+                  width: 48,
+                  height: 36,
+                  borderRadius: 8,
+                  background: banner.gradient,
+                  flexShrink: 0,
+                  display: 'flex',
+                  alignItems: 'flex-end',
+                  padding: '4px 6px',
+                }} />
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <p className={s.itemTitle}>{banner.tag} · {banner.title}</p>
+                  <p className={s.itemMeta} style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                    {banner.subtitle}
+                  </p>
                 </div>
                 <div className={s.actionGroup}>
-                  <button className={s.smallBtn} onClick={() => setModal({ type: 'banner', banner })}><Edit3 size={13} /> 편집</button>
-                  <button className={banner.status === '활성' ? s.approveBtn : s.smallBtn} onClick={() => toggleBanner(banner)}>{banner.status}</button>
+                  <button
+                    className={s.smallBtn}
+                    onClick={() => setModal({ type: 'banner', banner })}
+                  >
+                    <Edit3 size={13} /> 편집
+                  </button>
+                  <button
+                    className={banner.active ? s.approveBtn : s.smallBtn}
+                    onClick={() => handleToggle(banner)}
+                  >
+                    {banner.active ? '활성' : '비활성'}
+                  </button>
+                  <button
+                    className={s.rejectBtn}
+                    onClick={() => handleDeleteBanner(banner)}
+                    style={{ padding: '4px 8px' }}
+                  >
+                    <Trash2 size={13} />
+                  </button>
                 </div>
               </div>
             ))}
           </div>
+        )}
+      </section>
+
+      <div className={s.grid2}>
+        {/* 키워드 관리 */}
+        <section className={s.card}>
+          <p className={s.cardTitle}>
+            키워드 관리{' '}
+            <button className={s.smallBtn} onClick={() => setModal({ type: 'keyword' })}>
+              <Plus size={13} /> 추가
+            </button>
+          </p>
+          <div className={s.filterRow}>
+            {keywordList.map((kw) => (
+              <span key={kw} className={`${s.badge} ${s.badgeBlue}`}>{kw}</span>
+            ))}
+          </div>
         </section>
 
+        {/* 공지사항 */}
         <section className={s.card}>
-          <p className={s.cardTitle}>키워드 관리 <button className={s.smallBtn} onClick={() => setModal({ type: 'keyword' })}><Plus size={13} /> 추가</button></p>
-          <div className={s.filterRow}>
-            {keywordList.map((keyword) => <span key={keyword} className={`${s.badge} ${s.badgeBlue}`}>{keyword}</span>)}
+          <p className={s.cardTitle}>공지사항 <span className={s.sectionNote}>{notices.length}건</span></p>
+          <div className={s.queueList}>
+            {notices.map((n) => (
+              <div key={`${n.title}-${n.date}`} className={s.queueItem}>
+                <div>
+                  <p className={s.itemTitle}>{n.title}</p>
+                  <p className={s.itemMeta}>{n.position} · {n.date}</p>
+                </div>
+                <Bell size={16} color="#1677ff" />
+              </div>
+            ))}
           </div>
         </section>
       </div>
 
-      <div className={s.grid3}>
-        {initialRecommendedClubs.map(([slot, name, category, count]) => (
-          <section key={slot} className={s.card}>
-            <p className={s.cardTitle}>{slot} <span className={s.sectionNote}>{count}</span></p>
-            <p className={s.itemTitle}>{name}</p>
-            <p className={s.itemMeta}>{category}</p>
-          </section>
-        ))}
-      </div>
-
-      <section className={s.card}>
-        <p className={s.cardTitle}>공지 사항 <span className={s.sectionNote}>{notices.length}건</span></p>
-        <div className={s.queueList}>
-          {notices.map((notice) => (
-            <div key={`${notice.title}-${notice.date}`} className={s.queueItem}>
-              <div><p className={s.itemTitle}>{notice.title}</p><p className={s.itemMeta}>{notice.position} · {notice.date}</p></div>
-              <Bell size={16} color="#1677ff" />
-            </div>
-          ))}
-        </div>
-      </section>
-
+      {/* ── 모달 ── */}
       {modal?.type === 'confirm' && (
         <SimpleModal title={modal.title} onClose={() => setModal(null)}>
           <p className={s.itemMeta}>{modal.message}</p>
           <div className={s.modalFooter}>
             <button className={s.ghostBtn} onClick={() => setModal(null)}>취소</button>
-            <button className={s.primaryBtn} onClick={() => { modal.onConfirm(); setModal(null); }}>{modal.confirmLabel}</button>
+            <button
+              className={modal.danger ? s.rejectBtn : s.primaryBtn}
+              onClick={() => { modal.onConfirm(); setModal(null); }}
+            >
+              {modal.confirmLabel}
+            </button>
           </div>
         </SimpleModal>
       )}
+
+      {modal?.type === 'banner' && (
+        <BannerModal
+          banner={modal.banner}
+          selectedRegion={selectedRegion}
+          onSave={saveBanner}
+          onClose={() => setModal(null)}
+        />
+      )}
+
       {modal?.type === 'keyword' && (
         <SimpleModal title="키워드 추가" onClose={() => setModal(null)}>
           <form onSubmit={addKeyword} className={s.formGrid}>
@@ -141,20 +262,9 @@ export function AdminOperationsPage() {
           </form>
         </SimpleModal>
       )}
-      {modal?.type === 'banner' && (
-        <SimpleModal title="메인 배너 편집" onClose={() => setModal(null)}>
-          <form onSubmit={saveBanner} className={s.formGrid}>
-            <input type="hidden" name="id" value={modal.banner.id} />
-            <label className={s.formField}>배너 제목<input name="title" className={s.input} defaultValue={modal.banner.title} /></label>
-            <label className={s.formField}>문구<input name="subtitle" className={s.input} defaultValue={modal.banner.subtitle} /></label>
-            <label className={s.formField}>사진 URL<input name="imageUrl" className={s.input} defaultValue={modal.banner.imageUrl} /></label>
-            <label className={s.formField}>노출 기간<input name="period" className={s.input} defaultValue={modal.banner.period} /></label>
-            <div className={s.modalFooter}><button className={s.primaryBtn}>저장</button></div>
-          </form>
-        </SimpleModal>
-      )}
+
       {modal?.type === 'notice' && (
-        <SimpleModal title="공지 사항 작성" onClose={() => setModal(null)}>
+        <SimpleModal title="공지 작성" onClose={() => setModal(null)}>
           <form onSubmit={addNotice} className={s.formGrid}>
             <label className={s.formField}>제목<input name="title" className={s.input} placeholder="공지 제목" /></label>
             <label className={s.formField}>노출 위치<input name="position" className={s.input} placeholder="홈 공지" /></label>
@@ -164,6 +274,98 @@ export function AdminOperationsPage() {
           </form>
         </SimpleModal>
       )}
+    </div>
+  );
+}
+
+/** 배너 추가/편집 모달 — 실시간 미리보기 포함 */
+function BannerModal({ banner, selectedRegion, onSave, onClose }) {
+  const [preview, setPreview] = useState({
+    tag: banner?.tag ?? '',
+    title: banner?.title ?? '',
+    subtitle: banner?.subtitle ?? '',
+    gradient: banner?.gradient ?? GRADIENT_PRESETS[0].value,
+  });
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    if (['tag', 'title', 'subtitle', 'gradient'].includes(name)) {
+      setPreview((p) => ({ ...p, [name]: value }));
+    }
+  };
+
+  return (
+    <SimpleModal title={banner?.id ? '배너 편집' : '새 배너 추가'} onClose={onClose}>
+      <form onSubmit={onSave} className={s.formGrid} onChange={handleChange}>
+        <label className={s.formField}>
+          지역
+          <select name="region" className={s.input} defaultValue={banner?.region ?? selectedRegion}>
+            {REGIONS.map((r) => <option key={r} value={r}>{r}</option>)}
+          </select>
+        </label>
+        <label className={s.formField}>
+          태그 <span style={{ fontSize: 11, color: 'var(--ink-4)' }}>(이모지 포함 가능)</span>
+          <input name="tag" className={s.input} defaultValue={banner?.tag ?? ''} placeholder="🏔️ 주말 나들이" required />
+        </label>
+        <label className={s.formField}>
+          제목
+          <input name="title" className={s.input} defaultValue={banner?.title ?? ''} placeholder="이번 주말 추천" required />
+        </label>
+        <label className={s.formField}>
+          문구
+          <input name="subtitle" className={s.input} defaultValue={banner?.subtitle ?? ''} placeholder="동네 뒷산 가볍게 어때요?" required />
+        </label>
+        <label className={s.formField}>
+          배경 색상
+          <select name="gradient" className={s.input} defaultValue={banner?.gradient ?? GRADIENT_PRESETS[0].value}>
+            {GRADIENT_PRESETS.map((p) => (
+              <option key={p.value} value={p.value}>{p.label}</option>
+            ))}
+          </select>
+        </label>
+        <BannerPreview {...preview} />
+        <div className={s.modalFooter}>
+          <button type="button" className={s.ghostBtn} onClick={onClose}>취소</button>
+          <button type="submit" className={s.primaryBtn}>저장</button>
+        </div>
+      </form>
+    </SimpleModal>
+  );
+}
+
+/** 배너 편집 폼 내 실시간 미리보기 */
+function BannerPreview({ tag, title, subtitle, gradient }) {
+  return (
+    <div>
+      <p style={{ fontSize: 12, color: 'var(--ink-3)', marginBottom: 6 }}>미리보기</p>
+      <div style={{
+        background: gradient || GRADIENT_PRESETS[0].value,
+        borderRadius: 14,
+        padding: '20px 18px 16px',
+        minHeight: 90,
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'flex-end',
+        gap: 4,
+      }}>
+        {tag && (
+          <span style={{
+            fontSize: 11, fontWeight: 600,
+            color: 'rgba(255,255,255,0.9)',
+            background: 'rgba(255,255,255,0.18)',
+            padding: '2px 10px', borderRadius: 999,
+            width: 'fit-content',
+          }}>
+            {tag}
+          </span>
+        )}
+        <p style={{ fontSize: 11, color: 'rgba(255,255,255,0.75)', fontWeight: 500 }}>
+          {title || '제목'}
+        </p>
+        <p style={{ fontSize: 16, color: '#fff', fontWeight: 700 }}>
+          {subtitle || '문구'}
+        </p>
+      </div>
     </div>
   );
 }

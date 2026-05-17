@@ -65,7 +65,7 @@ export function PostDetailPage({ postId }) {
   };
 
   return (
-    <div className={styles.page}>
+    <div className={styles.page} style={{ display: 'flex', flexDirection: 'column', height: '100dvh', overflow: 'hidden' }}>
       <Header
         title=""
         right={
@@ -93,54 +93,56 @@ export function PostDetailPage({ postId }) {
         />
       )}
 
-      <div className={styles.body}>
-        {/* 카테고리 & 제목 */}
-        <div className={styles.topMeta}>
-          <span className={`${styles.badge} ${badgeClass(post.category)}`}>{post.category}</span>
-        </div>
-        <h1 className={styles.title}>{post.title}</h1>
-
-        <button
-          className={styles.authorRow}
-          onClick={() => post.authorId && router.push(`/users?userId=${post.authorId}`)}
-        >
-          <span className={styles.authorEmoji}>{post.authorNickname?.[0]?.toUpperCase() ?? '?'}</span>
-          <div>
-            <p className={styles.authorName}>{post.authorNickname}</p>
-            <div className={styles.authorMeta}>
-              <span>{formatDate(post.createdAt)}</span>
-              <Eye size={11} /><span>{post.viewCount}</span>
-            </div>
+      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+        <div style={{ padding: '0 20px 12px', borderBottom: '1px solid var(--base-border)' }}>
+          {/* 카테고리 & 제목 */}
+          <div className={styles.topMeta}>
+            <span className={`${styles.badge} ${badgeClass(post.category)}`}>{post.category}</span>
           </div>
-        </button>
+          <h1 className={styles.title}>{post.title}</h1>
 
-        <p className={styles.content}>{post.content}</p>
-
-        {/* 액션 */}
-        <div className={styles.actions}>
-          <button className={`${styles.actionBtn} ${isLiked ? styles.liked : ''}`} onClick={() => { toggleLike(lookupPostId); showToast(isLiked ? '좋아요를 취소했어요' : '좋아요를 눌렀어요 ❤️', 'success'); }}>
-            <Heart size={18} fill={isLiked ? 'var(--pink)' : 'none'} />
-            <span>{post.likeCount}</span>
-          </button>
           <button
-            className={styles.actionBtn}
-            onClick={async () => {
-              const url = window.location.href;
-              if (navigator.share) {
-                await navigator.share({ title: post.title, text: post.content, url });
-              } else {
-                await navigator.clipboard.writeText(url);
-                showToast('링크가 복사됐어요 🔗', 'success');
-              }
-            }}
+            className={styles.authorRow}
+            onClick={() => post.authorId && router.push(`/users?userId=${post.authorId}`)}
           >
-            <Share2 size={18} />
-            <span>공유</span>
+            <span className={styles.authorEmoji}>{post.authorNickname?.[0]?.toUpperCase() ?? '?'}</span>
+            <div>
+              <p className={styles.authorName}>{post.authorNickname}</p>
+              <div className={styles.authorMeta}>
+                <span>{formatDate(post.createdAt)}</span>
+                <Eye size={11} /><span>{post.viewCount}</span>
+              </div>
+            </div>
           </button>
+
+          <p className={styles.content}>{post.content}</p>
+
+          {/* 액션 */}
+          <div className={styles.actions}>
+            <button className={`${styles.actionBtn} ${isLiked ? styles.liked : ''}`} onClick={() => { toggleLike(lookupPostId); showToast(isLiked ? '좋아요를 취소했어요' : '좋아요를 눌렀어요 ❤️', 'success'); }}>
+              <Heart size={18} fill={isLiked ? 'var(--pink)' : 'none'} />
+              <span>{post.likeCount}</span>
+            </button>
+            <button
+              className={styles.actionBtn}
+              onClick={async () => {
+                const url = window.location.href;
+                if (navigator.share) {
+                  await navigator.share({ title: post.title, text: post.content, url });
+                } else {
+                  await navigator.clipboard.writeText(url);
+                  showToast('링크가 복사됐어요 🔗', 'success');
+                }
+              }}
+            >
+              <Share2 size={18} />
+              <span>공유</span>
+            </button>
+          </div>
         </div>
 
         {/* 댓글 목록 */}
-        <div className={styles.commentSection}>
+        <div className={styles.commentSection} style={{ flex: 1, overflowY: 'auto', padding: '0 20px' }}>
           <p className={styles.commentHeader}><MessageCircle size={14} /> 댓글 {comments.length}</p>
           {comments.length === 0
             ? <p className={styles.noComment}>첫 댓글을 남겨보세요!</p>
@@ -157,8 +159,8 @@ export function PostDetailPage({ postId }) {
                 </div>
               ))
           }
+          <div style={{ height: 16 }} />
         </div>
-        <div style={{ height: 80 }} />
       </div>
 
       {/* 댓글 입력창 */}

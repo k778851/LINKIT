@@ -75,6 +75,7 @@ public class UserDto {
         private String provider;
         private String bio;
         private String profileImage;
+        private String serviceRegion;
         private String role;
         private String status;
         private LocalDateTime lastLoginAt;
@@ -92,6 +93,7 @@ public class UserDto {
                     .provider(u.getProvider())
                     .bio(u.getBio())
                     .profileImage(u.getProfileImage())
+                    .serviceRegion(u.getServiceRegion())
                     .role(u.getRole().name())
                     .status(u.getStatus().name())
                     .lastLoginAt(u.getLastLoginAt())
@@ -107,6 +109,7 @@ public class UserDto {
                     .provider(u.getProvider())
                     .bio(u.getBio())
                     .profileImage(u.getProfileImage())
+                    .serviceRegion(u.getServiceRegion())
                     .role(u.getRole().name())
                     .status(u.getStatus().name())
                     .lastLoginAt(u.getLastLoginAt())

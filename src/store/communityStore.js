@@ -7,16 +7,17 @@ import { clubApi } from '../api/clubApi';
 import { ApiError } from '../api/apiClient';
 import { getPostDetailPath } from '../lib/communityRoutes';
 
-/** 백엔드 미연결 or 미인증 상태 — 로컬 fallback 허용 */
-const shouldFallback = (e) =>
-  e instanceof ApiError && (e.status === 0 || e.status === 401 || e.status === 403);
+/** 네트워크 자체가 불통(백엔드 미실행)일 때만 샘플 데이터 사용 */
+const isOffline = (e) => e instanceof ApiError && e.status === 0;
+/** 기존 코드 호환용 */
+const shouldFallback = (e) => e instanceof ApiError && (e.status === 0 || e.status === 401 || e.status === 403);
 
 export const useCommunityStore = create(
   persist(
     (set, get) => ({
-      posts:            samplePosts,
-      comments:         sampleComments,
-      clubPosts:        sampleClubPosts,
+      posts:            [],
+      comments:         [],
+      clubPosts:        [],
       likedClubPosts:   [],
       selectedCategory: '전체',
       likedPosts:       [],
@@ -28,11 +29,13 @@ export const useCommunityStore = create(
         const cat = category ?? get().selectedCategory;
         try {
           const posts = await postApi.getAll(cat);
-          // 백엔드 DB가 비어 있으면 sampleData 유지
-          if (posts && posts.length > 0) set({ posts });
+          set({ posts: posts ?? [] });
         } catch (e) {
-          if (!shouldFallback(e)) throw e;
-          // 오프라인/미인증 → sampleData 유지
+          if (isOffline(e)) {
+            // 백엔드 미실행 → 샘플 데이터로 데모 모드
+            set({ posts: samplePosts, comments: sampleComments, clubPosts: sampleClubPosts });
+          }
+          // 백엔드는 살아있음 → 빈 목록 유지, 샘플 데이터 표시 안 함
         }
       },
 
@@ -225,19 +228,28 @@ export const useCommunityStore = create(
             p.id === comment.postId ? { ...p, commentCount: p.commentCount + 1 } : p
           ),
         })),
+
+      deleteClubComment: (commentId) =>
+        set((s) => ({
+          comments: s.comments.filter((c) => c.id !== commentId),
+        })),
+
+      updateClubComment: (commentId, newContent) =>
+        set((s) => ({
+          comments: s.comments.map((c) =>
+            c.id === commentId ? { ...c, content: newContent } : c
+          ),
+        })),
     }),
     {
       name: 'linkit-posts',
+      version: 2, // 샘플 데이터 초기값 제거로 인한 스키마 변경
       merge: (persisted, initial) => ({
         ...initial,
         ...persisted,
-        // 사용자 작성 게시글 유지 + samplePosts 항상 포함
-        posts: (() => {
-          const sampleIds = new Set(initial.posts.map((p) => p.id));
-          const userPosts = (persisted.posts ?? []).filter((p) => !sampleIds.has(p.id));
-          return [...initial.posts, ...userPosts];
-        })(),
-        comments: persisted.comments?.length > 0 ? persisted.comments : initial.comments,
+        // 게시글/댓글은 항상 fetchPosts 결과로 채워짐 — 빈 상태로 시작
+        posts: [],
+        comments: [],
       }),
     }
   )
