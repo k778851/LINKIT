@@ -39,6 +39,17 @@
   color: var(--ink-2); white-space: nowrap; flex-shrink: 0;
 }
 
+.backBtn {
+  display: flex; align-items: center; justify-content: center;
+  width: 36px; height: 36px;
+  flex-shrink: 0;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: var(--ink);
+}
+.backBtn:hover { color: var(--blue); }
+
 .regionRow {
   display: flex;
   gap: 8px;

@@ -104,6 +104,44 @@
   color: #fff;
 }
 
+.backToAppRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  min-height: 38px;
+  padding: 0 11px;
+  border-radius: 8px;
+  color: rgba(255,255,255,0.72);
+  font-size: 13px;
+  font-weight: 700;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  margin-bottom: 4px;
+}
+.backToAppRow:hover {
+  background: rgba(102,240,255,0.10);
+  color: #66f0ff;
+}
+
+.backToApp {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px; height: 36px;
+  border-radius: 8px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: #061427;
+  flex-shrink: 0;
+}
+.backToApp:hover {
+  background: #f1f4f9;
+  color: var(--blue);
+}
+
 .topbar {
   display: none;
   align-items: center;

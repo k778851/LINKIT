@@ -4,6 +4,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname, useRouter } from 'next/navigation';
 import {
+  ArrowLeft,
   BarChart3,
   Bell,
   BookOpen,
@@ -70,6 +71,10 @@ export function AdminLayout({ children }) {
             <Bell size={15} />
             <span>신고 5건 대기</span>
           </div>
+          <button className={styles.backToAppRow} onClick={() => router.push('/home')}>
+            <ArrowLeft size={16} />
+            <span>앱으로 돌아가기</span>
+          </button>
           <button className={styles.logoutBtn} onClick={handleLogout}>
             <LogOut size={16} />
             <span>로그아웃</span>
@@ -78,6 +83,13 @@ export function AdminLayout({ children }) {
       </aside>
 
       <header className={styles.topbar}>
+        <button
+          className={styles.backToApp}
+          onClick={() => router.push('/home')}
+          aria-label="앱으로 돌아가기"
+        >
+          <ArrowLeft size={20} strokeWidth={2} />
+        </button>
         <Image
           src={assetPath('/logo-sig-color.png')}
           alt="LINKIT"

@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
-import { Search, X, Clock, TrendingUp } from 'lucide-react';
+import { Search, X, Clock, TrendingUp, ArrowLeft } from 'lucide-react';
 import { useClubStore } from '../store/clubStore';
 import { useCommunityStore } from '../store/communityStore';
 import { useAuthStore } from '../store/authStore';
@@ -102,6 +102,9 @@ export function SearchPage() {
   return (
     <div className={styles.page}>
       <div className={styles.searchBar}>
+        <button className={styles.backBtn} onClick={() => router.back()} aria-label="뒤로가기">
+          <ArrowLeft size={22} strokeWidth={2} />
+        </button>
         <form className={styles.inputWrap} onSubmit={handleSubmit}>
           <Search size={18} color="var(--ink-3)" className={styles.searchIcon} />
           <input
@@ -117,7 +120,6 @@ export function SearchPage() {
             </button>
           )}
         </form>
-        <button className={styles.cancelBtn} onClick={() => router.back()}>취소</button>
       </div>
 
       {showRegionFilter && (
