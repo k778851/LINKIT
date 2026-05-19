@@ -9,6 +9,7 @@ const DEFAULT_BANNERS = [
     title: '이번 주말 추천',
     subtitle: '동네 뒷산 가볍게 어때요?',
     gradient: 'linear-gradient(135deg, #0088FF 0%, #00C3D0 100%)',
+    image: null,
     active: true,
   },
   {
@@ -18,6 +19,7 @@ const DEFAULT_BANNERS = [
     title: '신규 클럽',
     subtitle: '지금 막 열린 클럽 확인하기',
     gradient: 'linear-gradient(135deg, #FF668A 0%, #FF8A3D 100%)',
+    image: null,
     active: true,
   },
   {
@@ -27,6 +29,7 @@ const DEFAULT_BANNERS = [
     title: '이번 주 인기',
     subtitle: '광산구에서 가장 활발한 모임',
     gradient: 'linear-gradient(135deg, #7B61FF 0%, #0088FF 100%)',
+    image: null,
     active: true,
   },
   {
@@ -36,6 +39,7 @@ const DEFAULT_BANNERS = [
     title: '주말 산책 모임',
     subtitle: '광산구 수완 호수공원에서 만나요',
     gradient: 'linear-gradient(135deg, #00C3D0 0%, #00B074 100%)',
+    image: null,
     active: true,
   },
   {
@@ -45,6 +49,7 @@ const DEFAULT_BANNERS = [
     title: '함께 뛰어요',
     subtitle: '북구 풋살 크루 모집 중',
     gradient: 'linear-gradient(135deg, #FF668A 0%, #7B61FF 100%)',
+    image: null,
     active: true,
   },
   {
@@ -54,6 +59,7 @@ const DEFAULT_BANNERS = [
     title: '같이 읽어요',
     subtitle: '북구 독서 모임 새 멤버 환영',
     gradient: 'linear-gradient(135deg, #0088FF 0%, #7B61FF 100%)',
+    image: null,
     active: true,
   },
 ];
@@ -77,7 +83,6 @@ export const useBannerStore = create(
       /** 지역별 활성 배너 반환 */
       getBannersForRegion: (region) => {
         const all = get().banners;
-        // '전체' 또는 지역 미설정이면 전체 활성 배너 반환
         if (!region || region === '전체') return all.filter((b) => b.active);
         return all.filter((b) => b.region === region && b.active);
       },
@@ -109,6 +114,6 @@ export const useBannerStore = create(
           ),
         })),
     }),
-    { name: 'linkit-banners', version: 1 }
+    { name: 'linkit-banners', version: 2 }
   )
 );

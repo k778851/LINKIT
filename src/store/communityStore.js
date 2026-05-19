@@ -181,7 +181,9 @@ export const useCommunityStore = create(
             ],
           }));
         } catch (e) {
-          if (!shouldFallback(e)) throw e;
+          // 오프라인 또는 백엔드에 없는 클럽(404) → 기존 로컬 데이터 유지
+          const ignore = shouldFallback(e) || (e instanceof ApiError && e.status === 404);
+          if (!ignore) throw e;
         }
       },
 
@@ -191,7 +193,9 @@ export const useCommunityStore = create(
           set((s) => ({ clubPosts: [created, ...s.clubPosts] }));
           return created;
         } catch (e) {
-          if (shouldFallback(e)) {
+          // 오프라인, 인증 오류, 또는 백엔드에 클럽이 없을 때(404) → 로컬 저장
+          const fallback = shouldFallback(e) || (e instanceof ApiError && e.status === 404);
+          if (fallback) {
             const local = {
               ...post,
               id: `cp-${Date.now()}`,

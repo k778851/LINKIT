@@ -1,16 +1,15 @@
 'use client';
 
 import { Bell, Edit3, Plus, Trash2 } from 'lucide-react';
-import { useState } from 'react';
-import { keywords } from './adminDemoData';
+import { useEffect, useState } from 'react';
+import { keywords as demoKeywords } from './adminDemoData';
 import { useBannerStore, GRADIENT_PRESETS } from '../../store/bannerStore';
+import { ImageUpload } from '../../components/ui/ImageUpload';
+import { ApiError, api } from '../../api/apiClient';
 import s from './admin.module.css';
 
 const REGIONS = ['본부', '광산', '북구'];
-
-const initialNotices = [
-  { title: '서비스 점검 안내', position: '홈 공지', date: '2026.05.16 02:00' },
-];
+const isOffline = (e) => e instanceof ApiError && e.status === 0;
 
 export function AdminOperationsPage() {
   const banners = useBannerStore((st) => st.banners);
@@ -20,8 +19,17 @@ export function AdminOperationsPage() {
   const toggleBannerActive = useBannerStore((st) => st.toggleBannerActive);
 
   const [selectedRegion, setSelectedRegion] = useState('본부');
-  const [keywordList, setKeywordList] = useState(keywords);
-  const [notices, setNotices] = useState(initialNotices);
+  const [keywordList, setKeywordList] = useState([]);
+  const [notices, setNotices] = useState([]);
+
+  useEffect(() => {
+    api.get('/api/admin/keywords').then(setKeywordList).catch((e) => {
+      if (isOffline(e)) setKeywordList(demoKeywords);
+    });
+    api.get('/api/admin/notices').then(setNotices).catch((e) => {
+      if (isOffline(e)) setNotices([{ title: '서비스 점검 안내', position: '홈 공지', date: '2026.05.16 02:00' }]);
+    });
+  }, []);
   const [modal, setModal] = useState(null);
 
   const regionBanners = banners.filter((b) => b.region === selectedRegion);
@@ -48,7 +56,7 @@ export function AdminOperationsPage() {
     });
   };
 
-  const saveBanner = (e) => {
+  const saveBanner = (e, image) => {
     e.preventDefault();
     const form = new FormData(e.currentTarget);
     const data = {
@@ -57,6 +65,7 @@ export function AdminOperationsPage() {
       title: form.get('title'),
       subtitle: form.get('subtitle'),
       gradient: form.get('gradient'),
+      image: image ?? null,
     };
     if (modal.banner?.id) {
       updateBanner(modal.banner.id, data);
@@ -285,6 +294,7 @@ function BannerModal({ banner, selectedRegion, onSave, onClose }) {
     title: banner?.title ?? '',
     subtitle: banner?.subtitle ?? '',
     gradient: banner?.gradient ?? GRADIENT_PRESETS[0].value,
+    image: banner?.image ?? null,
   });
 
   const handleChange = (e) => {
@@ -296,7 +306,7 @@ function BannerModal({ banner, selectedRegion, onSave, onClose }) {
 
   return (
     <SimpleModal title={banner?.id ? '배너 편집' : '새 배너 추가'} onClose={onClose}>
-      <form onSubmit={onSave} className={s.formGrid} onChange={handleChange}>
+      <form onSubmit={(e) => onSave(e, preview.image)} className={s.formGrid} onChange={handleChange}>
         <label className={s.formField}>
           지역
           <select name="region" className={s.input} defaultValue={banner?.region ?? selectedRegion}>
@@ -315,14 +325,27 @@ function BannerModal({ banner, selectedRegion, onSave, onClose }) {
           문구
           <input name="subtitle" className={s.input} defaultValue={banner?.subtitle ?? ''} placeholder="동네 뒷산 가볍게 어때요?" required />
         </label>
-        <label className={s.formField}>
-          배경 색상
-          <select name="gradient" className={s.input} defaultValue={banner?.gradient ?? GRADIENT_PRESETS[0].value}>
-            {GRADIENT_PRESETS.map((p) => (
-              <option key={p.value} value={p.value}>{p.label}</option>
-            ))}
-          </select>
-        </label>
+        <div className={s.formField}>
+          <p style={{ fontSize: 13, fontWeight: 500, marginBottom: 8 }}>
+            배너 이미지 <span style={{ fontSize: 11, color: 'var(--ink-4)', fontWeight: 400 }}>(선택 · 없으면 색상 배경 사용)</span>
+          </p>
+          <ImageUpload
+            value={preview.image}
+            onChange={(url) => setPreview((p) => ({ ...p, image: url }))}
+            shape="square"
+            placeholder="🖼️"
+          />
+        </div>
+        {!preview.image && (
+          <label className={s.formField}>
+            배경 색상
+            <select name="gradient" className={s.input} defaultValue={banner?.gradient ?? GRADIENT_PRESETS[0].value}>
+              {GRADIENT_PRESETS.map((p) => (
+                <option key={p.value} value={p.value}>{p.label}</option>
+              ))}
+            </select>
+          </label>
+        )}
         <BannerPreview {...preview} />
         <div className={s.modalFooter}>
           <button type="button" className={s.ghostBtn} onClick={onClose}>취소</button>
@@ -334,12 +357,15 @@ function BannerModal({ banner, selectedRegion, onSave, onClose }) {
 }
 
 /** 배너 편집 폼 내 실시간 미리보기 */
-function BannerPreview({ tag, title, subtitle, gradient }) {
+function BannerPreview({ tag, title, subtitle, gradient, image }) {
   return (
     <div>
       <p style={{ fontSize: 12, color: 'var(--ink-3)', marginBottom: 6 }}>미리보기</p>
       <div style={{
-        background: gradient || GRADIENT_PRESETS[0].value,
+        background: image ? undefined : (gradient || GRADIENT_PRESETS[0].value),
+        backgroundImage: image ? `url("${image}")` : undefined,
+        backgroundSize: image ? 'cover' : undefined,
+        backgroundPosition: image ? 'center' : undefined,
         borderRadius: 14,
         padding: '20px 18px 16px',
         minHeight: 90,
@@ -347,7 +373,15 @@ function BannerPreview({ tag, title, subtitle, gradient }) {
         flexDirection: 'column',
         justifyContent: 'flex-end',
         gap: 4,
+        position: 'relative',
+        overflow: 'hidden',
       }}>
+        {image && (
+          <div style={{
+            position: 'absolute', inset: 0,
+            background: 'linear-gradient(to top, rgba(0,0,0,0.55) 0%, rgba(0,0,0,0.1) 50%, transparent 100%)',
+          }} />
+        )}
         {tag && (
           <span style={{
             fontSize: 11, fontWeight: 600,
@@ -355,14 +389,15 @@ function BannerPreview({ tag, title, subtitle, gradient }) {
             background: 'rgba(255,255,255,0.18)',
             padding: '2px 10px', borderRadius: 999,
             width: 'fit-content',
+            position: 'relative',
           }}>
             {tag}
           </span>
         )}
-        <p style={{ fontSize: 11, color: 'rgba(255,255,255,0.75)', fontWeight: 500 }}>
+        <p style={{ fontSize: 11, color: 'rgba(255,255,255,0.75)', fontWeight: 500, position: 'relative' }}>
           {title || '제목'}
         </p>
-        <p style={{ fontSize: 16, color: '#fff', fontWeight: 700 }}>
+        <p style={{ fontSize: 16, color: '#fff', fontWeight: 700, position: 'relative' }}>
           {subtitle || '문구'}
         </p>
       </div>

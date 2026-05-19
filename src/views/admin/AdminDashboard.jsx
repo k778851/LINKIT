@@ -6,17 +6,33 @@ import { useRouter } from 'next/navigation';
 import { useClubStore } from '../../store/clubStore';
 import { useCommunityStore } from '../../store/communityStore';
 import { adminApi } from '../../api/adminApi';
-import { dashboardTasks, reportInbox } from './adminDemoData';
+import { ApiError } from '../../api/apiClient';
+import { dashboardTasks as demoDashboardTasks, reportInbox as demoReportInbox } from './adminDemoData';
 import s from './admin.module.css';
+
+const isOffline = (e) => e instanceof ApiError && e.status === 0;
 
 export function AdminDashboard() {
   const router = useRouter();
   const clubs = useClubStore((state) => state.clubs);
   const posts = useCommunityStore((state) => state.posts);
   const [stats, setStats] = useState(null);
+  const [dashboardTasks, setDashboardTasks] = useState([]);
+  const [reportInbox, setReportInbox] = useState([]);
 
   useEffect(() => {
-    adminApi.getStats().then(setStats).catch(() => {});
+    adminApi.getStats()
+      .then((data) => {
+        setStats(data);
+        // 서버 연결 성공 시 태스크/신고도 빈 상태 유지 (실제 API 추가 전까지)
+      })
+      .catch((e) => {
+        // 오프라인일 때만 데모 데이터 표시
+        if (isOffline(e)) {
+          setDashboardTasks(demoDashboardTasks);
+          setReportInbox(demoReportInbox);
+        }
+      });
   }, []);
 
   const cards = [
@@ -55,7 +71,7 @@ export function AdminDashboard() {
           <p className={s.cardTitle}>오늘 업무 <span className={s.sectionNote}>{dashboardTasks.length}건</span></p>
           <div className={s.grid3}>
             {dashboardTasks.map((task) => (
-              <div key={task.title} className={s.queueItem}>
+              <div key={task.id ?? task.title} className={s.queueItem}>
                 <div><p className={s.itemTitle}>{task.title}</p><p className={s.itemMeta}>{task.meta}</p></div>
                 <Clock size={16} color="#1677ff" />
               </div>
@@ -67,7 +83,7 @@ export function AdminDashboard() {
           <p className={s.cardTitle}>신고 알림 <span className={s.sectionNote}>{reportInbox.length}건 대기</span></p>
           <div className={s.queueList}>
             {reportInbox.map((item) => (
-              <div key={item.title} className={s.queueItem}>
+              <div key={item.id ?? item.title} className={s.queueItem}>
                 <div><p className={s.itemTitle}>{item.title}</p><p className={s.itemMeta}>{item.time} · {item.reason}</p></div>
                 <span className={`${s.badge} ${item.severity === '높음' ? s.badgeRed : s.badgeOrange}`}>{item.severity}</span>
               </div>

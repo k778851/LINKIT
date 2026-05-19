@@ -14,12 +14,24 @@ import styles from './ClubCreatePage.module.css';
 
 const CATEGORIES = ['운동', '음식', '아트', '스터디', '음악', '기타'];
 const SERVICE_REGIONS = REGION_OPTIONS.filter((region) => region !== '전체');
-// 지파 유저용: 전체 포함
 const JIPA_REGIONS = REGION_OPTIONS;
+const DAYS = ['월', '화', '수', '목', '금', '토', '일'];
+
+/** 단일 블록 → "화·목요일 19:30" */
+function formatBlock({ days, time }) {
+  if (!days.length) return '';
+  const dayStr = days.join('·') + '요일';
+  return time ? `${dayStr} ${time}` : dayStr;
+}
+
+/** 전체 블록 배열 → "화·목요일 19:30 / 토요일 07:00" */
+function formatScheduleBlocks(blocks) {
+  return blocks.map(formatBlock).filter(Boolean).join(' / ');
+}
 
 export function ClubCreatePage() {
   const router = useRouter();
-  const submitClubForApproval = useClubStore((s) => s.submitClubForApproval);
+  const addClub = useClubStore((s) => s.addClub);
   const selectedRegion = useClubStore((s) => s.selectedRegion);
   const user = useAuthStore((s) => s.user);
   const { showToast } = useToastContext();
@@ -31,13 +43,28 @@ export function ClubCreatePage() {
     serviceRegion: jipaUser ? '전체' : (selectedRegion && selectedRegion !== '전체' ? selectedRegion : '본부'),
     coverImage: null,
     description: '',
-    schedule: '',
     isPrivate: false,
     tags: '',
     joinQuestion: '',
   });
+  // 정기 일정 블록 배열 [{ days: [], time: '' }, ...]
+  const [scheduleBlocks, setScheduleBlocks] = useState([{ days: [], time: '' }]);
   const [errors, setErrors] = useState({});
   const [submitting, setSubmitting] = useState(false);
+
+  const toggleBlockDay = (idx, day) => {
+    setScheduleBlocks((prev) => prev.map((b, i) =>
+      i !== idx ? b : {
+        ...b,
+        days: b.days.includes(day) ? b.days.filter((d) => d !== day) : [...b.days, day],
+      }
+    ));
+  };
+  const setBlockTime = (idx, time) => {
+    setScheduleBlocks((prev) => prev.map((b, i) => i !== idx ? b : { ...b, time }));
+  };
+  const addBlock = () => setScheduleBlocks((prev) => [...prev, { days: [], time: '' }]);
+  const removeBlock = (idx) => setScheduleBlocks((prev) => prev.filter((_, i) => i !== idx));
 
   const set = (key, val) => setForm((f) => ({ ...f, [key]: val }));
 
@@ -61,9 +88,9 @@ export function ClubCreatePage() {
         .map((t) => t.trim())
         .filter(Boolean)
         .slice(0, 3);
-      submitClubForApproval({
-        id: `club-${Date.now()}`,
+      await addClub({
         ...form,
+        schedule: formatScheduleBlocks(scheduleBlocks),
         location: form.serviceRegion,
         joinQuestion: form.isPrivate ? form.joinQuestion.trim() : '',
         tags: parsedTags,
@@ -169,13 +196,89 @@ export function ClubCreatePage() {
         </div>
 
         <div className={styles.section}>
-          <label className={styles.label}>정기 일정 <span className={styles.optional}>(선택)</span></label>
-          <input
-            className={styles.input}
-            placeholder="예: 매주 금요일 20:00"
-            value={form.schedule}
-            onChange={(e) => set('schedule', e.target.value)}
-          />
+          <p className={styles.label}>정기 일정 <span className={styles.optional}>(선택)</span></p>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+            {scheduleBlocks.map((block, idx) => (
+              <div key={idx} style={{
+                background: 'var(--bg-input, #f5f7fa)',
+                borderRadius: 12,
+                padding: '12px 14px',
+                position: 'relative',
+              }}>
+                {/* 블록 삭제 버튼 */}
+                {scheduleBlocks.length > 1 && (
+                  <button
+                    type="button"
+                    onClick={() => removeBlock(idx)}
+                    style={{
+                      position: 'absolute', top: 8, right: 10,
+                      background: 'none', border: 'none',
+                      fontSize: 16, color: 'var(--ink-4)',
+                      cursor: 'pointer', lineHeight: 1, padding: 2,
+                    }}
+                    aria-label="삭제"
+                  >×</button>
+                )}
+                {/* 요일 선택 */}
+                <div className={styles.chipRow} style={{ marginBottom: 10, flexWrap: 'wrap' }}>
+                  {DAYS.map((day) => (
+                    <button
+                      key={day}
+                      type="button"
+                      className={`${styles.chip} ${block.days.includes(day) ? styles.chipActive : ''}`}
+                      style={{ minWidth: 36 }}
+                      onClick={() => toggleBlockDay(idx, day)}
+                    >
+                      {day}
+                    </button>
+                  ))}
+                </div>
+                {/* 시간 선택 */}
+                {block.days.length > 0 && (
+                  <input
+                    className={styles.input}
+                    type="time"
+                    value={block.time}
+                    style={{ marginBottom: 0 }}
+                    onChange={(e) => setBlockTime(idx, e.target.value)}
+                  />
+                )}
+                {/* 블록 미리보기 */}
+                {block.days.length > 0 && (
+                  <p style={{ fontSize: 12, color: 'var(--blue)', marginTop: 6, fontWeight: 500 }}>
+                    📅 {formatBlock(block)}
+                  </p>
+                )}
+              </div>
+            ))}
+          </div>
+
+          {/* 일정 추가 버튼 */}
+          <button
+            type="button"
+            onClick={addBlock}
+            style={{
+              marginTop: 10,
+              width: '100%',
+              padding: '9px 0',
+              borderRadius: 10,
+              border: '1.5px dashed var(--ink-5, #d0d5dd)',
+              background: 'transparent',
+              color: 'var(--ink-3)',
+              fontSize: 13,
+              fontWeight: 500,
+              cursor: 'pointer',
+            }}
+          >
+            + 일정 추가
+          </button>
+
+          {/* 전체 미리보기 */}
+          {formatScheduleBlocks(scheduleBlocks) && (
+            <p style={{ fontSize: 12, color: 'var(--ink-3)', marginTop: 8 }}>
+              최종: <strong style={{ color: 'var(--blue)' }}>{formatScheduleBlocks(scheduleBlocks)}</strong>
+            </p>
+          )}
         </div>
 
         <div className={styles.section}>

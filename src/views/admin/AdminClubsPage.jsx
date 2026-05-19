@@ -3,8 +3,11 @@
 import { CheckCircle2, Search } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 import { adminApi } from '../../api/adminApi';
+import { ApiError } from '../../api/apiClient';
 import { REGION_OPTIONS, matchesRegion } from '../../data/regions';
-import { adminClubs } from './adminDemoData';
+import { adminClubs as demoClubs } from './adminDemoData';
+
+const isOffline = (e) => e instanceof ApiError && e.status === 0;
 import s from './admin.module.css';
 
 const filters = ['전체', '승인', '대기', '중지'];
@@ -35,13 +38,13 @@ export function AdminClubsPage() {
   const [query, setQuery] = useState('');
   const [filter, setFilter] = useState('전체');
   const [regionFilter, setRegionFilter] = useState('전체');
-  const [clubs, setClubs] = useState(adminClubs);
+  const [clubs, setClubs] = useState([]);
   const [modal, setModal] = useState(null);
 
   useEffect(() => {
-    adminApi.getClubs().then((list) => {
-      if (Array.isArray(list) && list.length > 0) setClubs(list.map(mapApiClub));
-    }).catch(() => {});
+    adminApi.getClubs()
+      .then((list) => setClubs(Array.isArray(list) ? list.map(mapApiClub) : []))
+      .catch((e) => { if (isOffline(e)) setClubs(demoClubs); });
   }, []);
 
   const visibleClubs = useMemo(() => {

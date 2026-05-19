@@ -178,7 +178,7 @@ export function ClubDetailPage({ clubId }) {
 
         {tab === 'intro' && (
           <div className={styles.introBody}>
-            <p className={styles.desc}>{club.description}</p>
+            <p className={styles.desc} style={{ whiteSpace: 'pre-line' }}>{club.description}</p>
           </div>
         )}
 

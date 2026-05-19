@@ -173,12 +173,22 @@ export function HomePage() {
                 key={i}
                 className={styles.banner}
                 style={{
-                  background: b.gradient,
+                  background: b.image ? undefined : b.gradient,
+                  backgroundImage: b.image ? `url("${b.image}")` : undefined,
+                  backgroundSize: b.image ? 'cover' : undefined,
+                  backgroundPosition: b.image ? 'center' : undefined,
                   width: `${100 / slides.length}%`,
                   flexShrink: 0,
                   position: 'relative',
                 }}
               >
+                {b.image && (
+                  <div style={{
+                    position: 'absolute', inset: 0,
+                    background: 'linear-gradient(to top, rgba(0,0,0,0.55) 0%, rgba(0,0,0,0.1) 50%, transparent 100%)',
+                    borderRadius: 'inherit',
+                  }} />
+                )}
                 <span className={styles.bannerTag}>{b.tag}</span>
                 <p className={styles.bannerTitle}>{b.title}</p>
                 <p className={styles.bannerSubtitle}>{b.subtitle}</p>

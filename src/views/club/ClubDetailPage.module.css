@@ -58,7 +58,7 @@
 }
 
 /* ── Tags ── */
-.tags { display: flex; gap: 6px; margin-bottom: 10px; flex-wrap: wrap; }
+.tags { display: flex; gap: 6px; margin-bottom: 12px; flex-wrap: wrap; }
 
 .tag {
   font-size: 12px; font-weight: 600;
@@ -80,7 +80,7 @@
 
 .name {
   font-size: 22px; font-weight: 700; color: var(--ink);
-  margin-bottom: 16px;
+  margin-bottom: 14px;
 }
 
 /* ── Info boxes ── */
@@ -135,7 +135,7 @@
   font-size: 15px; color: var(--ink-2); line-height: 1.7;
 }
 
-.tagRow { display: flex; gap: 6px; flex-wrap: wrap; }
+.tagRow { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 14px; }
 
 .hashTag {
   font-size: 13px; font-weight: 500;

@@ -3,8 +3,11 @@
 import { Search } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 import { adminApi } from '../../api/adminApi';
+import { ApiError } from '../../api/apiClient';
 import { REGION_OPTIONS, matchesRegion } from '../../data/regions';
-import { adminUsers } from './adminDemoData';
+import { adminUsers as demoUsers } from './adminDemoData';
+
+const isOffline = (e) => e instanceof ApiError && e.status === 0;
 import s from './admin.module.css';
 
 const filters = ['전체', '정상', '경고', '정지'];
@@ -32,18 +35,23 @@ export function AdminUsersPage() {
   const [query, setQuery] = useState('');
   const [filter, setFilter] = useState('전체');
   const [regionFilter, setRegionFilter] = useState('전체');
-  const [users, setUsers] = useState(adminUsers);
-  const [selectedUserId, setSelectedUserId] = useState(adminUsers[0]?.id ?? null);
+  const [users, setUsers] = useState([]);
+  const [selectedUserId, setSelectedUserId] = useState(null);
   const [confirmAction, setConfirmAction] = useState(null);
 
   useEffect(() => {
-    adminApi.getUsers().then((list) => {
-      if (Array.isArray(list) && list.length > 0) {
-        const mapped = list.map(mapApiUser);
+    adminApi.getUsers()
+      .then((list) => {
+        const mapped = Array.isArray(list) ? list.map(mapApiUser) : [];
         setUsers(mapped);
         setSelectedUserId(mapped[0]?.id ?? null);
-      }
-    }).catch(() => {});
+      })
+      .catch((e) => {
+        if (isOffline(e)) {
+          setUsers(demoUsers);
+          setSelectedUserId(demoUsers[0]?.id ?? null);
+        }
+      });
   }, []);
 
   const visibleUsers = useMemo(() => {

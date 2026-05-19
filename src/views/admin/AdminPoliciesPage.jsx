@@ -1,7 +1,10 @@
 'use client';
 
-import { useMemo, useState } from 'react';
-import { auditLogs } from './adminDemoData';
+import { useEffect, useMemo, useState } from 'react';
+import { auditLogs as demoAuditLogs } from './adminDemoData';
+import { ApiError, api } from '../../api/apiClient';
+
+const isOffline = (e) => e instanceof ApiError && e.status === 0;
 import s from './admin.module.css';
 
 const roles = [
@@ -17,7 +20,14 @@ export function AdminPoliciesPage() {
     { title: '개인정보처리방침', version: 'v1.5', category: '개인정보', date: '2026.03.15', status: '시행중' },
     { title: '마케팅 수신 동의', version: 'v1.0', category: '동의', date: '2026.01.01', status: '시행중' },
   ]);
-  const [logs] = useState(auditLogs);
+  const [logs, setLogs] = useState([]);
+
+  useEffect(() => {
+    // 백엔드 감사로그 API 미구현 — 오프라인 시에만 데모 데이터 표시
+    api.get('/api/admin/audit-logs').then(setLogs).catch((e) => {
+      if (isOffline(e)) setLogs(demoAuditLogs);
+    });
+  }, []);
   const [page, setPage] = useState(1);
   const [modalOpen, setModalOpen] = useState(false);
 

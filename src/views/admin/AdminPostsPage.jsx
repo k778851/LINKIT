@@ -3,7 +3,10 @@
 import { Search } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 import { adminApi } from '../../api/adminApi';
-import { adminPosts, reportInbox } from './adminDemoData';
+import { ApiError } from '../../api/apiClient';
+import { adminPosts as demoPosts, reportInbox as demoReportInbox } from './adminDemoData';
+
+const isOffline = (e) => e instanceof ApiError && e.status === 0;
 import s from './admin.module.css';
 
 const filters = ['전체', '정상', '검토', '숨김'];
@@ -26,13 +29,19 @@ function mapApiPost(post) {
 export function AdminPostsPage() {
   const [query, setQuery] = useState('');
   const [filter, setFilter] = useState('전체');
-  const [posts, setPosts] = useState(adminPosts);
+  const [posts, setPosts] = useState([]);
+  const [reportInbox, setReportInbox] = useState([]);
   const [selectedReport, setSelectedReport] = useState(null);
 
   useEffect(() => {
-    adminApi.getPosts().then((list) => {
-      if (Array.isArray(list) && list.length > 0) setPosts(list.map(mapApiPost));
-    }).catch(() => {});
+    adminApi.getPosts()
+      .then((list) => setPosts(Array.isArray(list) ? list.map(mapApiPost) : []))
+      .catch((e) => {
+        if (isOffline(e)) {
+          setPosts(demoPosts);
+          setReportInbox(demoReportInbox);
+        }
+      });
   }, []);
 
   const visiblePosts = useMemo(() => {
